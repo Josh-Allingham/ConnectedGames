@@ -1,8 +1,12 @@
 using UnityEngine;
+using Photon.Pun;
+using Photon.Realtime;
+using System.Collections;
+using System.Collections.Generic;
 
-public class PlayerMovement : MonoBehaviour
+public class PlayerMovement : MonoBehaviourPunCallbacks
 {
-    public float speed = 0.1f;
+    public float speed = 5f;
     public float jumpStrength = 5f;
     private Rigidbody rb;
     void Start()
@@ -13,13 +17,35 @@ public class PlayerMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+       if (photonView.IsMine)
+        {
+            InputMovement();
+        }
+    }
+
+    private void InputMovement()
+    {
         Vector2 inputs = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
 
-        rb.MovePosition(transform.position + new Vector3(inputs.x, 0, inputs.y) * speed);    
+        rb.MovePosition(transform.position + new Vector3(inputs.x, 0, inputs.y) * speed * Time.deltaTime);
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            rb.AddForce(Vector3.up * jumpStrength, ForceMode.Impulse);
+            Jump();
         }
     }
+    private void Jump()
+    {
+        if (Physics.Raycast(transform.position, Vector3.down, 3))
+        {
+            rb.AddForce(Vector3.up * jumpStrength, ForceMode.Impulse);
+        }
+        
+    }
+
+   
+
+    
+
+    
 }
