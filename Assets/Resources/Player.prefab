@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 3466403635926074363}
   - component: {fileID: 3036383022120870442}
   - component: {fileID: 9087434924260859972}
+  - component: {fileID: 3807598178122211820}
   - component: {fileID: 208680904460786001}
   - component: {fileID: 8965136216623151542}
   - component: {fileID: 7715264059520144298}
@@ -53,6 +54,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 5
   jumpStrength: 5
+  footstepRadius: 2
 --- !u!114 &9087434924260859972
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -67,6 +69,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentType: 0
   currentColour: {r: 0, g: 0, b: 0, a: 0}
+--- !u!114 &3807598178122211820
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 869804286486522258}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3860d743848368940b3fe0ea9a7c9162, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  footstepRadius: 1
+  playerType: 0
+  footstepColour: {r: 1, g: 1, b: 1, a: 1}
+  FIRE: {r: 1, g: 0, b: 0, a: 1}
+  WATER: {r: 0.088679194, g: 0.839378, b: 1, a: 1}
+  EARTH: {r: 0.49056602, g: 0.38646606, b: 0.22908506, a: 1}
+  MUD: {r: 0.29837134, g: 0.3301887, b: 0.10746708, a: 1}
+  DRY: {r: 0.6301887, g: 0.5715888, b: 0.4791812, a: 1}
+  MAGMA: {r: 1, g: 0.57254905, b: 0, a: 1}
 --- !u!33 &208680904460786001
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -130,7 +153,7 @@ BoxCollider:
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 4
   m_ExcludeLayers:
     serializedVersion: 2
     m_Bits: 128

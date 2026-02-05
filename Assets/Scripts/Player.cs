@@ -26,7 +26,14 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
     [PunRPC]
     void RPCChangeColourTo(Vector3 colour)
     {
-        GetComponent<Renderer>().material.color = new Color(colour.x, colour.y, colour.z, 1f);
+        //Change our colour
+        currentColour = new Color(colour.x, colour.y, colour.z, 1f);
+
+        GetComponent<PlayerFootsteps>().SetColour(currentColour);
+
+        GetComponent<Renderer>().material.color = currentColour;
+
+        //Tell everyone else what our new colour is
         if (photonView.IsMine)
         {
             photonView.RPC("RPCChangeColourTo", RpcTarget.OthersBuffered, colour);
@@ -56,17 +63,18 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
         {
             case PlayerType.Water:
                 currentType = PlayerType.Fire;
-                return;
+                break;
             case PlayerType.Fire:
                 currentType = PlayerType.Earth;
-                return;
+                break;
             case PlayerType.Earth:
                 currentType = PlayerType.Wind;
-                return;
+                break;
             case PlayerType.Wind:
                 currentType = PlayerType.Water;
-                return;
+                break;
         }
+        GetComponent<PlayerFootsteps>().SetType(currentType);
     }
     private void OnTriggerEnter(Collider other)
     {

@@ -7,6 +7,7 @@ using UnityEngine.UI;
 public class NetManager : MonoBehaviourPunCallbacks
 {
     string playerName = "P1";
+    string playerElement = "0";
     string gameVersion = "0.1";
     List<RoomInfo> createdRooms = new List<RoomInfo> ();
     string roomName = "Room 1";
@@ -121,8 +122,30 @@ public class NetManager : MonoBehaviourPunCallbacks
         GUILayout.BeginHorizontal();
         GUILayout.Label("Player Name: ", GUILayout.Width(85));
         playerName = GUILayout.TextField(playerName, GUILayout.Width(250));
-        GUILayout.FlexibleSpace();
+        GUILayout.Label("Element: ", GUILayout.Width(85));
+        playerElement = GUILayout.TextField(playerElement, GUILayout.Width(50));
 
+        string elementChosen = "";
+        switch (playerElement)
+        {
+            case "0":
+                elementChosen = "Water";
+                break;
+            case "1":
+                elementChosen = "Fire";
+                break;
+            case "2":
+                elementChosen = "Earth";
+                break;
+            case "3":
+                elementChosen = "Wind";
+                break;
+        }
+
+        GUILayout.Label(elementChosen, GUILayout.Width(85));
+
+        GUILayout.FlexibleSpace();
+        
         GUI.enabled = (PhotonNetwork.NetworkClientState == ClientState.JoinedLobby || PhotonNetwork.NetworkClientState == ClientState.Disconnected) && !joiningRoom;
         if (GUILayout.Button("Refresh", GUILayout.Width(100)))
         {
@@ -156,14 +179,31 @@ public class NetManager : MonoBehaviourPunCallbacks
         Debug.Log("Connected to Room");
         print(PhotonNetwork.CurrentRoom.Players.Count);
         render = false;
-        AddPlayer(true);
+        AddPlayer(int.Parse(playerElement), true);
         
     }
 
-    void AddPlayer(bool setCameraTarget = false)
+    void AddPlayer(int element = 0, bool setCameraTarget = false)
     {
         //spawn player
         GameObject newPlayer = PhotonNetwork.Instantiate(playerPrefab.name, new Vector3(0, 1, 0), Quaternion.identity, 0);
+
+        switch (playerElement)
+        {
+            case "0":
+                newPlayer.GetComponent<Player>().currentType = Player.PlayerType.Water;
+                break;
+            case "1":
+                newPlayer.GetComponent<Player>().currentType = Player.PlayerType.Fire;
+                break;
+            case "2":
+                newPlayer.GetComponent<Player>().currentType = Player.PlayerType.Earth;
+                break;
+            case "3":
+                newPlayer.GetComponent<Player>().currentType = Player.PlayerType.Wind;
+                break;
+        }
+        
         players.Add(newPlayer);
         if (setCameraTarget)
         {

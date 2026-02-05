@@ -8,7 +8,9 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
 {
     public float speed = 5f;
     public float jumpStrength = 5f;
+    public int footstepRadius = 2;
     private Rigidbody rb;
+   
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -17,7 +19,7 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
     // Update is called once per frame
     void Update()
     {
-       if (photonView.IsMine)
+        if (photonView.IsMine)
         {
             InputMovement();
         }
@@ -36,16 +38,14 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
     }
     private void Jump()
     {
-        if (Physics.Raycast(transform.position, Vector3.down, 3))
+        if (Physics.Raycast(transform.position, Vector3.down, 1f))
         {
             rb.AddForce(Vector3.up * jumpStrength, ForceMode.Impulse);
         }
         
     }
 
-   
-
     
-
+    
     
 }
