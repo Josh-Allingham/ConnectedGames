@@ -1,9 +1,12 @@
 using UnityEngine;
+
 public class PlayerFootsteps : MonoBehaviour
 {
     public float footstepRadius = 1f;
     public Player.PlayerType playerType;
     public Color footstepColour;
+    public float footstepDistance;
+    private Vector3 prevPosition;
 
     #region ColorCodes
 
@@ -15,6 +18,12 @@ public class PlayerFootsteps : MonoBehaviour
     public Color MAGMA;
     #endregion
 
+    public Color burnBlendColour;
+    public ParticleSystem waterParticles;
+    public ParticleSystem flameParticles;
+    public ParticleSystem earthParticles;
+    public ParticleSystem windParticles;
+
     void Start()
     {
         
@@ -25,11 +34,19 @@ public class PlayerFootsteps : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Mathf.FloorToInt(Time.time) % 5 == 0)
-            CheckTerrain();
+        if (prevPosition == null || (prevPosition - transform.position).magnitude > footstepDistance)
+        {
+            prevPosition = transform.position;
+            PlaceFootstep();
+        }
+        else if (GetComponent<Rigidbody>().linearVelocity == Vector3.zero && Time.time - Mathf.FloorToInt(Time.time) < 0.2f)
+        {
+            PlaceFootstep();
+        }
+
     }
 
-    private void CheckTerrain()
+    private void PlaceFootstep()
     {
         RaycastHit hit;
         if (Physics.Raycast(transform.position, Vector3.down, out hit, .5f))
@@ -104,7 +121,7 @@ public class PlayerFootsteps : MonoBehaviour
             Debug.Log("W/E");
             colour = MUD;
         }
-
+        Instantiate(waterParticles, transform.position, Quaternion.identity);
         //Draw at location
         generator.DrawAt(drawPos.x, drawPos.y, (int)footstepRadius, colour);
     }
@@ -118,9 +135,10 @@ public class PlayerFootsteps : MonoBehaviour
         Color currentColour = generator.GetColorAt(drawPos.x, drawPos.y);
 
         //By default set our paint colour to the colour of our type
-        Color colour = FIRE;
+        Color colour = FIRE; //BurnColour(currentColour);
 
-        if (currentColour == WATER)
+        Instantiate(flameParticles, transform.position, Quaternion.identity);
+        /*if (currentColour == WATER)
         {
             //TODO ReleaseSteam()
             Debug.Log("F/W");
@@ -131,12 +149,22 @@ public class PlayerFootsteps : MonoBehaviour
         {
             Debug.Log("F/E");
             colour = MAGMA;
-        }
+        }*/
         
         //Draw at location
         generator.DrawAt(drawPos.x, drawPos.y, (int)footstepRadius, colour);
     }
 
+    Color BurnColour(Color _colour)
+    {
+        Color result = new Color();
+
+        result.r = burnBlendColour.r == 0 ? 0 : (1 - _colour.r) / burnBlendColour.r;
+        result.g = burnBlendColour.g == 0 ? 0 : (1 - _colour.g) / burnBlendColour.g;
+        result.b = burnBlendColour.b == 0 ? 0 : (1 - _colour.b) / burnBlendColour.b;
+
+        return result;
+    }
     private void ApplyEarthFootsteps(GroundTextureGenerator generator)
     {
         //Our location
@@ -159,13 +187,13 @@ public class PlayerFootsteps : MonoBehaviour
             Debug.Log("E/F");
             colour = MAGMA;
         }
-
+        Instantiate(earthParticles, transform.position, Quaternion.identity);
         //Draw at location
         generator.DrawAt(drawPos.x, drawPos.y, (int)footstepRadius, colour);
     }
 
     private void ApplyWindFootsteps(GroundTextureGenerator generator)
     {
-
+        Instantiate(windParticles, transform.position, windParticles.transform.rotation);
     }
 }
