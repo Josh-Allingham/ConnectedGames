@@ -1,5 +1,5 @@
 using UnityEngine;
-
+using Photon.Pun;
 public class PlayerFootsteps : MonoBehaviour
 {
     public float footstepRadius = 1f;
@@ -23,12 +23,20 @@ public class PlayerFootsteps : MonoBehaviour
     public ParticleSystem flameParticles;
     public ParticleSystem earthParticles;
     public ParticleSystem windParticles;
+    private ParticleSystem[,] particleInteractionLookup;
 
+    #region Particles
+    public ParticleSystem pSTEAM;
+    public ParticleSystem pMUD;
+    public ParticleSystem pCYCLONE;
+    public ParticleSystem pMAGMA;
+    public ParticleSystem pFIRESTORM;
+    public ParticleSystem pEARTHQUAKE;
+    #endregion
     void Start()
     {
-        
-        
-
+        SetType(GetComponent<Player>().currentType);
+        ConstructLookupTable();
     }
 
     // Update is called once per frame
@@ -39,7 +47,7 @@ public class PlayerFootsteps : MonoBehaviour
             prevPosition = transform.position;
             PlaceFootstep();
         }
-        else if (GetComponent<Rigidbody>().linearVelocity == Vector3.zero && Time.time - Mathf.FloorToInt(Time.time) < 0.2f)
+        else if (GetComponent<Rigidbody>().linearVelocity == Vector3.zero && Time.time - Mathf.FloorToInt(Time.time) < 0.2f) //If standing still, place periodically
         {
             PlaceFootstep();
         }
@@ -54,8 +62,7 @@ public class PlayerFootsteps : MonoBehaviour
             hit.collider.gameObject.TryGetComponent(out GroundTextureGenerator generator);
             if (generator != null)
             {
-                //If standing on drawable texture
-
+                //If standing on drawable texture, run relevent footstep logic
 
                 switch (playerType)
                 {
@@ -78,7 +85,7 @@ public class PlayerFootsteps : MonoBehaviour
         }
     }
 
-    private Vector2Int GetPositionOnTexture(GroundTextureGenerator generator)
+    private Vector2Int GetPlayerPositionOnGrid(GroundTextureGenerator generator)
     {
         Vector3 scale = generator.transform.localScale;
         Vector3 playerLoc = transform.position - (generator.transform.position - scale / 2);
@@ -93,16 +100,73 @@ public class PlayerFootsteps : MonoBehaviour
     {
         footstepColour = colour;
     }
-
     public void SetType(Player.PlayerType _playerType)
     {
         playerType = _playerType;
     }
+    void SpawnParticles(ParticleSystem particles)
+    {
+        ParticleSystem newParticle = Instantiate(particles, transform.position + Vector3.back * 0.1f, Quaternion.identity);
+        newParticle.GetComponent<FootstepParticle>().player = this;
+    }
+    void ConstructLookupTable()
+    {
+        particleInteractionLookup = new ParticleSystem[4, 4];
 
+        int iWATER = TypeToInt(Player.PlayerType.Water);
+        int iFIRE = TypeToInt(Player.PlayerType.Fire);
+        int iEARTH = TypeToInt(Player.PlayerType.Earth);
+        int iWIND = TypeToInt(Player.PlayerType.Wind);
+
+        particleInteractionLookup[iWATER, iWATER] = null;
+        particleInteractionLookup[iFIRE, iFIRE] = null;
+        particleInteractionLookup[iEARTH, iEARTH] = null;
+        particleInteractionLookup[iWIND, iWIND] = null;
+        particleInteractionLookup[iWATER, iFIRE] = pSTEAM;
+        particleInteractionLookup[iFIRE, iWATER] = pSTEAM;
+        particleInteractionLookup[iWATER, iEARTH] = pMUD;
+        particleInteractionLookup[iEARTH, iWATER] = pMUD;
+        particleInteractionLookup[iWATER, iWIND] = pCYCLONE;
+        particleInteractionLookup[iWIND, iWATER] = pCYCLONE;
+        particleInteractionLookup[iFIRE, iEARTH] = pMAGMA;
+        particleInteractionLookup[iEARTH, iFIRE] = pMAGMA;
+        particleInteractionLookup[iWIND, iFIRE] = pFIRESTORM;
+        particleInteractionLookup[iFIRE, iWIND] = pFIRESTORM;
+        particleInteractionLookup[iWIND, iEARTH] = pEARTHQUAKE;
+        particleInteractionLookup[iEARTH, iWIND] = pEARTHQUAKE;
+    }
+    public int TypeToInt(Player.PlayerType type)
+    {
+        switch (type)
+        {
+            case Player.PlayerType.Water:
+                return 0;
+            case Player.PlayerType.Fire:
+                return 1;
+            case Player.PlayerType.Earth:
+                return 2;
+            case Player.PlayerType.Wind:
+                return 3;
+        }
+        //if null
+        return -1;
+    }
+    public ParticleSystem ParticleCrossover(Player.PlayerType TypeA, Player.PlayerType TypeB)
+    {
+        int indexA = TypeToInt(TypeA);
+        int indexB = TypeToInt(TypeB);
+
+        if (particleInteractionLookup == null)
+            ConstructLookupTable();
+
+        ParticleSystem particles = particleInteractionLookup[indexA, indexB];
+
+        return particles;
+    }
     private void ApplyWaterFootsteps(GroundTextureGenerator generator)
     {
         //Our location
-        Vector2Int drawPos = GetPositionOnTexture(generator);
+        Vector2Int drawPos = GetPlayerPositionOnGrid(generator);
 
         //Current colour of the ground
         Color currentColour = generator.GetColorAt(drawPos.x, drawPos.y);
@@ -112,24 +176,21 @@ public class PlayerFootsteps : MonoBehaviour
         if (currentColour == FIRE)
         {
             //TODO ReleaseSteam()
-            Debug.Log("W/F");
             //dry out spot
             colour = DRY;
         } 
         else if (currentColour == EARTH)
         {
-            Debug.Log("W/E");
             colour = MUD;
         }
-        Instantiate(waterParticles, transform.position, Quaternion.identity);
+        SpawnParticles(waterParticles);
         //Draw at location
         generator.DrawAt(drawPos.x, drawPos.y, (int)footstepRadius, colour);
     }
-
     private void ApplyFireFootsteps(GroundTextureGenerator generator)
     {
         //Our location
-        Vector2Int drawPos = GetPositionOnTexture(generator);
+        Vector2Int drawPos = GetPlayerPositionOnGrid(generator);
 
         //Current colour of the ground
         Color currentColour = generator.GetColorAt(drawPos.x, drawPos.y);
@@ -137,7 +198,7 @@ public class PlayerFootsteps : MonoBehaviour
         //By default set our paint colour to the colour of our type
         Color colour = FIRE; //BurnColour(currentColour);
 
-        Instantiate(flameParticles, transform.position, Quaternion.identity);
+        SpawnParticles(flameParticles);
         /*if (currentColour == WATER)
         {
             //TODO ReleaseSteam()
@@ -150,11 +211,10 @@ public class PlayerFootsteps : MonoBehaviour
             Debug.Log("F/E");
             colour = MAGMA;
         }*/
-        
+
         //Draw at location
         generator.DrawAt(drawPos.x, drawPos.y, (int)footstepRadius, colour);
     }
-
     Color BurnColour(Color _colour)
     {
         Color result = new Color();
@@ -168,7 +228,7 @@ public class PlayerFootsteps : MonoBehaviour
     private void ApplyEarthFootsteps(GroundTextureGenerator generator)
     {
         //Our location
-        Vector2Int drawPos = GetPositionOnTexture(generator);
+        Vector2Int drawPos = GetPlayerPositionOnGrid(generator);
 
         //Current colour of the ground
         Color currentColour = generator.GetColorAt(drawPos.x, drawPos.y);
@@ -179,21 +239,20 @@ public class PlayerFootsteps : MonoBehaviour
         //TODO Quake()
         if (currentColour == WATER)
         {
-            Debug.Log("E/W");
             colour = MUD;
         }
         else if (currentColour == FIRE)
         {
-            Debug.Log("E/F");
             colour = MAGMA;
         }
-        Instantiate(earthParticles, transform.position, Quaternion.identity);
+        SpawnParticles(earthParticles);
         //Draw at location
         generator.DrawAt(drawPos.x, drawPos.y, (int)footstepRadius, colour);
     }
-
     private void ApplyWindFootsteps(GroundTextureGenerator generator)
     {
-        Instantiate(windParticles, transform.position, windParticles.transform.rotation);
+        SpawnParticles(windParticles);
     }
+
+    
 }

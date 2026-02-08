@@ -3,11 +3,21 @@ using Photon.Pun;
 using Photon.Realtime;
 public class Player : MonoBehaviourPunCallbacks, IPunObservable
 {
+    public enum PlayerType
+    {
+        Water,
+        Fire,
+        Earth,
+        Wind,
+        NULL
+    };
+
     public PlayerType currentType;
     public Color currentColour;
     void Start()
     {
-        TempUpdateColour();
+        AssignElementColour();
+        GetComponent<PlayerFootsteps>().SetType(currentType);
     }
 
     void Update()
@@ -16,8 +26,8 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
         {
             if (Input.GetKeyDown(KeyCode.E))
             {
-                ChangeTypeToNext();
-                TempUpdateColour();
+                ToggleElementSwitch();
+                AssignElementColour();
             }
         }
         
@@ -39,7 +49,19 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
             photonView.RPC("RPCChangeColourTo", RpcTarget.OthersBuffered, colour);
         }
     }
-    void TempUpdateColour()
+
+    [PunRPC]
+    void RPCChangeTypeTo(PlayerType newType)
+    {
+        currentType = newType;
+        GetComponent<PlayerFootsteps>().SetType(currentType);
+        //Tell everyone else what our new type is
+        if (photonView.IsMine)
+        {
+            photonView.RPC("RPCChangeTypeTo", RpcTarget.OthersBuffered, newType);
+        }
+    }
+    void AssignElementColour()
     {
         switch (currentType)
         {
@@ -57,24 +79,23 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
                 return;
         }
     }
-    void ChangeTypeToNext()
+    void ToggleElementSwitch()
     {
         switch (currentType)
         {
             case PlayerType.Water:
-                currentType = PlayerType.Fire;
+                RPCChangeTypeTo(PlayerType.Fire);
                 break;
             case PlayerType.Fire:
-                currentType = PlayerType.Earth;
+                RPCChangeTypeTo(PlayerType.Earth);
                 break;
             case PlayerType.Earth:
-                currentType = PlayerType.Wind;
+                RPCChangeTypeTo(PlayerType.Wind);
                 break;
             case PlayerType.Wind:
-                currentType = PlayerType.Water;
+                RPCChangeTypeTo(PlayerType.Water);
                 break;
         }
-        GetComponent<PlayerFootsteps>().SetType(currentType);
     }
     private void OnTriggerEnter(Collider other)
     {
@@ -114,12 +135,4 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
             
         }
     }
-
-    public enum PlayerType
-    {
-        Water,
-        Fire,
-        Earth,
-        Wind
-    };
 }
