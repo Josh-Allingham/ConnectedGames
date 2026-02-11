@@ -8,7 +8,6 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
 {
     public float speed = 5f;
     public float jumpStrength = 5f;
-    public int footstepRadius = 2;
     private Rigidbody rb;
    
     void Start()
