@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Grass : MonoBehaviour, IEnvironmentDynamic
+public class Grass : MonoBehaviour, IElementInteractable
 {
     [SerializeField]
     private States currentState = States.Base;

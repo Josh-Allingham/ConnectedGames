@@ -4,6 +4,7 @@ using Photon.Realtime;
 using System.Collections.Generic;
 using System.Collections;
 using UnityEngine.UI;
+using TMPro;
 public class NetManager : MonoBehaviourPunCallbacks
 {
     string playerName = "P1";
@@ -19,6 +20,7 @@ public class NetManager : MonoBehaviourPunCallbacks
     public GameObject playerPrefab;
     public List<GameObject> players = new List<GameObject> ();
 
+    
     void Start()
     {
         PhotonNetwork.AutomaticallySyncScene = true;
@@ -187,19 +189,20 @@ public class NetManager : MonoBehaviourPunCallbacks
     {
         //spawn player
         GameObject newPlayer = PhotonNetwork.Instantiate(playerPrefab.name, new Vector3(0, 1, 0), Quaternion.identity, 0);
-
-        switch (playerElement)
+        newPlayer.GetComponent<Player>().playerName = playerName;
+        
+        switch (element)
         {
-            case "0":
+            case 0:
                 newPlayer.GetComponent<Player>().currentType = Player.PlayerType.Water;
                 break;
-            case "1":
+            case 1:
                 newPlayer.GetComponent<Player>().currentType = Player.PlayerType.Fire;
                 break;
-            case "2":
+            case 2:
                 newPlayer.GetComponent<Player>().currentType = Player.PlayerType.Earth;
                 break;
-            case "3":
+            case 3:
                 newPlayer.GetComponent<Player>().currentType = Player.PlayerType.Wind;
                 break;
         }

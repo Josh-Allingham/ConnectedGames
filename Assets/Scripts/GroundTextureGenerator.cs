@@ -19,14 +19,24 @@ public class GroundTextureGenerator : MonoBehaviour
         
     }
 
-    public void DrawAt(int x, int y, int brushRadius, Vector4 colour)
+    public void DrawAt(int x, int y, int brushRadius, Vector4 colour, bool multiply = false)
     {
         texture.GetPixels();
         for (int i = -brushRadius; i <= brushRadius; i++)
         {
             for (int j = -brushRadius; j <= brushRadius; j++)
             {
-                ChangePixelColour(x + i, y + j, colour);
+                if (multiply)
+                {
+                    Color currentColour = GetColorAt(x, y);
+                    Vector4 newColour = ColourMultiply(colour, currentColour);
+                    ChangePixelColour(x + i, y + j, newColour);
+                }
+                else
+                {
+                    ChangePixelColour(x + i, y + j, colour);
+                }
+                
                 
             }
         }
@@ -55,7 +65,18 @@ public class GroundTextureGenerator : MonoBehaviour
             }
         }
     }
+    Color ColourMultiply(Color colour1, Color colour2)
+    {
+        Color result = new Color();
 
+        result.r = colour1.r * colour2.r;
+        result.g = colour1.g * colour2.g;
+        result.b = colour1.b * colour2.b;
+        result.a = colour1.a * colour2.a;
+
+        return result;
+
+    }
     public Color GetColorAt(int x, int y)
     {
         return texture.GetPixel(x, y);
