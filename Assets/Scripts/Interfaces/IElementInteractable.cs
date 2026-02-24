@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public interface IEnvironmentDynamic
+public interface IElementInteractable
 {
     void TouchWater();
     void TouchFire();

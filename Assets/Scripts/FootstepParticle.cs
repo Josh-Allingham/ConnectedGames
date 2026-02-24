@@ -39,11 +39,16 @@ public class FootstepParticle : MonoBehaviour
         if (other.TryGetComponent(out FootstepParticle particle))
         {
             Player.PlayerType otherType = particle.InteractionType;
-            if (otherType != Player.PlayerType.NULL && InteractionType != Player.PlayerType.NULL)
+            if (otherType != Player.PlayerType.NULL && InteractionType != Player.PlayerType.NULL) //if the two types can interact
             {
-                SpawnParticles(player.ParticleCrossover(InteractionType, otherType));
-                Destroy(particle.gameObject);
-                Destroy(this);
+                ParticleSystem crossoverParticles = player.ParticleCrossover(InteractionType, otherType); //get the result
+                SpawnParticles(crossoverParticles);
+                
+                if (crossoverParticles != null) //if there has been an interaction, destroy parent particles
+                {
+                    Destroy(particle.gameObject);
+                    Destroy(this.gameObject);
+                }
             }
                 
             

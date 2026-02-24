@@ -754,7 +754,7 @@ ParticleSystem:
     sphericalDirectionAmount: 0
     randomPositionAmount: 0
     radius:
-      value: 1
+      value: 1.46
       mode: 0
       spread: 0
       speed:
@@ -4849,12 +4849,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   InteractionType: 1
-  STEAM: {fileID: 1494279176249264221}
-  MUD: {fileID: 1494279176249264221}
-  CYCLONE: {fileID: 1494279176249264221}
-  MAGMA: {fileID: 1494279176249264221}
-  FIRESTORM: {fileID: 1494279176249264221}
-  EARTHQUAKE: {fileID: 1494279176249264221}
+  player: {fileID: 0}
 --- !u!136 &-194511229349111174
 CapsuleCollider:
   m_ObjectHideFlags: 0
