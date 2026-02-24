@@ -2,6 +2,7 @@ using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
 using TMPro;
+using System.Collections.Generic;
 public class Player : MonoBehaviourPunCallbacks, IPunObservable
 {
     public enum PlayerType
@@ -24,6 +25,8 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
     //Wind
     public GameObject windTunnel;
     public GameObject windTunnelInstance;
+    public GameObject earthCube;
+    public List<GameObject> earthCubeInstances;
     void Start()
     {
         AssignElementColour();
@@ -149,10 +152,16 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
                 break;
         }
     }
-    public void SpawnWindTunnel(float powerTimer)
+    public void SpawnWindTunnel()
     {
         windTunnelInstance = Instantiate(windTunnel, transform.position, Quaternion.identity);
         //windTunnelInstance.transform.localScale = Vector3.one * Mathf.Min(powerTimer, 3);
+    }
+
+    public void SpawnEarthCube()
+    {
+        GameObject newCube = Instantiate(earthCube, transform.position + Vector3.right, Quaternion.identity);
+        earthCubeInstances.Add(newCube);
     }
     private void OnTriggerEnter(Collider other)
     {

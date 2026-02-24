@@ -77,6 +77,8 @@ MonoBehaviour:
   playerName: 
   windTunnel: {fileID: 4967002450238993862, guid: 5907960c8b2a0764f88f22c074e2c764, type: 3}
   windTunnelInstance: {fileID: 0}
+  earthCube: {fileID: 1864968551278961925, guid: 6d2c5de7444424b418099088e711eaf9, type: 3}
+  earthCubeInstances: []
 --- !u!114 &3807598178122211820
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -94,6 +96,7 @@ MonoBehaviour:
   timeBetweenIdleSpawns: 0.05
   isActive: 0
   WindChargeTimeInSeconds: 4
+  EarthChargeTimeInSeconds: 4
   WATER: {r: 0.088679194, g: 0.839378, b: 1, a: 1}
   burnBlendColour: {r: 1, g: 0.35794678, b: 0, a: 0.03137255}
   EARTH: {r: 0.49056602, g: 0.38646606, b: 0.22908506, a: 1}
