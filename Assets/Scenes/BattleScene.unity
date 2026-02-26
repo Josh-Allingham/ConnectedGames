@@ -1670,7 +1670,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 577660206}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1183211001}
+        m_TargetAssemblyTypeName: Element, Assembly-CSharp
+        m_MethodName: damage
+        m_Mode: 4
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 10
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &577660206
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5338,7 +5350,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1963914001}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1183211001}
+        m_TargetAssemblyTypeName: Element, Assembly-CSharp
+        m_MethodName: updatePlayerStats
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1963914001
 MonoBehaviour:
   m_ObjectHideFlags: 0

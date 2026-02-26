@@ -119,9 +119,9 @@ public class Element : MonoBehaviour
         StartCoroutine(LoadStats(element));
     }
 
-    public void updatePlayerStats(string url)
+    public void updatePlayerStats()
     {
-        StartCoroutine(UpdateStats(url));
+        StartCoroutine(UpdateStats());
     }
 
     IEnumerator LoadStats(string element)
@@ -169,10 +169,12 @@ public class Element : MonoBehaviour
         }
     }
 
-    IEnumerator UpdateStats(string url)
+    IEnumerator UpdateStats()
     {
+        string uri = "http://localhost/CGDB/UpdateStats.php";
+
         WWWForm form1 = new WWWForm();
-        form1.AddField("Element_Type", elementType);
+        form1.AddField("Element_Type", ElementType.ToString());
         form1.AddField("Curr_Health", CurrentHealth.ToString());
         form1.AddField("Max_Health", MaxHealth.ToString());
         form1.AddField("Defence", Defence.ToString());
@@ -180,7 +182,7 @@ public class Element : MonoBehaviour
         form1.AddField("Speed", Speed.ToString());
         form1.AddField("Elemental_Statera", ElementStatera.ToString());
 
-        using (UnityWebRequest webRequest = UnityWebRequest.Post(url, form1))
+        using (UnityWebRequest webRequest = UnityWebRequest.Post(uri, form1))
         {
             yield return webRequest.SendWebRequest();
             if (webRequest.result != UnityWebRequest.Result.Success)
