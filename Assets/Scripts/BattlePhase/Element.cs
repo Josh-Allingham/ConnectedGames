@@ -1,7 +1,9 @@
+using System;
 using System.Collections;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
+using static System.Net.WebRequestMethods;
 
 public class Element : MonoBehaviour
 {
@@ -112,9 +114,9 @@ public class Element : MonoBehaviour
             heal(maxHealth / 3);
         }
     }
-    public void getPlayerStats(string url)
+    public void getPlayerStats(string element)
     {
-        StartCoroutine(LoadStats(url));
+        StartCoroutine(LoadStats(element));
     }
 
     public void updatePlayerStats(string url)
@@ -122,9 +124,11 @@ public class Element : MonoBehaviour
         StartCoroutine(UpdateStats(url));
     }
 
-    IEnumerator LoadStats(string url)
+    IEnumerator LoadStats(string element)
     {
-        using (UnityWebRequest webRequest = UnityWebRequest.Get(url))
+        string uri = "http://localhost/CGDB/GetStats.php";
+
+        using (UnityWebRequest webRequest = UnityWebRequest.Get(uri))
         {
             yield return webRequest.SendWebRequest();
             if (webRequest.result != UnityWebRequest.Result.Success)
@@ -136,21 +140,30 @@ public class Element : MonoBehaviour
                 string playerStats = webRequest.downloadHandler.text;
                 Debug.Log(playerStats);
 
-                float[] stats = playerStats.Split(',', 6).Select(float.Parse).ToArray();
-                CurrentHealth = stats[0];
-                MaxHealth = stats[1];
-                Defence = stats[2];
-                Attack = stats[3];
-                Speed = stats[4];
-                ElementStatera = stats[5];
+                string[] stats = playerStats.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                for (int i = 0; i < playerStats.Length-7;i+=7)
+                { 
+                    if (element.Equals(stats[i]))
+                    {
+                        ElementType = stats[i];
+                        CurrentHealth = float.Parse(stats[i + 1]);
+                        MaxHealth = float.Parse(stats[i + 2]);
+                        Defence = float.Parse(stats[i + 3]);
+                        Attack = float.Parse(stats[i + 4]);
+                        Speed = float.Parse(stats[i + 5]);
+                        ElementStatera = float.Parse(stats[i + 6]);
 
-                if(CurrentHealth > 0)
-                {
-                    IsAlive = true;
-                }
-                else
-                {
-                    IsAlive = false;
+                        if (CurrentHealth > 0)
+                        {
+                            IsAlive = true;
+                        }
+                        else
+                        {
+                            IsAlive = false;
+                        }
+
+                        break;
+                    }
                 }
             }
         }
@@ -159,6 +172,7 @@ public class Element : MonoBehaviour
     IEnumerator UpdateStats(string url)
     {
         WWWForm form1 = new WWWForm();
+        form1.AddField("Element_Type", elementType);
         form1.AddField("Curr_Health", CurrentHealth.ToString());
         form1.AddField("Max_Health", MaxHealth.ToString());
         form1.AddField("Defence", Defence.ToString());

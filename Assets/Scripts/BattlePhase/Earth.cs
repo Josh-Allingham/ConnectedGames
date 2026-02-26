@@ -10,7 +10,7 @@ public class Earth : Element
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        getPlayerStats("http://localhost/CGDB/EarthStats.php");
+        getPlayerStats("Earth");
     }
 
     // Update is called once per frame

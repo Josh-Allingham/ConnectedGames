@@ -5,7 +5,7 @@ public class Fire : Element
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        getPlayerStats("http://localhost/CGDB/FireStats.php");
+        getPlayerStats("Fire");
     }
 
     // Update is called once per frame
