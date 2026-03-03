@@ -126,7 +126,9 @@ public class Element : MonoBehaviour
 
     IEnumerator LoadStats(string element)
     {
-        string uri = "http://localhost/CGDB/GetStats.php";
+        string uri = "http://16.171.171.100/GetStatus.php";
+
+        Debug.Log(uri);
 
         using (UnityWebRequest webRequest = UnityWebRequest.Get(uri))
         {
@@ -138,7 +140,6 @@ public class Element : MonoBehaviour
             else
             {
                 string playerStats = webRequest.downloadHandler.text;
-                Debug.Log(playerStats);
 
                 string[] stats = playerStats.Split(',', StringSplitOptions.RemoveEmptyEntries);
                 for (int i = 0; i < playerStats.Length-7;i+=7)
@@ -171,7 +172,7 @@ public class Element : MonoBehaviour
 
     IEnumerator UpdateStats()
     {
-        string uri = "http://localhost/CGDB/UpdateStats.php";
+        string uri = "http://16.171.171.100/UpdateStatus.php";
 
         WWWForm form1 = new WWWForm();
         form1.AddField("Element_Type", ElementType.ToString());

@@ -1,5 +1,5 @@
 <?php
-	$sql_connect = mysqli_connect("localhost","root", "") or die ("No DB Connections");
+	$sql_connect = mysqli_connect("stateri-elementi.chmiq4ey60h8.eu-north-1.rds.amazonaws.com","admin", "Element_Game26") or die ("No DB Connections");
 	mysqli_select_db($sql_connect,"stateri_elementi") or die ("DB not found");
 
 	$query = "SELECT * FROM player_stats";

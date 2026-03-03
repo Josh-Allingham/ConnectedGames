@@ -1,7 +1,7 @@
 <?php
-	$servername = "localhost";
-	$username = "root";
-	$password = "";
+	$servername = "stateri-elementi.chmiq4ey60h8.eu-north-1.rds.amazonaws.com";
+	$username = "admin";
+	$password = "Element_Game26";
 	$dbname = "stateri_elementi";
 
 	$Element_Type = $_POST['Element_Type'];
