@@ -126,7 +126,7 @@ public class Element : MonoBehaviour
 
     IEnumerator LoadStats(string element)
     {
-        string uri = "http://16.171.171.100/GetStatus.php";
+        string uri = "http://16.171.171.137/GetStatus.php";
 
         Debug.Log(uri);
 
@@ -172,7 +172,7 @@ public class Element : MonoBehaviour
 
     IEnumerator UpdateStats()
     {
-        string uri = "http://16.171.171.100/UpdateStatus.php";
+        string uri = "http://16.171.171.137/UpdateStatus.php";
 
         WWWForm form1 = new WWWForm();
         form1.AddField("Element_Type", ElementType.ToString());
