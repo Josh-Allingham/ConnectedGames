@@ -6,6 +6,7 @@ public class Water : Element
     void Start()
     {
         getPlayerStats("Water");
+        getPlayerMoves("Water");
     }
 
     // Update is called once per frame

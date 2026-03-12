@@ -6,6 +6,7 @@ public class Fire : Element
     void Start()
     {
         getPlayerStats("Fire");
+        getPlayerMoves("Fire");
     }
 
     // Update is called once per frame

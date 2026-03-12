@@ -6,6 +6,7 @@ public class Wind : Element
     void Start()
     {
         getPlayerStats("Wind");
+        getPlayerMoves("Wind");
     }
 
     // Update is called once per frame

@@ -11,6 +11,7 @@ public class Earth : Element
     void Start()
     {
         getPlayerStats("Earth");
+        getPlayerMoves("Earth");
     }
 
     // Update is called once per frame

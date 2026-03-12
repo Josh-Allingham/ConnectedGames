@@ -8,6 +8,20 @@ using System;
 
 public class BattleMenu : MonoBehaviour
 {
+    [Header("Selection Menus")]
+    [SerializeField] 
+    private GameObject actionMenu;
+    [SerializeField]
+    private GameObject skillMenu;
+    [SerializeField]
+    private GameObject skillInfoMenu;
+    [SerializeField]
+    private GameObject targetMenu;
+    [SerializeField]
+    private GameObject targetInfoMenu;
+
+
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
