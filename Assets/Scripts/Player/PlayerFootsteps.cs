@@ -19,6 +19,7 @@ public class PlayerFootsteps : MonoBehaviour
 
     #region Stats
     [SerializeField] private float WindChargeTimeInSeconds = 4f;
+    [SerializeField] private float EarthChargeTimeInSeconds = 4f;
     #endregion
     #region ColorCodes
     [Header("Colours")]
@@ -203,24 +204,25 @@ public class PlayerFootsteps : MonoBehaviour
         //Our location
         Vector2Int drawPos = GetPlayerPositionOnGrid(generator);
 
-        //Current colour of the ground
-        Color currentColour = generator.GetColorAt(drawPos.x, drawPos.y);
-
-        //By default set our paint colour to the colour of our type
         Color colour = EARTH;
+        generator.DrawAt(drawPos.x, drawPos.y, (int)footstepRadius, colour);
 
         //TODO Quake()
-        
+      
         SpawnParticles(earthParticles, Vector3.one * 0.1f);
-        //Draw at location
-        generator.DrawAt(drawPos.x, drawPos.y, (int)footstepRadius, colour);
+
+        if (powerTimer >= EarthChargeTimeInSeconds)
+        {
+            player.SpawnEarthCube();
+            powerTimer = 0;
+        }
     }
     private void ApplyWindFootsteps(GroundTextureGenerator generator)
     {
         SpawnParticles(windParticles, Vector3.one * 0.1f * Mathf.Min(powerTimer / 2, 2));
         if (powerTimer >= WindChargeTimeInSeconds)
         {
-            player.SpawnWindTunnel(powerTimer);
+            player.SpawnWindTunnel();
             powerTimer = 0;
         }
         
