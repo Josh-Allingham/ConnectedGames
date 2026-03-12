@@ -16,6 +16,11 @@ public class WindTunnel : MonoBehaviour
         {
             player.GetComponent<Rigidbody>().AddForce(Vector3.up * upwardsForce, ForceMode.Impulse);
         }
+        other.TryGetComponent(out IElementInteractable obj);
+        if (obj != null)
+        {
+            obj.TouchWind();
+        }
     }
 
     private IEnumerator LifetimeCountdown(float lifetime)

@@ -2,6 +2,7 @@ using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
 using TMPro;
+using System.Collections.Generic;
 public class Player : MonoBehaviourPunCallbacks, IPunObservable
 {
     public enum PlayerType
@@ -16,17 +17,22 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
 
     #region spriteIcons;
     [SerializeField] public Sprite waterIcon, fireIcon, earthIcon, windIcon;
+    [SerializeField] public Sprite waterSprite, fireSprite, earthSprite, windSprite;
     #endregion
     public PlayerType currentType;
     public Color currentColour;
     public string playerName;
+    public SpriteRenderer iconSprite;
+    public SpriteRenderer bodySprite;
 
     //Wind
     public GameObject windTunnel;
     public GameObject windTunnelInstance;
+    public GameObject earthCube;
+    public List<GameObject> earthCubeInstances;
     void Start()
     {
-        AssignElementColour();
+        //AssignElementColour();
         GetComponent<PlayerFootsteps>().SetType(currentType);
         GetComponentInChildren<SpriteRenderer>().sprite = waterIcon;
         RPCSetPlayerName(playerName);
@@ -39,7 +45,7 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
             if (Input.GetKeyDown(KeyCode.Q))
             {
                 ToggleElementSwitch();
-                AssignElementColour();
+                //AssignElementColour();
             }
             
             RPCSetElementPowerActive(Input.GetKey(KeyCode.E));
@@ -89,24 +95,28 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
         currentType = newType;
         GetComponent<PlayerFootsteps>().SetType(currentType);
 
-        Sprite sprite = waterIcon;
+        Sprite iconSprite = waterIcon;
         switch (currentType)
         {
             case PlayerType.Water:
-                sprite = waterIcon;
+                iconSprite = waterIcon;
+                bodySprite.sprite = waterSprite;
                 break;
             case PlayerType.Fire:
-                sprite = fireIcon;
+                iconSprite = fireIcon;
+                bodySprite.sprite = fireSprite;
                 break;
             case PlayerType.Earth:
-                sprite = earthIcon;
+                iconSprite = earthIcon;
+                bodySprite.sprite = earthSprite;
                 break;
             case PlayerType.Wind:
-                sprite = windIcon;
+                iconSprite = windIcon;
+                bodySprite.sprite = windSprite;
                 break;
         }
 
-        GetComponentInChildren<SpriteRenderer>().sprite = sprite;
+        GetComponentInChildren<SpriteRenderer>().sprite = iconSprite;
         //Tell everyone else what our new type is
         if (photonView.IsMine)
         {
@@ -149,10 +159,16 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
                 break;
         }
     }
-    public void SpawnWindTunnel(float powerTimer)
+    public void SpawnWindTunnel()
     {
         windTunnelInstance = Instantiate(windTunnel, transform.position, Quaternion.identity);
         //windTunnelInstance.transform.localScale = Vector3.one * Mathf.Min(powerTimer, 3);
+    }
+
+    public void SpawnEarthCube()
+    {
+        GameObject newCube = Instantiate(earthCube, transform.position + Vector3.right, Quaternion.identity);
+        earthCubeInstances.Add(newCube);
     }
     private void OnTriggerEnter(Collider other)
     {
