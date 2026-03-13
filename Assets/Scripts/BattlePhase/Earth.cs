@@ -17,7 +17,7 @@ public class Earth : Element
     // Update is called once per frame
     void Update()
     {
-
+        transform.LookAt(transform.position - (Camera.main.transform.position - transform.position));
     }
 
 }
