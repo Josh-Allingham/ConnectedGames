@@ -32,7 +32,7 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
     public List<GameObject> earthCubeInstances;
     void Start()
     {
-        //AssignElementColour();
+        AssignElementColour();
         GetComponent<PlayerFootsteps>().SetType(currentType);
         GetComponentInChildren<SpriteRenderer>().sprite = waterIcon;
         RPCSetPlayerName(playerName);
@@ -45,7 +45,7 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
             if (Input.GetKeyDown(KeyCode.Q))
             {
                 ToggleElementSwitch();
-                //AssignElementColour();
+                AssignElementColour();
             }
             
             RPCSetElementPowerActive(Input.GetKey(KeyCode.E));
@@ -70,7 +70,7 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
 
         GetComponent<PlayerFootsteps>().SetColour(currentColour);
 
-        GetComponent<Renderer>().material.color = currentColour;
+        GetComponentsInChildren<SpriteRenderer>()[1].color = currentColour;
 
         //Tell everyone else what our new colour is
         if (photonView.IsMine)
@@ -128,13 +128,13 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
         switch (currentType)
         {
             case PlayerType.Water:
-                RPCChangeColourTo(new Vector3(0,0,1));
+                RPCChangeColourTo(new Vector3(142f / 255f, 147f / 255f, 1));
                 return;
             case PlayerType.Fire:
-                RPCChangeColourTo(new Vector3(1, 0, 0));
+                RPCChangeColourTo(new Vector3(1, 185f/255f, 117f/255f));
                 return;
             case PlayerType.Earth:
-                RPCChangeColourTo(new Vector3(0, 1, 0));
+                RPCChangeColourTo(new Vector3(185f / 255f, 1, 117f / 255f));
                 return;
             case PlayerType.Wind:
                 RPCChangeColourTo(new Vector3(1, 1, 1));
@@ -167,13 +167,19 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
 
     public void SpawnEarthCube()
     {
-        GameObject newCube = Instantiate(earthCube, transform.position + Vector3.right, Quaternion.identity);
+        GameObject newCube = PhotonNetwork.Instantiate(earthCube.name, transform.position + Vector3.right, Quaternion.identity);
         earthCubeInstances.Add(newCube);
     }
     private void OnTriggerEnter(Collider other)
     {
-        other.TryGetComponent<IElementInteractable>(out IElementInteractable enviroObject);
-        if (enviroObject != null)
+        if (other.TryGetComponent(out IElementInteractable enviroObject))
+        {
+            if (currentType == PlayerType.Fire)
+            {
+                enviroObject.TouchFire();
+            }
+        }
+        /*if (enviroObject != null)
         {
             switch (currentType)
             {
@@ -190,7 +196,7 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
                     enviroObject.TouchWind();
                     return;
             }
-        }
+        }*/
     }
 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)

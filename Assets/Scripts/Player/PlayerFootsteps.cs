@@ -73,13 +73,11 @@ public class PlayerFootsteps : MonoBehaviour
     private void PlaceFootstep()
     {
         RaycastHit hit;
-        if (Physics.Raycast(transform.position, Vector3.down, out hit, .5f))
+        if (Physics.Raycast(transform.position, Vector3.down, out hit, .5f)) //if stood on ground
         {
             hit.collider.gameObject.TryGetComponent(out GroundTextureGenerator generator);
-            if (generator != null)
+            if (generator != null)//If standing on drawable texture, run relevent footstep logic
             {
-                //If standing on drawable texture, run relevent footstep logic
-
                 switch (playerType)
                 {
                     case Player.PlayerType.Water:
@@ -97,7 +95,33 @@ public class PlayerFootsteps : MonoBehaviour
                 }
                 
             }
+            
+        }
+        switch (playerType) //spawn particle
+        {
+            case Player.PlayerType.Water:
+                SpawnParticles(waterParticles, Vector3.one * 0.1f);
+                break;
+            case Player.PlayerType.Fire:
+                SpawnParticles(flameParticles, Vector3.one * 0.1f * Mathf.Min(powerTimer, 3));
+                break;
+            case Player.PlayerType.Earth:
+                SpawnParticles(earthParticles, Vector3.one * 0.1f);
 
+                if (powerTimer >= EarthChargeTimeInSeconds)
+                {
+                    player.SpawnEarthCube();
+                    powerTimer = 0;
+                }
+                break;
+            case Player.PlayerType.Wind:
+                SpawnParticles(windParticles, Vector3.one * 0.1f * Mathf.Min(powerTimer / 2, 2));
+                if (powerTimer >= WindChargeTimeInSeconds)
+                {
+                    player.SpawnWindTunnel();
+                    powerTimer = 0;
+                }
+                break;
         }
     }
 
@@ -186,7 +210,7 @@ public class PlayerFootsteps : MonoBehaviour
 
         Color colour = WATER;
         
-        SpawnParticles(waterParticles, Vector3.one * 0.1f);
+        
         
         generator.DrawAt(drawPos.x, drawPos.y, (int)footstepRadius, colour);
     }
@@ -194,7 +218,7 @@ public class PlayerFootsteps : MonoBehaviour
     {
         Vector2Int drawPos = GetPlayerPositionOnGrid(generator);
 
-        SpawnParticles(flameParticles, Vector3.one * 0.1f * Mathf.Min(powerTimer, 3));
+        
        
         generator.DrawAt(drawPos.x, drawPos.y, (int)footstepRadius, burnBlendColour, true); //Multiply mode (burn)
     }
@@ -209,22 +233,11 @@ public class PlayerFootsteps : MonoBehaviour
 
         //TODO Quake()
       
-        SpawnParticles(earthParticles, Vector3.one * 0.1f);
-
-        if (powerTimer >= EarthChargeTimeInSeconds)
-        {
-            player.SpawnEarthCube();
-            powerTimer = 0;
-        }
+        
     }
     private void ApplyWindFootsteps(GroundTextureGenerator generator)
     {
-        SpawnParticles(windParticles, Vector3.one * 0.1f * Mathf.Min(powerTimer / 2, 2));
-        if (powerTimer >= WindChargeTimeInSeconds)
-        {
-            player.SpawnWindTunnel();
-            powerTimer = 0;
-        }
+        
         
         
     }
