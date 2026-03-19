@@ -11,12 +11,13 @@ public class Earth : Element
     void Start()
     {
         getPlayerStats("Earth");
+        getPlayerMoves("Earth");
     }
 
     // Update is called once per frame
     void Update()
     {
-
+        transform.LookAt(transform.position - (Camera.main.transform.position - transform.position));
     }
 
 }

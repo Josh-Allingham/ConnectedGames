@@ -15,7 +15,7 @@ public class Element : MonoBehaviour
     public float speed;
     public float elementStatera;
     public bool alive;
-
+    public string[,] myMoves = new string[3,5];
 
     public string ElementType
     {
@@ -61,6 +61,12 @@ public class Element : MonoBehaviour
     {
         get { return alive; }
         set { alive = value; }
+    }
+
+    public string[,] MyMoves
+    {
+        get { return myMoves; }
+        set { myMoves = value; }
     }
 
     public void heal(float aid)
@@ -124,6 +130,11 @@ public class Element : MonoBehaviour
         StartCoroutine(UpdateStats());
     }
 
+    public void getPlayerMoves(string element)
+    {
+        StartCoroutine(LoadMoves(element));
+    }
+
     IEnumerator LoadStats(string element)
     {
         string uri = "http://16.171.171.137/GetStatus.php";
@@ -142,7 +153,7 @@ public class Element : MonoBehaviour
                 string playerStats = webRequest.downloadHandler.text;
 
                 string[] stats = playerStats.Split(',', StringSplitOptions.RemoveEmptyEntries);
-                for (int i = 0; i < playerStats.Length-7;i+=7)
+                for (int i = 0; i < stats.Length;i+=7)
                 { 
                     if (element.Equals(stats[i]))
                     {
@@ -196,4 +207,42 @@ public class Element : MonoBehaviour
             }
         }
     }
+
+    IEnumerator LoadMoves(string element)
+    {
+        string uri = "http://localhost/CGDB/GetMoves.php";
+
+        Debug.Log(uri);
+
+        using (UnityWebRequest webRequest = UnityWebRequest.Get(uri))
+        {
+            yield return webRequest.SendWebRequest();
+            if (webRequest.result != UnityWebRequest.Result.Success)
+            {
+                Debug.Log(webRequest.error);
+            }
+            else
+            {
+                string playerMoves = webRequest.downloadHandler.text;
+
+                string[] moves = playerMoves.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                int moveNum = 0;
+                for (int i = 0; i < moves.Length; i += 6)
+                {
+                    if (element.Equals(moves[i]))
+                    {
+                        MyMoves[moveNum,0] = moves[i+1];
+                        MyMoves[moveNum,1] = moves[i+2];
+                        MyMoves[moveNum,2] = moves[i+3];
+                        MyMoves[moveNum,3] = moves[i+4];
+                        MyMoves[moveNum,4] = moves[i+5];
+                        moveNum++;
+                    }
+                }
+            }
+        }
+    }
+
+
+
 }

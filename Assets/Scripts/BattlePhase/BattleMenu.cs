@@ -8,15 +8,41 @@ using System;
 
 public class BattleMenu : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    [Header("Selection Menus")]
+    [SerializeField] 
+    private GameObject actionMenu;
+    [SerializeField]
+    private GameObject skillMenu;
+    [SerializeField]
+    private GameObject skillInfoMenu;
+    [SerializeField]
+    private GameObject targetMenu;
+    [SerializeField]
+    private GameObject targetInfoMenu;
+
+
+    public void attack()
     {
-        
+        skillMenu.SetActive(false);
+        //Fill the skill info menu with the attack moves that can be used
+        skillMenu.SetActive(true);
+        actionMenu.GetComponentInChildren<Button>().interactable = false;
     }
 
-    // Update is called once per frame
-    void Update()
+    public void cast()
     {
-        
+        skillMenu.SetActive(false);
+        //Fill the skill info menu with the cast moves that can be used
+        skillMenu.SetActive(true);
+        actionMenu.GetComponentInChildren<Button>().interactable = false;
     }
+
+    public void item()
+    {
+        skillMenu.SetActive(false);
+        //Fill the skill info menu with the items that can be used
+        skillMenu.SetActive(true);
+        actionMenu.GetComponentInChildren<Button>().interactable = false;
+    }
+
 }
