@@ -23,6 +23,14 @@ public class WindTunnel : MonoBehaviour
         }
     }
 
+    private void OnTriggerStay(Collider other)
+    {
+        other.TryGetComponent(out IElementInteractable obj);
+        if (obj != null)
+        {
+            obj.TouchWind();
+        }
+    }
     private IEnumerator LifetimeCountdown(float lifetime)
     {
         yield return new WaitForSeconds(lifetime);

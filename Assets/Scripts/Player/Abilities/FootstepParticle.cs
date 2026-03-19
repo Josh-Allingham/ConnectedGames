@@ -53,5 +53,24 @@ public class FootstepParticle : MonoBehaviour
                 
             
         }
+
+        if (other.TryGetComponent(out IElementInteractable interactable))
+        {
+            switch (InteractionType)
+            {
+                case Player.PlayerType.Water:
+                    interactable.TouchWater();
+                    return;
+                case Player.PlayerType.Fire:
+                    interactable.TouchFire();
+                    return;
+                case Player.PlayerType.Earth:
+                    interactable.TouchEarth();
+                    return;
+                case Player.PlayerType.Wind:
+                    interactable.TouchWind();
+                    return;
+            }
+        }
     }
 }

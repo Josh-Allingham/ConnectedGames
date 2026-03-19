@@ -53,7 +53,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe2d3a7b0ae51dd42ac6ac144b8d83dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 7.5
+  speed: 5
   jumpStrength: 5
 --- !u!114 &9087434924260859972
 MonoBehaviour:
@@ -134,8 +134,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.5, y: 0.5, z: 0.32}
-  m_Center: {x: 0, y: -0.25, z: 0}
+  m_Size: {x: 0.7766031, y: 1.2543094, z: 0.32}
+  m_Center: {x: -0.0047923774, y: 0.12715471, z: 0}
 --- !u!54 &6391962331672973110
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -280,7 +280,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: -372282226, guid: a6ed40ee2475db745a4ff08fa8f91549, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.5566037, g: 0.57433957, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
