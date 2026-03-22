@@ -188,7 +188,7 @@ public class NetManager : MonoBehaviourPunCallbacks
     void AddPlayer(int element = 0, bool setCameraTarget = false)
     {
         //spawn player
-        GameObject newPlayer = PhotonNetwork.Instantiate(playerPrefab.name, new Vector3(0, 1, 0), Quaternion.identity, 0);
+        GameObject newPlayer = PhotonNetwork.Instantiate(playerPrefab.name, new Vector3(20, 7, 15), Quaternion.identity, 0);
         newPlayer.GetComponent<Player>().playerName = playerName;
         
         switch (element)
