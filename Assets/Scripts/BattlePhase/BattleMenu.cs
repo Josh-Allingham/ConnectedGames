@@ -19,6 +19,8 @@ public class BattleMenu : MonoBehaviour
     private GameObject targetMenu;
     [SerializeField]
     private GameObject targetInfoMenu;
+    [SerializeField]
+    private GameObject timer;
 
 
     public void attack()
