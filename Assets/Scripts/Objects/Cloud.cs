@@ -9,6 +9,7 @@ public class Cloud : MonoBehaviour
     [SerializeField] private int numBalls = 5;
     [SerializeField] private int maxBallRange = 3;
     [SerializeField] private float speedMultiplier = 0.5f;
+    public bool isAlive = true;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -22,7 +23,11 @@ public class Cloud : MonoBehaviour
 
     void Update()
     {
-        UpdateBalls();
+        //UpdateBalls();
+        if (!isAlive)
+        {
+            Destroy(this.gameObject);
+        }
     }
 
     private void AddBall()
@@ -74,7 +79,8 @@ public class Cloud : MonoBehaviour
             timePassed += Time.deltaTime;
             yield return null;
         }
-        Destroy(this.gameObject);
+        isAlive = false;
+        
     }
     public struct CloudBall
     {

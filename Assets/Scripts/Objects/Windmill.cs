@@ -9,6 +9,7 @@ public class Windmill : MonoBehaviour, IElementInteractable
     [SerializeField] private float windmillDrag = 10f;
     [SerializeField] private Transform windmillAxis;
     [SerializeField] private Cloud cloud;
+    public bool isSpinning = false;
     private enum WindmillDamageState
     {
         tangled,
@@ -33,8 +34,8 @@ public class Windmill : MonoBehaviour, IElementInteractable
     {
         windmillAcceleration = Mathf.Max(0, windmillAcceleration - Time.deltaTime * windmillDrag);
         windmillSpeed = Mathf.Min(windmillSpeed + windmillAcceleration, maxWindmillSpeed);
-        windmillSpeed = Mathf.Max(windmillSpeed - Time.deltaTime * windmillDrag * windmillDrag, 0f);
-
+        windmillSpeed = Mathf.Max(windmillSpeed - Time.deltaTime * windmillDrag * windmillDrag, isSpinning ? maxWindmillSpeed / 2f : 0f);
+        
         windmillAxis.Rotate(Vector3.up, windmillSpeed * Time.deltaTime, Space.Self);
 
         Renderer r = windmillAxis.GetComponent<Renderer>();
@@ -56,6 +57,7 @@ public class Windmill : MonoBehaviour, IElementInteractable
                 r.material.color = Color.white;
                 if (windmillSpeed > maxWindmillSpeed / 2)
                 {
+                    isSpinning = true;
                     StartCoroutine(cloud.MoveCloud((cloud.transform.position - transform.position).normalized, 10));
                 }
                 break;
