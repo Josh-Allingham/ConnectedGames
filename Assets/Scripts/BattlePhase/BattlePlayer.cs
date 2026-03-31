@@ -13,36 +13,35 @@ public class BattlePlayer : MonoBehaviourPunCallbacks
 
     private void Start()
     {
-        RPCSetPlayerName();
-        RPCSetPlayerElement();
+        RPCSetPlayerName(playerName);
+        RPCSetPlayerElement(playerElement);
         RPCSpawnElemental();
         RPCPositionElemental();
     }
 
     void Update()
     {
-
+        RPCSetPlayerName(playerName);
+        RPCSetPlayerElement(playerElement);
     }
 
     [PunRPC]
-    void RPCSetPlayerName()
+    void RPCSetPlayerName(string name)
     {
-        playerName = "P1";
-
+        playerName = name;
         if (photonView.IsMine)
         {
-            photonView.RPC("RPCSetPlayerName", RpcTarget.OthersBuffered, playerName);
+            photonView.RPC("RPCSetPlayerName", RpcTarget.OthersBuffered, name);
         }
     }
 
     [PunRPC]
-    void RPCSetPlayerElement()
+    void RPCSetPlayerElement(string element)
     {
-        playerElement = "Fire";
-
+        playerElement = element;
         if (photonView.IsMine)
         {
-            photonView.RPC("RPCSetPlayerElement", RpcTarget.OthersBuffered, playerElement);
+            photonView.RPC("RPCSetPlayerElement", RpcTarget.OthersBuffered, element);
         }
     }
 
@@ -88,6 +87,11 @@ public class BattlePlayer : MonoBehaviourPunCallbacks
             case "Wind":
                 this.transform.position = new Vector3(11.145f, 2.39f, -8.15f);
                 break;
+        }
+
+        if (photonView.IsMine)
+        {
+            photonView.RPC("RPCPositionElemental", RpcTarget.OthersBuffered);
         }
     }
 }
