@@ -19,6 +19,10 @@ public class BattleMenu : MonoBehaviour
     [SerializeField]
     private GameObject targetInfoMenu;
     [SerializeField]
+    private GameObject lockInMenu;
+    [SerializeField]
+    private GameObject waitingScreen;
+    [SerializeField]
     private Image timer;
 
     public float timeLimit;
@@ -134,6 +138,13 @@ public class BattleMenu : MonoBehaviour
             targetInfo(true);
             targetStudy = true;
         }
+        else if (targetStudy == true)
+        {
+            targetInfo(false);
+            targetStudy = false;
+            checkLock();
+        }
+    
     }
 
     public void targetInfo(bool show)
@@ -183,7 +194,23 @@ public class BattleMenu : MonoBehaviour
 
     private void resetSelection()
     {
-       
+        attackStudy = false;
+        castStudy = false;
+        targetStudy = false;
+        actionMenu.SetActive(true);
     }
 
+   public void checkLock()
+    {
+       //Insert text to action and target
+       lockInMenu.SetActive(true);
+    }
+
+    public void lockIn()
+    {
+        actionMenu.SetActive(false);
+        targetMenu.SetActive(false);
+        lockInMenu.SetActive(false);
+        waitingScreen.SetActive(true);
+    }
 }
