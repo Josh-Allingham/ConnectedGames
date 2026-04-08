@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using System.Xml;
 using TMPro;
 using UnityEngine;
@@ -33,6 +34,10 @@ public class BattleMenu : MonoBehaviour
     public bool castStudy;
     public bool targetStudy;
 
+    public string actionSelection;
+    public string targetSelection;
+
+
     public void Start()
     {
         resetSelection();
@@ -51,6 +56,7 @@ public class BattleMenu : MonoBehaviour
         {
             targetMenu.SetActive(false);
             targetStudy = false;
+            actionSelection = "";
         }
 
         if (attackStudy == false && castStudy == false)
@@ -65,6 +71,8 @@ public class BattleMenu : MonoBehaviour
             attackInfo(false);
             targetMenu.SetActive(true);
             attackStudy = false;
+            actionSelection = "Attack";
+            targetSelection = "";
         }
         else if(attackStudy == false && castStudy == true)
         {
@@ -94,6 +102,8 @@ public class BattleMenu : MonoBehaviour
         {
             targetMenu.SetActive(false);
             targetStudy = false;
+            actionSelection = "";
+            targetSelection = "";
         }
 
         if (attackStudy == false && castStudy == false)
@@ -115,6 +125,7 @@ public class BattleMenu : MonoBehaviour
             attackInfo(false);
             targetMenu.SetActive(true);
             castStudy = false;
+            actionSelection = "Cast";
         }
     }
 
@@ -140,6 +151,8 @@ public class BattleMenu : MonoBehaviour
         }
         else if (targetStudy == true)
         {
+            //Lock in target and show the lock in menu
+            targetSelection = "Target";
             targetInfo(false);
             targetStudy = false;
             checkLock();

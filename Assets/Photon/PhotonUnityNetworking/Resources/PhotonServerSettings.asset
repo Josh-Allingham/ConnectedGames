@@ -49,6 +49,9 @@ MonoBehaviour:
   - RPCPositionElemental
   - RPCSetPlayerElement
   - RPCSpawnElemental
+  - RPCCheckTimer
+  - RPCTimerStart
+  - joinTimerTick
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
