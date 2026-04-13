@@ -1,11 +1,13 @@
-using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
-using System.Collections.Generic;
 using System.Collections;
-using UnityEngine.UI;
-using TMPro;
+using System.Collections.Generic;
 using System.Threading;
+using TMPro;
+using Unity.VisualScripting;
+using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.UIElements;
 public class BattleNetManager : MonoBehaviourPunCallbacks
 {
     string playerName = "P1";
@@ -18,16 +20,18 @@ public class BattleNetManager : MonoBehaviourPunCallbacks
     bool joiningRoom = false;
     bool render = true;
 
+    public GameObject playerManager;
     public GameObject playerPrefab;
     public GameObject cpuPrefab;
     public List<GameObject> players = new List<GameObject>();
     public List<string> elements = new List<string>();
 
     public int expectedPlayerCount;
-    public bool timeStarted = false;
-    public float timeToConnect = 5f;
-    public float timerCurrent;
     public bool cpuLoaded = false;
+
+    public bool timerStarted = false;
+    public double start;
+    public double timer;
 
     void Start()
     {
@@ -37,30 +41,32 @@ public class BattleNetManager : MonoBehaviourPunCallbacks
         {
             PhotonNetwork.PhotonServerSettings.AppSettings.AppVersion = gameVersion;
             PhotonNetwork.ConnectUsingSettings();
+
         }
+
     }
 
     private void Update()
     {
-        if (!timeStarted && PhotonNetwork.CurrentRoom.PlayerCount == 1)
+        if (PhotonNetwork.CurrentRoom != null)
         {
-            RPCTimerStart();
-        }
-    }
-
-    private void FixedUpdate()
-    {
-        if(timeStarted == true)
-        {
-            timeToConnect = RPCCheckTimer();
-            if (timeToConnect <= 0f && !cpuLoaded)
+            if (PhotonNetwork.CurrentRoom.PlayerCount > 0)
             {
-                PhotonNetwork.CurrentRoom.IsOpen = false;
-                loadCPU();
+                if (timerStarted == false)
+                {
+                    start = PhotonNetwork.Time;
+                    timerStarted = true;
+                }
+
+                timer = PhotonNetwork.Time - start;
+
+                if (timer >= 5 && !cpuLoaded)
+                {
+                    loadCPU();
+                }
             }
         }
     }
-
 
     public override void OnDisconnected(DisconnectCause cause)
     {
@@ -206,13 +212,14 @@ public class BattleNetManager : MonoBehaviourPunCallbacks
         Debug.Log("Connected to Room");
         print(PhotonNetwork.CurrentRoom.Players.Count);
         render = false;
-        AddPlayer(int.Parse(playerElement));
+        addPlayer(int.Parse(playerElement));
     }
 
-    void AddPlayer(int element = 0)
+    void addPlayer(int element = 0)
     {
         //spawn player
         GameObject newPlayer = PhotonNetwork.Instantiate(playerPrefab.name, new Vector3(0, 1, 0), Quaternion.identity, 0);
+        newPlayer.transform.parent = playerManager.transform;
         newPlayer.GetComponent<BattlePlayer>().playerName = playerName;
 
         switch (element)
@@ -230,28 +237,15 @@ public class BattleNetManager : MonoBehaviourPunCallbacks
                 newPlayer.GetComponent<BattlePlayer>().playerElement = "Wind";
                 break;
         }
-        players.Add(newPlayer);
-        elements.Add(newPlayer.GetComponent<BattlePlayer>().playerElement);
+        RPCUpdateLists(newPlayer, newPlayer.GetComponentInChildren<BattlePlayer>().playerElement);
     }
 
-    [PunRPC]
-    void RPCTimerStart()
+    void RPCUpdateLists(GameObject player, string element)
     {
-        timerCurrent = timeToConnect;
-        timeStarted = true;
-        joinTimerTick();
-    }
+        players.Add(player);
+        elements.Add(element);
+        Debug.Log(element + " Added to list!");
 
-    [PunRPC]
-    void joinTimerTick()
-    {
-        timerCurrent -= Time.deltaTime;
-    }
-
-    [PunRPC]
-    float RPCCheckTimer()
-    {
-        return timerCurrent;
     }
 
     void loadCPU()
@@ -264,32 +258,35 @@ public class BattleNetManager : MonoBehaviourPunCallbacks
             if (!elements.Contains("Water"))
             {
                 elementsNeeded[e] = "Water";
-                break;
+                elements.Add("Water");
             }
             else if (!elements.Contains("Fire"))
             {
                 elementsNeeded[e] = "Fire";
-                break;
+                elements.Add("Fire");
             }
             else if (!elements.Contains("Earth"))
             {
                 elementsNeeded[e] = "Earth";
-                break;
+                elements.Add("Earth");
             }
             else if (!elements.Contains("Wind"))
             {
                 elementsNeeded[e] = "Wind";
-                break;
+                elements.Add("Wind");
             }
         }
 
         for (int i = 0; i < cpuNeeded; i++)
         {
             GameObject newCPU = PhotonNetwork.Instantiate(cpuPrefab.name, new Vector3(0, 1, 0), Quaternion.identity, 0);
+            newCPU.transform.parent = playerManager.transform;
             newCPU.GetComponent<BattleCPU>().playerName = "CPU " + (i + 1);
             newCPU.GetComponent<BattleCPU>().playerElement = elementsNeeded[i];
             players.Add(newCPU);
         }
         cpuLoaded = true;
+
     }
+
 }

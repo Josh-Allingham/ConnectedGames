@@ -139,14 +139,14 @@ public class Element : MonoBehaviour
     {
         string uri = "http://16.171.171.137/GetStatus.php";
 
-        Debug.Log(uri);
+        //Debug.Log(uri);
 
         using (UnityWebRequest webRequest = UnityWebRequest.Get(uri))
         {
             yield return webRequest.SendWebRequest();
             if (webRequest.result != UnityWebRequest.Result.Success)
             {
-                Debug.Log(webRequest.error);
+                //Debug.Log(webRequest.error);
             }
             else
             {
@@ -198,11 +198,11 @@ public class Element : MonoBehaviour
             yield return webRequest.SendWebRequest();
             if (webRequest.result != UnityWebRequest.Result.Success)
             {
-                Debug.Log(webRequest.error);
+                //Debug.Log(webRequest.error);
             }
             else
             {
-                Debug.Log("Stats updated successfully");
+                //Debug.Log("Stats updated successfully");
             }
         }
     }
@@ -211,14 +211,14 @@ public class Element : MonoBehaviour
     {
         string uri = "http://localhost/CGDB/GetMoves.php";
 
-        Debug.Log(uri);
+        //Debug.Log(uri);
 
         using (UnityWebRequest webRequest = UnityWebRequest.Get(uri))
         {
             yield return webRequest.SendWebRequest();
             if (webRequest.result != UnityWebRequest.Result.Success)
             {
-                Debug.Log(webRequest.error);
+                //Debug.Log(webRequest.error);
             }
             else
             {
@@ -235,7 +235,7 @@ public class Element : MonoBehaviour
                         moveNum++;
                     }
                 }
-                Debug.Log(moves);
+                //Debug.Log(moves);
             }
         }
     }

@@ -1,6 +1,4 @@
 using Photon.Pun;
-using Photon.Realtime;
-using TMPro;
 using UnityEngine;
 
 public class BattlePlayer : MonoBehaviourPunCallbacks
@@ -11,7 +9,7 @@ public class BattlePlayer : MonoBehaviourPunCallbacks
     [SerializeField]
     public GameObject water, fire, earth, wind;
 
-    private void Start()
+    public void Start()
     {
         RPCSetPlayerName(playerName);
         RPCSetPlayerElement(playerElement);
@@ -19,14 +17,14 @@ public class BattlePlayer : MonoBehaviourPunCallbacks
         RPCPositionElemental();
     }
 
-    void Update()
+    public void Update()
     {
         RPCSetPlayerName(playerName);
         RPCSetPlayerElement(playerElement);
     }
 
     [PunRPC]
-    void RPCSetPlayerName(string name)
+    public void RPCSetPlayerName(string name)
     {
         playerName = name;
         if (photonView.IsMine)
@@ -36,7 +34,7 @@ public class BattlePlayer : MonoBehaviourPunCallbacks
     }
 
     [PunRPC]
-    void RPCSetPlayerElement(string element)
+    public void RPCSetPlayerElement(string element)
     {
         playerElement = element;
         if (photonView.IsMine)
@@ -46,7 +44,7 @@ public class BattlePlayer : MonoBehaviourPunCallbacks
     }
 
     [PunRPC]
-    void RPCSpawnElemental()
+    public void RPCSpawnElemental()
     {
         switch (playerElement)
         {
@@ -71,7 +69,7 @@ public class BattlePlayer : MonoBehaviourPunCallbacks
     }
 
     [PunRPC]
-    void RPCPositionElemental()
+    public void RPCPositionElemental()
     {
         switch (playerElement)
         {
