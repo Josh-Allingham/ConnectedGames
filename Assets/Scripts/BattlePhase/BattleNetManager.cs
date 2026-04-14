@@ -30,8 +30,8 @@ public class BattleNetManager : MonoBehaviourPunCallbacks
     public bool cpuLoaded = false;
 
     public bool timerStarted = false;
-    public double start;
-    public double timer;
+    public double start = 0;
+    public double timer = 0;
 
     void Start()
     {
@@ -55,12 +55,17 @@ public class BattleNetManager : MonoBehaviourPunCallbacks
                 if (timerStarted == false)
                 {
                     start = PhotonNetwork.Time;
+                    Debug.Log("Timer started at: " + start);
                     timerStarted = true;
                 }
 
-                timer = PhotonNetwork.Time - start;
+                if(timerStarted)
+                {
+                    timer = PhotonNetwork.Time - start;
+                    Debug.Log("Timer: " + timer);
+                }
 
-                if (timer >= 5 && !cpuLoaded)
+                if (timer >= 8 && !cpuLoaded)
                 {
                     loadCPU();
                 }
@@ -248,6 +253,7 @@ public class BattleNetManager : MonoBehaviourPunCallbacks
 
     }
 
+    [PunRPC]
     void loadCPU()
     {
         int cpuNeeded = 4 - PhotonNetwork.CurrentRoom.PlayerCount;
@@ -287,6 +293,10 @@ public class BattleNetManager : MonoBehaviourPunCallbacks
         }
         cpuLoaded = true;
 
+        if (photonView.IsMine)
+        {
+            photonView.RPC("loadCPU", RpcTarget.OthersBuffered);
+        }
     }
 
 }
