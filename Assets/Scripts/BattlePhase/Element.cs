@@ -139,31 +139,31 @@ public class Element : MonoBehaviour
     {
         string uri = "http://16.171.171.137/GetStatus.php";
 
-        Debug.Log(uri);
+        //Debug.Log(uri);
 
         using (UnityWebRequest webRequest = UnityWebRequest.Get(uri))
         {
             yield return webRequest.SendWebRequest();
             if (webRequest.result != UnityWebRequest.Result.Success)
             {
-                Debug.Log(webRequest.error);
+                //Debug.Log(webRequest.error);
             }
             else
             {
                 string playerStats = webRequest.downloadHandler.text;
 
                 string[] stats = playerStats.Split(',', StringSplitOptions.RemoveEmptyEntries);
-                for (int i = 0; i < stats.Length;i+=7)
+                for (int i = 0; i < stats.Length;i+=6)
                 { 
                     if (element.Equals(stats[i]))
                     {
                         ElementType = stats[i];
-                        CurrentHealth = float.Parse(stats[i + 1]);
-                        MaxHealth = float.Parse(stats[i + 2]);
-                        Defence = float.Parse(stats[i + 3]);
-                        Attack = float.Parse(stats[i + 4]);
-                        Speed = float.Parse(stats[i + 5]);
-                        ElementStatera = float.Parse(stats[i + 6]);
+                        MaxHealth = float.Parse(stats[i + 1]);
+                        CurrentHealth = MaxHealth;
+                        Defence = float.Parse(stats[i + 2]);
+                        Attack = float.Parse(stats[i + 3]);
+                        Speed = float.Parse(stats[i + 4]);
+                        ElementStatera = float.Parse(stats[i + 5]);
 
                         if (CurrentHealth > 0)
                         {
@@ -187,7 +187,6 @@ public class Element : MonoBehaviour
 
         WWWForm form1 = new WWWForm();
         form1.AddField("Element_Type", ElementType.ToString());
-        form1.AddField("Curr_Health", CurrentHealth.ToString());
         form1.AddField("Max_Health", MaxHealth.ToString());
         form1.AddField("Defence", Defence.ToString());
         form1.AddField("Attack", Attack.ToString());
@@ -199,11 +198,11 @@ public class Element : MonoBehaviour
             yield return webRequest.SendWebRequest();
             if (webRequest.result != UnityWebRequest.Result.Success)
             {
-                Debug.Log(webRequest.error);
+                //Debug.Log(webRequest.error);
             }
             else
             {
-                Debug.Log("Stats updated successfully");
+                //Debug.Log("Stats updated successfully");
             }
         }
     }
@@ -212,14 +211,14 @@ public class Element : MonoBehaviour
     {
         string uri = "http://localhost/CGDB/GetMoves.php";
 
-        Debug.Log(uri);
+        //Debug.Log(uri);
 
         using (UnityWebRequest webRequest = UnityWebRequest.Get(uri))
         {
             yield return webRequest.SendWebRequest();
             if (webRequest.result != UnityWebRequest.Result.Success)
             {
-                Debug.Log(webRequest.error);
+                //Debug.Log(webRequest.error);
             }
             else
             {
@@ -233,12 +232,10 @@ public class Element : MonoBehaviour
                     {
                         MyMoves[moveNum,0] = moves[i+1];
                         MyMoves[moveNum,1] = moves[i+2];
-                        MyMoves[moveNum,2] = moves[i+3];
-                        MyMoves[moveNum,3] = moves[i+4];
-                        MyMoves[moveNum,4] = moves[i+5];
                         moveNum++;
                     }
                 }
+                //Debug.Log(moves);
             }
         }
     }

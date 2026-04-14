@@ -46,6 +46,19 @@ MonoBehaviour:
   - RPCChangeTypeTo
   - RPCSetElementPowerActive
   - RPCSetPlayerName
+  - RPCPositionElemental
+  - RPCSetPlayerElement
+  - RPCSpawnElemental
+  - RPCCheckTimer
+  - RPCTimerStart
+  - joinTimerTick
+  - RPCJoinTimerTick
+  - RPCLoadCPU
+  - AddPlayer
+  - updateLists
+  - RPCUpdateLists
+  - RPCAddPlayer
+  - loadCPU
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

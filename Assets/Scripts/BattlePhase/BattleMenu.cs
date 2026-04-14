@@ -1,48 +1,229 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.Networking;
+using System.Threading;
 using System.Xml;
-using System;
+using TMPro;
+using UnityEngine;
+using UnityEngine.Networking;
+using UnityEngine.UI;
 
 public class BattleMenu : MonoBehaviour
 {
     [Header("Selection Menus")]
-    [SerializeField] 
-    private GameObject actionMenu;
     [SerializeField]
-    private GameObject skillMenu;
+    private GameObject actionMenu;
     [SerializeField]
     private GameObject skillInfoMenu;
     [SerializeField]
     private GameObject targetMenu;
     [SerializeField]
     private GameObject targetInfoMenu;
+    [SerializeField]
+    private GameObject lockInMenu;
+    [SerializeField]
+    private GameObject waitingScreen;
+    [SerializeField]
+    private Image timer;
+
+    public float timeLimit;
+    public float timerCurrent;
+    public bool timeUp;
+
+    public bool attackStudy;
+    public bool castStudy;
+    public bool targetStudy;
+
+    public string actionSelection;
+    public string targetSelection;
+
+
+    public void Start()
+    {
+        resetSelection();
+    }
+
+    private void FixedUpdate()
+    {
+        TimerTick();
+        TimeUpCheck();
+    }
 
 
     public void attack()
     {
-        skillMenu.SetActive(false);
-        //Fill the skill info menu with the attack moves that can be used
-        skillMenu.SetActive(true);
-        actionMenu.GetComponentInChildren<Button>().interactable = false;
+        if (targetMenu.activeSelf)
+        {
+            targetMenu.SetActive(false);
+            targetStudy = false;
+            actionSelection = "";
+        }
+
+        if (attackStudy == false && castStudy == false)
+        {
+            //Show the attack info on menu
+            attackInfo(true);
+            attackStudy = true;
+        }
+        else if(attackStudy == true && castStudy == false)
+        {
+            //Lock in attack and show the target menu
+            attackInfo(false);
+            targetMenu.SetActive(true);
+            attackStudy = false;
+            actionSelection = "Attack";
+            targetSelection = "";
+        }
+        else if(attackStudy == false && castStudy == true)
+        {
+            //Show the attack info on menu by replacing cast info
+            attackInfo(true);
+            castStudy = false;
+            attackStudy = true;
+        }
     }
+
+    public void attackInfo(bool show)
+    {
+        if(!show)
+        {
+            skillInfoMenu.SetActive(false);
+        }
+        else
+        {
+            skillInfoMenu.SetActive(true);
+        }
+    }
+
 
     public void cast()
     {
-        skillMenu.SetActive(false);
-        //Fill the skill info menu with the cast moves that can be used
-        skillMenu.SetActive(true);
-        actionMenu.GetComponentInChildren<Button>().interactable = false;
+        if(targetMenu.activeSelf)
+        {
+            targetMenu.SetActive(false);
+            targetStudy = false;
+            actionSelection = "";
+            targetSelection = "";
+        }
+
+        if (attackStudy == false && castStudy == false)
+        {
+            //Show the cast info on menu 
+            castInfo(true);
+            castStudy = true;
+        }
+        else if (attackStudy == true && castStudy == false)
+        {
+            //Show the cast info on menu by replacing attack info
+            castInfo(true);
+            attackStudy = false;
+            castStudy = true;
+        }
+        else if (attackStudy == false && castStudy == true)
+        {
+            //Lock in cast and show the target menu
+            attackInfo(false);
+            targetMenu.SetActive(true);
+            castStudy = false;
+            actionSelection = "Cast";
+        }
     }
 
-    public void item()
+    public void castInfo(bool show)
     {
-        skillMenu.SetActive(false);
-        //Fill the skill info menu with the items that can be used
-        skillMenu.SetActive(true);
-        actionMenu.GetComponentInChildren<Button>().interactable = false;
+        if (!show)
+        {
+            skillInfoMenu.SetActive(false);
+        }
+        else
+        {
+            skillInfoMenu.SetActive(true);
+        }
     }
 
+    public void target()
+    {
+        if (targetStudy == false)
+        {
+            //Show the target info on menu
+            targetInfo(true);
+            targetStudy = true;
+        }
+        else if (targetStudy == true)
+        {
+            //Lock in target and show the lock in menu
+            targetSelection = "Target";
+            targetInfo(false);
+            targetStudy = false;
+            checkLock();
+        }
+    
+    }
+
+    public void targetInfo(bool show)
+    {
+        if (!show)
+        {
+            targetInfoMenu.SetActive(false);
+        }
+        else
+        {
+            targetInfoMenu.SetActive(true);
+        }
+    }
+
+    //Reduce the timer by the time passed in real-time
+    public void TimerTick()
+    {
+        if (timerCurrent > 0)
+        {
+            timerCurrent -= Time.deltaTime;
+            timer.fillAmount= timerCurrent / timeLimit;
+
+        }
+        else
+        {
+            timerCurrent = 0;
+            timer.fillAmount = 0;
+        }
+    }
+
+    //This checks if the timer has hit 0
+    public void TimeUpCheck()
+    {
+        if (timerCurrent <= 0)
+        {
+            timeUp = true;
+        }
+    }
+
+    public void resetTimer()
+    {
+        timeUp = false;
+        timeLimit = 60f; //1 minute
+        timerCurrent = timeLimit; //Reset timer
+        timer.fillAmount = timerCurrent; //Full timer at the start of the battle
+    }
+
+    private void resetSelection()
+    {
+        attackStudy = false;
+        castStudy = false;
+        targetStudy = false;
+        actionMenu.SetActive(true);
+    }
+
+   public void checkLock()
+    {
+       //Insert text to action and target
+       lockInMenu.SetActive(true);
+    }
+
+    public void lockIn()
+    {
+        actionMenu.SetActive(false);
+        targetMenu.SetActive(false);
+        lockInMenu.SetActive(false);
+        waitingScreen.SetActive(true);
+    }
 }
