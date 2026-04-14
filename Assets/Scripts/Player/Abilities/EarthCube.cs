@@ -4,11 +4,13 @@ using System.Collections.Generic;
 public class EarthCube : MonoBehaviour, IElementInteractable
 {
 
-    private float riseTime = 0.5f;
+    private float riseTime = 2f;
+    Rigidbody rb;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
+        rb = GetComponent<Rigidbody>();
+        rb.useGravity = false;
     }
 
     // Update is called once per frame
@@ -17,12 +19,12 @@ public class EarthCube : MonoBehaviour, IElementInteractable
         if (riseTime > 0)
         {
             Rise();
-            riseTime--;
+            riseTime -= Time.deltaTime;
         }
-        else
+        /*else
         {
-
-        }
+            rb.useGravity = true;
+        }*/
             
     }
 

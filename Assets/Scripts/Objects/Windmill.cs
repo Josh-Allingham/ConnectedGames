@@ -8,16 +8,18 @@ public class Windmill : MonoBehaviour, IElementInteractable
     [SerializeField] private float maxWindmillSpeed = 100f;
     [SerializeField] private float windmillDrag = 10f;
     [SerializeField] private Transform windmillAxis;
+    [SerializeField] private Cloud cloud;
+    public bool isSpinning = false;
     private enum WindmillDamageState
     {
         tangled,
         snapped,
         needsWater,
-        NULL
+        canSpin
     }
 
     [Header("State & Interaction")]
-    [SerializeField] private WindmillDamageState currentState = WindmillDamageState.NULL;
+    [SerializeField] private WindmillDamageState currentState = WindmillDamageState.canSpin;
     public ParticleSystem flameParticles;
 
 
@@ -32,37 +34,47 @@ public class Windmill : MonoBehaviour, IElementInteractable
     {
         windmillAcceleration = Mathf.Max(0, windmillAcceleration - Time.deltaTime * windmillDrag);
         windmillSpeed = Mathf.Min(windmillSpeed + windmillAcceleration, maxWindmillSpeed);
-        windmillSpeed = Mathf.Max(windmillSpeed - Time.deltaTime * windmillDrag * windmillDrag, 0f);
-
+        windmillSpeed = Mathf.Max(windmillSpeed - Time.deltaTime * windmillDrag * windmillDrag, isSpinning ? maxWindmillSpeed / 2f : 0f);
+        
         windmillAxis.Rotate(Vector3.up, windmillSpeed * Time.deltaTime, Space.Self);
 
-        Renderer r = windmillAxis.GetComponent<Renderer>();
+        
         switch (currentState)
         {
             case WindmillDamageState.tangled:
-                r.material.color = Color.green;
+                
                 break;
 
             case WindmillDamageState.snapped:
-                r.material.color = Color.gray;
+                
                 break;
 
             case WindmillDamageState.needsWater:
-                r.material.color = Color.yellow;
+                
                 break;
 
-            case WindmillDamageState.NULL:
-                r.material.color = Color.white;
+            case WindmillDamageState.canSpin:
+
+                if (windmillSpeed > maxWindmillSpeed / 2)
+                {
+                    isSpinning = true;
+                    StartCoroutine(cloud.MoveCloud((cloud.transform.position - transform.position).normalized, 10));
+                }
                 break;
         }
     }
 
+    public void ReadyToSpin()
+    {
+        currentState = WindmillDamageState.canSpin;
+    }
     public void IsReceivingPowerFromWheel(bool isPowered)
     {
         if (isPowered && currentState == WindmillDamageState.needsWater)
         {
-            currentState = WindmillDamageState.NULL;
-        }else if (!isPowered && currentState == WindmillDamageState.NULL)
+            currentState = WindmillDamageState.canSpin;
+        }
+        else if (!isPowered && currentState == WindmillDamageState.canSpin)
         {
             currentState = WindmillDamageState.needsWater;
         }
@@ -76,7 +88,7 @@ public class Windmill : MonoBehaviour, IElementInteractable
     {
         if (currentState == WindmillDamageState.tangled)
         {
-            currentState = WindmillDamageState.NULL;
+            currentState = WindmillDamageState.canSpin;
             
             for (int i = 0; i < 10; i++)
                 Instantiate(flameParticles, windmillAxis.position + Random.insideUnitSphere, Quaternion.identity);
@@ -90,7 +102,7 @@ public class Windmill : MonoBehaviour, IElementInteractable
 
     public void TouchWind()
     {
-        if (currentState == WindmillDamageState.NULL)
+        if (currentState == WindmillDamageState.canSpin)
             windmillAcceleration += 0.1f;
     }
 
@@ -102,7 +114,8 @@ public class Windmill : MonoBehaviour, IElementInteractable
             //UI display press R to repair
             if (Input.GetKey(KeyCode.R) && player.currentType == Player.PlayerType.Earth)
             {
-                currentState = WindmillDamageState.NULL;
+                ReadyToSpin();
+                
             }
         }
     }

@@ -30,9 +30,14 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
     public GameObject windTunnelInstance;
     public GameObject earthCube;
     public List<GameObject> earthCubeInstances;
+
+    private Animator anim;
+    private Rigidbody rb;
+
     void Start()
     {
-        AssignElementColour();
+        anim = GetComponent<Animator>();
+        rb = GetComponent<Rigidbody>();
         GetComponent<PlayerFootsteps>().SetType(currentType);
         GetComponentInChildren<SpriteRenderer>().sprite = waterIcon;
         RPCSetPlayerName(playerName);
@@ -45,11 +50,12 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
             if (Input.GetKeyDown(KeyCode.Q))
             {
                 ToggleElementSwitch();
-                AssignElementColour();
             }
             
             RPCSetElementPowerActive(Input.GetKey(KeyCode.E));
             RPCSetPlayerName(playerName);
+
+            anim.SetBool("IsWalking", rb.linearVelocity.magnitude > .1f);
         }
         
     }
@@ -101,18 +107,22 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
             case PlayerType.Water:
                 iconSprite = waterIcon;
                 bodySprite.sprite = waterSprite;
+                anim.SetInteger("ElementID", 0);
                 break;
             case PlayerType.Fire:
                 iconSprite = fireIcon;
                 bodySprite.sprite = fireSprite;
+                anim.SetInteger("ElementID", 1);
                 break;
             case PlayerType.Earth:
                 iconSprite = earthIcon;
                 bodySprite.sprite = earthSprite;
+                anim.SetInteger("ElementID", 2);
                 break;
             case PlayerType.Wind:
                 iconSprite = windIcon;
                 bodySprite.sprite = windSprite;
+                anim.SetInteger("ElementID", 3);
                 break;
         }
 
@@ -143,6 +153,9 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
     }
     void ToggleElementSwitch()
     {
+        anim.SetInteger("ElementID", -1);
+        anim.SetTrigger("Switch");
+
         switch (currentType)
         {
             case PlayerType.Water:
@@ -167,7 +180,7 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
 
     public void SpawnEarthCube()
     {
-        GameObject newCube = PhotonNetwork.Instantiate(earthCube.name, transform.position + Vector3.right, Quaternion.identity);
+        GameObject newCube = PhotonNetwork.Instantiate(earthCube.name, transform.position + Vector3.down, Quaternion.identity);
         earthCubeInstances.Add(newCube);
     }
     private void OnTriggerEnter(Collider other)

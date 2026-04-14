@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 6391962331672973110}
   - component: {fileID: 3165240859375381284}
   - component: {fileID: -6975321961944899306}
+  - component: {fileID: 8453124257190068483}
   m_Layer: 7
   m_Name: Player
   m_TagString: Untagged
@@ -54,7 +55,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 5
-  jumpStrength: 5
+  jumpStrength: 4
 --- !u!114 &9087434924260859972
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -71,10 +72,10 @@ MonoBehaviour:
   fireIcon: {fileID: -364828499, guid: aa22f22896ea6e24b9d0858ddc5cada0, type: 3}
   earthIcon: {fileID: 1462304607, guid: aa22f22896ea6e24b9d0858ddc5cada0, type: 3}
   windIcon: {fileID: 1335267743, guid: aa22f22896ea6e24b9d0858ddc5cada0, type: 3}
-  waterSprite: {fileID: -372282226, guid: a6ed40ee2475db745a4ff08fa8f91549, type: 3}
-  fireSprite: {fileID: 1545645509, guid: a6ed40ee2475db745a4ff08fa8f91549, type: 3}
-  earthSprite: {fileID: -815171457, guid: a6ed40ee2475db745a4ff08fa8f91549, type: 3}
-  windSprite: {fileID: -1468255439, guid: a6ed40ee2475db745a4ff08fa8f91549, type: 3}
+  waterSprite: {fileID: 991470593, guid: cb46f1b15471b074292bcc0051995c6b, type: 3}
+  fireSprite: {fileID: 1844500207, guid: cb46f1b15471b074292bcc0051995c6b, type: 3}
+  earthSprite: {fileID: -1979245163, guid: cb46f1b15471b074292bcc0051995c6b, type: 3}
+  windSprite: {fileID: -1123262932, guid: cb46f1b15471b074292bcc0051995c6b, type: 3}
   currentType: 0
   currentColour: {r: 0, g: 0, b: 0, a: 0}
   playerName: 
@@ -203,6 +204,28 @@ MonoBehaviour:
   m_SynchronizeRotation: 1
   m_SynchronizeScale: 0
   m_UseLocal: 1
+--- !u!95 &8453124257190068483
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 869804286486522258}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 8e289aa11e3f9274e97b037990622eb0, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &1921939592052355921
 GameObject:
   m_ObjectHideFlags: 0
@@ -279,8 +302,8 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: -372282226, guid: a6ed40ee2475db745a4ff08fa8f91549, type: 3}
-  m_Color: {r: 0.5566037, g: 0.57433957, b: 1, a: 1}
+  m_Sprite: {fileID: 1844500207, guid: cb46f1b15471b074292bcc0051995c6b, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
