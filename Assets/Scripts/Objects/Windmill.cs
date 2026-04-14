@@ -38,23 +38,23 @@ public class Windmill : MonoBehaviour, IElementInteractable
         
         windmillAxis.Rotate(Vector3.up, windmillSpeed * Time.deltaTime, Space.Self);
 
-        Renderer r = windmillAxis.GetComponent<Renderer>();
+        
         switch (currentState)
         {
             case WindmillDamageState.tangled:
-                r.material.color = Color.green;
+                
                 break;
 
             case WindmillDamageState.snapped:
-                r.material.color = Color.gray;
+                
                 break;
 
             case WindmillDamageState.needsWater:
-                r.material.color = Color.yellow;
+                
                 break;
 
             case WindmillDamageState.canSpin:
-                r.material.color = Color.white;
+
                 if (windmillSpeed > maxWindmillSpeed / 2)
                 {
                     isSpinning = true;

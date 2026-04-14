@@ -37,7 +37,7 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
     }
     private void Jump()
     {
-        if (Physics.Raycast(transform.position, Vector3.down, 1f))
+        if (Physics.Raycast(transform.position, Vector3.down, .5f))
         {
             rb.AddForce(Vector3.up * jumpStrength, ForceMode.Impulse);
         }

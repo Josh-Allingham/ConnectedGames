@@ -46,7 +46,7 @@ Material:
     - _QueueOffset: 0
     m_Colors:
     - _CloudColour: {r: 0.91886795, g: 1, b: 0.99849075, a: 0}
-    - _CloudVel: {r: 0.007, g: 0.005, b: 0, a: 0}
+    - _CloudVel: {r: 0.0035, g: 0.0025, b: 0, a: 0}
     - _DistortVel: {r: 0.02, g: 0.02, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

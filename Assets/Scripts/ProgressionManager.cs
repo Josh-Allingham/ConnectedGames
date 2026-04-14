@@ -29,6 +29,10 @@ public class ProgressionManager : MonoBehaviour
                 break;
 
             case ProgressionState.WindmillsActive:
+                // if (cauldron.isActive()){
+                // RaiseBridge();
+                // ChangeState(ProgressionState.PlatformsSpawned;
+                //}
                 break;
             case ProgressionState.PlatformsSpawned:
                 break;
