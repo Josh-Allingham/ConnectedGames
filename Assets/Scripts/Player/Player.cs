@@ -34,10 +34,16 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
     private Animator anim;
     private Rigidbody rb;
 
+    public NPC currentInteractee;
+
+    [SerializeField] private CanvasGroup DialogueUI;
+    [SerializeField] private TMP_Text DialogueUIText;
+    [SerializeField] private TMP_Text HighlightText;
     void Start()
     {
         anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody>();
+        RPCEndDialogue();
         GetComponent<PlayerFootsteps>().SetType(currentType);
         GetComponentInChildren<SpriteRenderer>().sprite = waterIcon;
         RPCSetPlayerName(playerName);
@@ -56,6 +62,19 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
             RPCSetPlayerName(playerName);
 
             anim.SetBool("IsWalking", rb.linearVelocity.magnitude > .1f);
+
+            if (currentInteractee != null)
+            {
+                if (Input.GetKeyDown(KeyCode.R) && currentInteractee.dialogueIndex != -1) //check the player has R'd and there is valid dialogue stored
+                {
+                    Debug.Log("H");
+                    RPCShowDialogue(currentInteractee.GetDialogue());
+                }
+                else if (currentInteractee.dialogueIndex == -1)
+                {
+                    RPCEndDialogue();
+                }
+            }
         }
         
     }
@@ -131,6 +150,37 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
         if (photonView.IsMine)
         {
             photonView.RPC("RPCChangeTypeTo", RpcTarget.OthersBuffered, newType);
+        }
+    }
+
+    public void setInteractee(NPC interactee)
+    {
+        this.currentInteractee = interactee;
+        if (interactee != null)
+        {
+            HighlightText.text = interactee.highlightText;
+        }
+        
+    }
+    [PunRPC] public void RPCShowDialogue(string dialogue)
+    {
+        DialogueUI.alpha = 1f;
+        DialogueUIText.text = dialogue;
+        if (photonView.IsMine)
+        {
+            photonView.RPC("RPCShowDialogue", RpcTarget.OthersBuffered, dialogue);
+        }
+    }
+
+    [PunRPC]
+    public void RPCEndDialogue()
+    {
+        DialogueUI.alpha = 0f;
+        DialogueUIText.text = "";
+        currentInteractee = null;
+        if (photonView.IsMine)
+        {
+            photonView.RPC("RPCEndDialogue", RpcTarget.OthersBuffered);
         }
     }
     void AssignElementColour()

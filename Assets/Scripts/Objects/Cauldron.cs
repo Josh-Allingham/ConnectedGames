@@ -30,16 +30,27 @@ public class Cauldron : MonoBehaviour, IElementInteractable
 
     public void TouchFire()
     {
-        isLit = true;
+        if (hasEarth)
+        {
+            isLit = true;
+            //add flames to fire
+        }
+
     }
 
     public void TouchEarth()
     {
         hasEarth = true;
+        //add wood to fire
     }
 
     public void TouchWind()
     {
-        hasWind = true;
+        if (hasEarth && hasWater && isLit) //wind is the last thing
+        {
+            hasWind = true;
+            //trigger platforms
+        }
+
     }
 }
