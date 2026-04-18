@@ -49,6 +49,23 @@ MonoBehaviour:
   - ShowDialogue
   - RPCShowDialogue
   - RPCEndDialogue
+  - RPCPositionElemental
+  - RPCSetPlayerElement
+  - RPCSpawnElemental
+  - RPCCheckTimer
+  - RPCTimerStart
+  - joinTimerTick
+  - RPCJoinTimerTick
+  - RPCLoadCPU
+  - AddPlayer
+  - updateLists
+  - RPCUpdateLists
+  - RPCAddPlayer
+  - loadCPU
+  - addPlayer
+  - addElementToList
+  - addPlayerToList
+  - loadMenu
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
