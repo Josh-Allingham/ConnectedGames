@@ -59,6 +59,10 @@ MonoBehaviour:
   - RPCUpdateLists
   - RPCAddPlayer
   - loadCPU
+  - addPlayer
+  - addElementToList
+  - addPlayerToList
+  - loadMenu
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
