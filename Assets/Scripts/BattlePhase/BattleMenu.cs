@@ -1,3 +1,4 @@
+using Photon.Pun;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -8,23 +9,36 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
 
-public class BattleMenu : MonoBehaviour
+public class BattleMenu : MonoBehaviourPunCallbacks
 {
-    [Header("Selection Menus")]
     [SerializeField]
-    private GameObject actionMenu;
+    public GameObject actionMenu;
     [SerializeField]
-    private GameObject skillInfoMenu;
+    public GameObject actionDetailMenu;
     [SerializeField]
-    private GameObject targetMenu;
+    public TMP_Text actionInfoTxt;
     [SerializeField]
-    private GameObject targetInfoMenu;
+    public GameObject targetMenu;
     [SerializeField]
-    private GameObject lockInMenu;
+    public GameObject targetAlly;
     [SerializeField]
-    private GameObject waitingScreen;
+    public TMP_Text targetAllyTxt1;
     [SerializeField]
-    private Image timer;
+    public TMP_Text targetAllyTxt2;
+    [SerializeField]
+    public TMP_Text targetAllyTxt3;
+
+    [SerializeField]
+    public GameObject targetEnemy;
+    [SerializeField]
+    public TMP_Text targetEnemyTxt;
+
+    [SerializeField]
+    public GameObject lockInMenu;
+    [SerializeField]
+    public GameObject waitingScreen;
+    [SerializeField]
+    public Image timer;
 
     public float timeLimit;
     public float timerCurrent;
@@ -37,172 +51,96 @@ public class BattleMenu : MonoBehaviour
     public string actionSelection;
     public string targetSelection;
 
+    public PlayerManager playerManager;
+
 
     public void Start()
     {
         resetSelection();
     }
 
-    private void FixedUpdate()
-    {
-        TimerTick();
-        TimeUpCheck();
-    }
-
-
     public void attack()
     {
-        if (targetMenu.activeSelf)
+        if (!attackStudy)
         {
-            targetMenu.SetActive(false);
-            targetStudy = false;
-            actionSelection = "";
-        }
-
-        if (attackStudy == false && castStudy == false)
-        {
-            //Show the attack info on menu
-            attackInfo(true);
+            actionDetailMenu.SetActive(true);
+            actionInfoTxt.text = playerManager.attackDescription;
             attackStudy = true;
-        }
-        else if(attackStudy == true && castStudy == false)
-        {
-            //Lock in attack and show the target menu
-            attackInfo(false);
-            targetMenu.SetActive(true);
-            attackStudy = false;
-            actionSelection = "Attack";
-            targetSelection = "";
-        }
-        else if(attackStudy == false && castStudy == true)
-        {
-            //Show the attack info on menu by replacing cast info
-            attackInfo(true);
             castStudy = false;
-            attackStudy = true;
-        }
-    }
-
-    public void attackInfo(bool show)
-    {
-        if(!show)
-        {
-            skillInfoMenu.SetActive(false);
         }
         else
         {
-            skillInfoMenu.SetActive(true);
+            attackStudy = false;
+            actionInfoTxt.text = "";
+            actionDetailMenu.SetActive(false);
+            target(playerManager.attackTarget);
         }
     }
 
 
     public void cast()
     {
-        if(targetMenu.activeSelf)
+        if (!castStudy)
         {
-            targetMenu.SetActive(false);
-            targetStudy = false;
-            actionSelection = "";
-            targetSelection = "";
-        }
-
-        if (attackStudy == false && castStudy == false)
-        {
-            //Show the cast info on menu 
-            castInfo(true);
-            castStudy = true;
-        }
-        else if (attackStudy == true && castStudy == false)
-        {
-            //Show the cast info on menu by replacing attack info
-            castInfo(true);
+            actionDetailMenu.SetActive(true);
+            actionInfoTxt.text = playerManager.castDescription;
             attackStudy = false;
             castStudy = true;
         }
-        else if (attackStudy == false && castStudy == true)
+        else
         {
-            //Lock in cast and show the target menu
-            attackInfo(false);
-            targetMenu.SetActive(true);
             castStudy = false;
-            actionSelection = "Cast";
+            actionInfoTxt.text = "";
+            actionDetailMenu.SetActive(false);
+            target(playerManager.castTarget);
         }
     }
 
-    public void castInfo(bool show)
+    public void target(string target)
     {
-        if (!show)
+        targetEnemy.SetActive(false);
+        targetMenu.SetActive(true);
+        if(target == "Ally")
         {
-            skillInfoMenu.SetActive(false);
+            switch (playerManager.myElementType)
+            {
+                case "Water":
+                    targetAllyTxt1.text = "Fire";
+                    targetAllyTxt2.text = "Earth";
+                    targetAllyTxt3.text = "Wind";
+                    break;
+                case "Fire":
+                    targetAllyTxt1.text = "Water";
+                    targetAllyTxt2.text = "Earth";
+                    targetAllyTxt3.text = "Wind";
+                    break;
+                case "Earth":
+                    targetAllyTxt1.text = "Water";
+                    targetAllyTxt2.text = "Fire";
+                    targetAllyTxt3.text = "Wind";
+                    break;
+                case "Wind":
+                    targetAllyTxt1.text = "Water";
+                    targetAllyTxt2.text = "Fire";
+                    targetAllyTxt3.text = "Earth";
+                    break;
+            }
+            targetAlly.SetActive(true);
         }
-        else
+        else if(target == "Enemy")
         {
-            skillInfoMenu.SetActive(true);
+            targetAlly.SetActive(false);
+            targetMenu.SetActive(true);
+            targetAllyTxt1.text = "The Guardian";
+            targetEnemy.SetActive(true);
         }
     }
 
-    public void target()
+    public void cancelTarget()
     {
-        if (targetStudy == false)
-        {
-            //Show the target info on menu
-            targetInfo(true);
-            targetStudy = true;
-        }
-        else if (targetStudy == true)
-        {
-            //Lock in target and show the lock in menu
-            targetSelection = "Target";
-            targetInfo(false);
-            targetStudy = false;
-            checkLock();
-        }
-    
-    }
-
-    public void targetInfo(bool show)
-    {
-        if (!show)
-        {
-            targetInfoMenu.SetActive(false);
-        }
-        else
-        {
-            targetInfoMenu.SetActive(true);
-        }
-    }
-
-    //Reduce the timer by the time passed in real-time
-    public void TimerTick()
-    {
-        if (timerCurrent > 0)
-        {
-            timerCurrent -= Time.deltaTime;
-            timer.fillAmount= timerCurrent / timeLimit;
-
-        }
-        else
-        {
-            timerCurrent = 0;
-            timer.fillAmount = 0;
-        }
-    }
-
-    //This checks if the timer has hit 0
-    public void TimeUpCheck()
-    {
-        if (timerCurrent <= 0)
-        {
-            timeUp = true;
-        }
-    }
-
-    public void resetTimer()
-    {
-        timeUp = false;
-        timeLimit = 60f; //1 minute
-        timerCurrent = timeLimit; //Reset timer
-        timer.fillAmount = timerCurrent; //Full timer at the start of the battle
+        targetAlly.SetActive(false);
+        targetEnemy.SetActive(false);
+        targetMenu.SetActive(false);
     }
 
     private void resetSelection()
@@ -215,15 +153,11 @@ public class BattleMenu : MonoBehaviour
 
    public void checkLock()
     {
-       //Insert text to action and target
-       lockInMenu.SetActive(true);
+
     }
 
     public void lockIn()
     {
-        actionMenu.SetActive(false);
-        targetMenu.SetActive(false);
-        lockInMenu.SetActive(false);
-        waitingScreen.SetActive(true);
+
     }
 }

@@ -43,7 +43,7 @@ public class BattlePlayer : MonoBehaviourPunCallbacks
         }
     }
 
-    [PunRPC]
+
     public void RPCSpawnElemental()
     {
         switch (playerElement)
@@ -61,14 +61,8 @@ public class BattlePlayer : MonoBehaviourPunCallbacks
                 Instantiate(wind, transform.position, Quaternion.identity, this.transform);
                 break;
         }
-
-        if(photonView.IsMine)
-        {
-            photonView.RPC("RPCSpawnElemental", RpcTarget.OthersBuffered);
-        }
     }
 
-    [PunRPC]
     public void RPCPositionElemental()
     {
         switch (playerElement)
@@ -87,9 +81,5 @@ public class BattlePlayer : MonoBehaviourPunCallbacks
                 break;
         }
 
-        if (photonView.IsMine)
-        {
-            photonView.RPC("RPCPositionElemental", RpcTarget.OthersBuffered);
-        }
     }
 }

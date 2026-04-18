@@ -15,7 +15,7 @@ public class Element : MonoBehaviour
     public float speed;
     public float elementStatera;
     public bool alive;
-    public string[,] myMoves = new string[3,5];
+    public string[,] myMoves = new string[3,7];
 
     public string ElementType
     {
@@ -198,27 +198,25 @@ public class Element : MonoBehaviour
             yield return webRequest.SendWebRequest();
             if (webRequest.result != UnityWebRequest.Result.Success)
             {
-                //Debug.Log(webRequest.error);
+                Debug.Log(webRequest.error);
             }
             else
             {
-                //Debug.Log("Stats updated successfully");
+                Debug.Log("Stats updated successfully");
             }
         }
     }
 
     IEnumerator LoadMoves(string element)
     {
-        string uri = "http://localhost/CGDB/GetMoves.php";
-
-        //Debug.Log(uri);
+        string uri = "http://16.171.171.137/GetMoves.php";
 
         using (UnityWebRequest webRequest = UnityWebRequest.Get(uri))
         {
             yield return webRequest.SendWebRequest();
             if (webRequest.result != UnityWebRequest.Result.Success)
             {
-                //Debug.Log(webRequest.error);
+                Debug.Log(webRequest.error);
             }
             else
             {
@@ -226,20 +224,22 @@ public class Element : MonoBehaviour
 
                 string[] moves = playerMoves.Split(',', StringSplitOptions.RemoveEmptyEntries);
                 int moveNum = 0;
-                for (int i = 0; i < moves.Length; i += 6)
+                for (int i = 0; i <= moves.Length; i += 7)
                 {
                     if (element.Equals(moves[i]))
                     {
-                        MyMoves[moveNum,0] = moves[i+1];
-                        MyMoves[moveNum,1] = moves[i+2];
+                        MyMoves[moveNum, 0] = moves[i];
+                        MyMoves[moveNum,1] = moves[i+1];
+                        MyMoves[moveNum,2] = moves[i+2];
+                        MyMoves[moveNum,3] = moves[i+3];
+                        MyMoves[moveNum,4] = moves[i+4];
+                        MyMoves[moveNum,5] = moves[i+5];
+                        MyMoves[moveNum,6] = moves[i+6];
                         moveNum++;
                     }
                 }
-                //Debug.Log(moves);
+                Debug.Log("Moves acquired successfully");
             }
         }
     }
-
-
-
 }

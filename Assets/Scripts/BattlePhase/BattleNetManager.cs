@@ -20,10 +20,10 @@ public class BattleNetManager : MonoBehaviourPunCallbacks
     bool joiningRoom = false;
     bool render = true;
 
-    public GameObject playerManager;
+    public GameObject myPlayerManager;
     public GameObject playerPrefab;
     public GameObject cpuPrefab;
-    public List<GameObject> players = new List<GameObject>();
+    public List<string> playerNames = new List<string>();
     public List<string> elements = new List<string>();
 
     public int expectedPlayerCount;
@@ -33,6 +33,8 @@ public class BattleNetManager : MonoBehaviourPunCallbacks
     public double start = 0;
     public double timer = 0;
 
+    public GameObject battleMenu;
+
     void Start()
     {
         PhotonNetwork.AutomaticallySyncScene = true;
@@ -41,36 +43,43 @@ public class BattleNetManager : MonoBehaviourPunCallbacks
         {
             PhotonNetwork.PhotonServerSettings.AppSettings.AppVersion = gameVersion;
             PhotonNetwork.ConnectUsingSettings();
-
         }
 
     }
 
     private void Update()
     {
-        if (PhotonNetwork.CurrentRoom != null)
+        if(PhotonNetwork.IsMasterClient)
         {
-            if (PhotonNetwork.CurrentRoom.PlayerCount > 0)
+            if (PhotonNetwork.CurrentRoom != null)
             {
-                if (timerStarted == false)
+                if (PhotonNetwork.CurrentRoom.PlayerCount > 0)
                 {
-                    start = PhotonNetwork.Time;
-                    Debug.Log("Timer started at: " + start);
-                    timerStarted = true;
-                }
+                    if (timerStarted == false)
+                    {
+                        start = PhotonNetwork.Time;
+                        timerStarted = true;
+                    }
+    
+                    if (timerStarted)
+                    {
+                        timer = PhotonNetwork.Time - start;
+                    }
 
-                if(timerStarted)
-                {
-                    timer = PhotonNetwork.Time - start;
-                    Debug.Log("Timer: " + timer);
-                }
-
-                if (timer >= 8 && !cpuLoaded)
-                {
-                    loadCPU();
+                    if (timer >= 8 && !cpuLoaded)
+                    {
+                        int numCPU = 4 - PhotonNetwork.CurrentRoom.PlayerCount;
+                        loadCPU(numCPU);
+                    }
                 }
             }
         }
+
+        if(cpuLoaded)
+        {
+            photonView.RPC("loadMenu", RpcTarget.AllBuffered);
+        }
+
     }
 
     public override void OnDisconnected(DisconnectCause cause)
@@ -220,11 +229,12 @@ public class BattleNetManager : MonoBehaviourPunCallbacks
         addPlayer(int.Parse(playerElement));
     }
 
-    void addPlayer(int element = 0)
+    public void addPlayer(int element = 0)
     {
         //spawn player
-        GameObject newPlayer = PhotonNetwork.Instantiate(playerPrefab.name, new Vector3(0, 1, 0), Quaternion.identity, 0);
-        newPlayer.transform.parent = playerManager.transform;
+        Vector3 spawnPoint = new Vector3(0, 1, 0);
+        GameObject newPlayer = PhotonNetwork.Instantiate(playerPrefab.name, spawnPoint, Quaternion.identity, 0);
+        newPlayer.transform.parent = myPlayerManager.transform;
         newPlayer.GetComponent<BattlePlayer>().playerName = playerName;
 
         switch (element)
@@ -242,21 +252,26 @@ public class BattleNetManager : MonoBehaviourPunCallbacks
                 newPlayer.GetComponent<BattlePlayer>().playerElement = "Wind";
                 break;
         }
-        RPCUpdateLists(newPlayer, newPlayer.GetComponentInChildren<BattlePlayer>().playerElement);
-    }
-
-    void RPCUpdateLists(GameObject player, string element)
-    {
-        players.Add(player);
-        elements.Add(element);
-        Debug.Log(element + " Added to list!");
+        photonView.RPC("addPlayerToList", RpcTarget.AllBuffered, newPlayer.GetComponent<BattlePlayer>().playerName);
+        photonView.RPC("addElementToList", RpcTarget.AllBuffered, newPlayer.GetComponent<BattlePlayer>().playerElement);
 
     }
 
     [PunRPC]
-    void loadCPU()
+    public void addPlayerToList(string playerName)
     {
-        int cpuNeeded = 4 - PhotonNetwork.CurrentRoom.PlayerCount;
+        playerNames.Add(playerName);
+    }
+
+    [PunRPC]
+    public void addElementToList(string element)
+    {
+        elements.Add(element);
+    }
+
+
+    void loadCPU(int cpuNeeded)
+    {
         string[] elementsNeeded = new string[cpuNeeded];
 
         for (int e = 0; e < elementsNeeded.Length; e++)
@@ -264,39 +279,40 @@ public class BattleNetManager : MonoBehaviourPunCallbacks
             if (!elements.Contains("Water"))
             {
                 elementsNeeded[e] = "Water";
-                elements.Add("Water");
+                photonView.RPC("addElementToList", RpcTarget.AllBuffered, elementsNeeded[e]);
             }
             else if (!elements.Contains("Fire"))
             {
                 elementsNeeded[e] = "Fire";
-                elements.Add("Fire");
+                photonView.RPC("addElementToList", RpcTarget.AllBuffered, elementsNeeded[e]);
             }
             else if (!elements.Contains("Earth"))
             {
                 elementsNeeded[e] = "Earth";
-                elements.Add("Earth");
+                photonView.RPC("addElementToList", RpcTarget.AllBuffered, elementsNeeded[e]);
             }
             else if (!elements.Contains("Wind"))
             {
                 elementsNeeded[e] = "Wind";
-                elements.Add("Wind");
+                photonView.RPC("addElementToList", RpcTarget.AllBuffered, elementsNeeded[e]);
             }
         }
 
         for (int i = 0; i < cpuNeeded; i++)
         {
             GameObject newCPU = PhotonNetwork.Instantiate(cpuPrefab.name, new Vector3(0, 1, 0), Quaternion.identity, 0);
-            newCPU.transform.parent = playerManager.transform;
             newCPU.GetComponent<BattleCPU>().playerName = "CPU " + (i + 1);
             newCPU.GetComponent<BattleCPU>().playerElement = elementsNeeded[i];
-            players.Add(newCPU);
+            photonView.RPC("addPlayerToList", RpcTarget.AllBuffered, newCPU.GetComponent<BattlePlayer>().playerName);
         }
         cpuLoaded = true;
 
-        if (photonView.IsMine)
-        {
-            photonView.RPC("loadCPU", RpcTarget.OthersBuffered);
-        }
+    }
+
+    [PunRPC]
+    public void loadMenu()
+    {
+        battleMenu.SetActive(true);
     }
 
 }
