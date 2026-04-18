@@ -9,14 +9,16 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
 
-public class BattleMenu : MonoBehaviourPunCallbacks
+public class BattleMenu : MonoBehaviour
 {
     [SerializeField]
-    public GameObject actionMenu;
+    public GameObject bottomMenu;
     [SerializeField]
     public GameObject actionDetailMenu;
     [SerializeField]
     public TMP_Text actionInfoTxt;
+    [SerializeField]
+    public TMP_Text actionTitleTxt;
     [SerializeField]
     public GameObject targetMenu;
     [SerializeField]
@@ -64,6 +66,7 @@ public class BattleMenu : MonoBehaviourPunCallbacks
         if (!attackStudy)
         {
             actionDetailMenu.SetActive(true);
+            actionTitleTxt.text = playerManager.attackName;
             actionInfoTxt.text = playerManager.attackDescription;
             attackStudy = true;
             castStudy = false;
@@ -83,6 +86,7 @@ public class BattleMenu : MonoBehaviourPunCallbacks
         if (!castStudy)
         {
             actionDetailMenu.SetActive(true);
+            actionTitleTxt.text = playerManager.castName;
             actionInfoTxt.text = playerManager.castDescription;
             attackStudy = false;
             castStudy = true;
@@ -148,16 +152,49 @@ public class BattleMenu : MonoBehaviourPunCallbacks
         attackStudy = false;
         castStudy = false;
         targetStudy = false;
-        actionMenu.SetActive(true);
+        bottomMenu.SetActive(true);
     }
 
-   public void checkLock()
+    public void lockIn(TMP_Text target)
     {
-
+        switch (target.text)
+        {
+            case "Fire":
+                actionSelection = "Cast";
+                targetSelection = "Fire";
+                break;
+            case "Water":
+                actionSelection = "Cast";
+                targetSelection = "Water";
+                break;
+            case "Earth":
+                actionSelection = "Cast";
+                targetSelection = "Earth";
+                break;
+            case "Wind":
+                actionSelection = "Cast";
+                targetSelection = "Wind";
+                break;
+            case "The Guardian":
+                actionSelection = "Attack";
+                targetSelection = "The Guardian";
+                break;
+        }
+        endTurn();
+        RPCAddMove(actionSelection, targetSelection);
+    }
+    public void endTurn()
+    {
+        targetEnemy.SetActive(false);
+        targetAlly.SetActive(false);
+        targetMenu.SetActive(false);
+        bottomMenu.SetActive(false);
+        waitingScreen.SetActive(true);
     }
 
-    public void lockIn()
+    public void RPCAddMove(string action, string target)
     {
-
+        playerManager.turnAction = action;
+        playerManager.turnTarget = target;
     }
 }

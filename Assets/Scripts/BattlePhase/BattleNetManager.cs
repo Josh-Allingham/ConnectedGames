@@ -8,6 +8,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.UIElements;
+
 public class BattleNetManager : MonoBehaviourPunCallbacks
 {
     string playerName = "P1";
@@ -301,6 +302,7 @@ public class BattleNetManager : MonoBehaviourPunCallbacks
         for (int i = 0; i < cpuNeeded; i++)
         {
             GameObject newCPU = PhotonNetwork.Instantiate(cpuPrefab.name, new Vector3(0, 1, 0), Quaternion.identity, 0);
+            newCPU.transform.parent = myPlayerManager.transform;
             newCPU.GetComponent<BattleCPU>().playerName = "CPU " + (i + 1);
             newCPU.GetComponent<BattleCPU>().playerElement = elementsNeeded[i];
             photonView.RPC("addPlayerToList", RpcTarget.AllBuffered, newCPU.GetComponent<BattlePlayer>().playerName);
