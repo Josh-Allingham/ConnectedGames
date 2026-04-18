@@ -46,6 +46,9 @@ MonoBehaviour:
   - RPCChangeTypeTo
   - RPCSetElementPowerActive
   - RPCSetPlayerName
+  - ShowDialogue
+  - RPCShowDialogue
+  - RPCEndDialogue
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

@@ -35,12 +35,12 @@ public class EarthCube : MonoBehaviour, IElementInteractable
 
     public void TouchWater()
     {
-        
+        //destroy? sand/mud
     }
 
     public void TouchFire()
     {
-        
+        //harden    
     }
 
     public void TouchEarth()
