@@ -30,6 +30,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     public string castDescription;
     public string castTurnLimit;
 
+    public bool turnLockedIn;
     public string turnAction;
     public string turnTarget;
 
@@ -44,6 +45,9 @@ public class PlayerManager : MonoBehaviourPunCallbacks
 
     public float windHealth;
     public float windStateri;
+
+    public List<string> turnActions = new List<string>();
+    public List<bool> turnActionRecorded = new List<bool>();
 
 
     public void Update()
@@ -73,6 +77,17 @@ public class PlayerManager : MonoBehaviourPunCallbacks
         {
             getMyPlayerStats(myElement);
             announceStats(myElementType, myElement.currHealth, myElement.currStatera);
+        }
+
+        if(turnLockedIn)
+        {
+            RPCRecordTurnActions(myElementType, turnAction, turnTarget);
+            turnLockedIn = false;
+        }
+
+        if(turnActions.Count == 4)
+        {
+           
         }
     }
 
@@ -156,6 +171,18 @@ public class PlayerManager : MonoBehaviourPunCallbacks
         }
 
         photonView.RPC("announceStats", RpcTarget.Others, element, health, statera);
+    }
+
+    [PunRPC]
+    public void RPCRecordTurnActions(string element, string action, string target)
+    {
+        turnActions.Add(element + " using " + action + " on " + target);
+        turnActionRecorded.Add(true);
+
+        if (photonView.IsMine)
+        {
+            photonView.RPC("RPCRecordTurnActions", RpcTarget.Others, element, action, target);
+        }
     }
 
 }

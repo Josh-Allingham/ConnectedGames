@@ -68,6 +68,7 @@ MonoBehaviour:
   - loadMenu
   - RPCAddMove
   - announceStats
+  - RPCRecordTurnActions
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

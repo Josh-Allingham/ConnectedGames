@@ -181,7 +181,7 @@ public class BattleMenu : MonoBehaviour
                 break;
         }
         endTurn();
-        RPCAddMove(actionSelection, targetSelection);
+        addMove(actionSelection, targetSelection);
     }
     public void endTurn()
     {
@@ -192,9 +192,10 @@ public class BattleMenu : MonoBehaviour
         waitingScreen.SetActive(true);
     }
 
-    public void RPCAddMove(string action, string target)
+    public void addMove(string action, string target)
     {
         playerManager.turnAction = action;
         playerManager.turnTarget = target;
+        playerManager.turnLockedIn = true;
     }
 }
