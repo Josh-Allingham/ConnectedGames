@@ -67,9 +67,9 @@ public class BattleNetManager : MonoBehaviourPunCallbacks
                         timer = PhotonNetwork.Time - start;
                     }
 
-                    if (timer >= 8 && !cpuLoaded)
+                    if (timer >= 5 && !cpuLoaded)
                     {
-                        int numCPU = 4 - PhotonNetwork.CurrentRoom.PlayerCount;
+                        int numCPU = 5 - PhotonNetwork.CurrentRoom.PlayerCount;
                         loadCPU(numCPU);
                     }
                 }
@@ -255,7 +255,6 @@ public class BattleNetManager : MonoBehaviourPunCallbacks
         }
         photonView.RPC("addPlayerToList", RpcTarget.AllBuffered, newPlayer.GetComponent<BattlePlayer>().playerName);
         photonView.RPC("addElementToList", RpcTarget.AllBuffered, newPlayer.GetComponent<BattlePlayer>().playerElement);
-
     }
 
     [PunRPC]
@@ -295,6 +294,11 @@ public class BattleNetManager : MonoBehaviourPunCallbacks
             else if (!elements.Contains("Wind"))
             {
                 elementsNeeded[e] = "Wind";
+                photonView.RPC("addElementToList", RpcTarget.AllBuffered, elementsNeeded[e]);
+            }
+            else if (!elements.Contains("Chaos"))
+            {
+                elementsNeeded[e] = "Chaos";
                 photonView.RPC("addElementToList", RpcTarget.AllBuffered, elementsNeeded[e]);
             }
         }

@@ -13,8 +13,8 @@ public class BattlePlayer : MonoBehaviourPunCallbacks
     {
         RPCSetPlayerName(playerName);
         RPCSetPlayerElement(playerElement);
-        RPCSpawnElemental();
-        RPCPositionElemental();
+        spawnElemental();
+        positionElemental();
     }
 
     public void Update()
@@ -44,7 +44,7 @@ public class BattlePlayer : MonoBehaviourPunCallbacks
     }
 
 
-    public void RPCSpawnElemental()
+    public virtual void spawnElemental()
     {
         switch (playerElement)
         {
@@ -63,7 +63,7 @@ public class BattlePlayer : MonoBehaviourPunCallbacks
         }
     }
 
-    public void RPCPositionElemental()
+    public virtual void positionElemental()
     {
         switch (playerElement)
         {

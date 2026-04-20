@@ -69,6 +69,10 @@ MonoBehaviour:
   - RPCAddMove
   - announceStats
   - RPCRecordTurnActions
+  - RPCUpdateOthersOnMyStatus
+  - resetTurns
+  - RPCresetTurns
+  - RPCResetTurns
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
