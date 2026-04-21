@@ -9,6 +9,8 @@ public class Windmill : MonoBehaviour, IElementInteractable
     [SerializeField] private float windmillDrag = 10f;
     [SerializeField] private Transform windmillAxis;
     [SerializeField] private Cloud cloud;
+    private string windmillID;
+    private float cloudMoveAwayTime = 10;
     public bool isSpinning = false;
     private enum WindmillDamageState
     {
@@ -42,15 +44,15 @@ public class Windmill : MonoBehaviour, IElementInteractable
         switch (currentState)
         {
             case WindmillDamageState.tangled:
-                
+                windmillID = "WindmillTangled";
                 break;
 
             case WindmillDamageState.snapped:
-                
+                windmillID = "WindmillBroken";
                 break;
 
             case WindmillDamageState.needsWater:
-                
+                windmillID = "WindmillWater";
                 break;
 
             case WindmillDamageState.canSpin:
@@ -58,7 +60,10 @@ public class Windmill : MonoBehaviour, IElementInteractable
                 if (windmillSpeed > maxWindmillSpeed / 2)
                 {
                     isSpinning = true;
-                    StartCoroutine(cloud.MoveCloud((cloud.transform.position - transform.position).normalized, 10));
+                    CameraManager.main.ActivateCamera(windmillID);
+                    StartCoroutine(CameraManager.main.DisableCameraAfterXSeconds(windmillID, cloudMoveAwayTime, "Player"));
+                    StartCoroutine(cloud.MoveCloud((cloud.transform.position - transform.position).normalized, cloudMoveAwayTime));
+                    
                 }
                 break;
         }

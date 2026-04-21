@@ -1,6 +1,6 @@
 using UnityEngine;
 using Photon.Pun;
-public class PlayerFootsteps : MonoBehaviour
+public class PlayerPowers : MonoBehaviour
 {
 
 
@@ -18,8 +18,7 @@ public class PlayerFootsteps : MonoBehaviour
     private Player player;
 
     #region Stats
-    [SerializeField] private float WindChargeTimeInSeconds = 4f;
-    [SerializeField] private float EarthChargeTimeInSeconds = 4f;
+    [SerializeField] private float PowerChargeTimeInSeconds = 4f;
     #endregion
     #region ColorCodes
     [Header("Colours")]
@@ -52,12 +51,17 @@ public class PlayerFootsteps : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        player.SetPowerChargeBar(powerTimer / PowerChargeTimeInSeconds);
+
         if (!isActive)
         {
             powerTimer = 0;
             return;
         }
+
+        
         powerTimer += Time.deltaTime;
+        
         if (prevPosition == null || (prevPosition - transform.position).magnitude > footstepDistance)
         {
             prevPosition = transform.position;
@@ -108,15 +112,15 @@ public class PlayerFootsteps : MonoBehaviour
             case Player.PlayerType.Earth:
                 SpawnParticles(earthParticles, Vector3.one * 0.1f);
 
-                if (powerTimer >= EarthChargeTimeInSeconds)
+                if (powerTimer >= PowerChargeTimeInSeconds)
                 {
-                    player.SpawnEarthCube();
+                    player.RPCSpawnEarthCube();
                     powerTimer = 0;
                 }
                 break;
             case Player.PlayerType.Wind:
                 SpawnParticles(windParticles, Vector3.one * 0.1f * Mathf.Min(powerTimer / 2, 2));
-                if (powerTimer >= WindChargeTimeInSeconds)
+                if (powerTimer >= PowerChargeTimeInSeconds)
                 {
                     player.SpawnWindTunnel();
                     powerTimer = 0;

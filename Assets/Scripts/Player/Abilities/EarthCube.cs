@@ -4,7 +4,7 @@ using System.Collections.Generic;
 public class EarthCube : MonoBehaviour, IElementInteractable
 {
 
-    private float riseTime = 2f;
+    public float riseTime = 2f;
     Rigidbody rb;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()

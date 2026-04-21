@@ -3,7 +3,7 @@ using UnityEngine;
 public class FootstepParticle : MonoBehaviour
 {
     public Player.PlayerType InteractionType = Player.PlayerType.NULL;
-    public PlayerFootsteps player;
+    public PlayerPowers player;
    
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
