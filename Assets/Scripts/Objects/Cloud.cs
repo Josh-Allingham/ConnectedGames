@@ -26,7 +26,7 @@ public class Cloud : MonoBehaviour
         //UpdateBalls();
         if (!isAlive)
         {
-            Destroy(this.gameObject);
+            gameObject.SetActive(false);
         }
     }
 
@@ -81,6 +81,7 @@ public class Cloud : MonoBehaviour
         }
         isAlive = false;
         
+            
     }
     public struct CloudBall
     {
