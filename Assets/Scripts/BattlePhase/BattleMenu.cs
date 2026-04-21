@@ -106,9 +106,11 @@ public class BattleMenu : MonoBehaviour
 
     private IEnumerator drain;
 
+    private Animator anim;
 
     public void Start()
     {
+        anim = bottomMenu.GetComponent<Animator>();
         resetSelection();
         resetStatuses();
     }
@@ -217,7 +219,7 @@ public class BattleMenu : MonoBehaviour
         attackStudy = false;
         castStudy = false;
         targetStudy = false;
-        bottomMenu.SetActive(true);
+        anim.SetBool("HideMenu", false);
     }
 
     public void lockIn(TMP_Text target)
@@ -253,7 +255,7 @@ public class BattleMenu : MonoBehaviour
         targetEnemy.SetActive(false);
         targetAlly.SetActive(false);
         targetMenu.SetActive(false);
-        bottomMenu.SetActive(false);
+        anim.SetBool("HideMenu", true);
         waitingScreen.SetActive(true);
     }
 
