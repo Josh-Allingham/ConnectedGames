@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 4311aa2c4b1f65d4391fce3b071bf96b
+timeCreated: 1455586248
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 56402
+  packageName: Stylized Cemetery Pack
+  packageVersion: 1.0
+  assetPath: Assets/CemeteryPack/Materials/MaterialTombstones.mat
+  uploadId: 106261

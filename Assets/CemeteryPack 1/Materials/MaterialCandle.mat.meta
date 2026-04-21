@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 6018154bc53eced49ae232659e984222
+timeCreated: 1455582297
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 56402
+  packageName: Stylized Cemetery Pack
+  packageVersion: 1.0
+  assetPath: Assets/CemeteryPack/Materials/MaterialCandle.mat
+  uploadId: 106261

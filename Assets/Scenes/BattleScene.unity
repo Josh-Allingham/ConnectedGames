@@ -7773,6 +7773,7 @@ MonoBehaviour:
   castTarget: 
   castDescription: 
   castTurnLimit: 
+  cpuTurnsLockedIn: 0
   turnLockedIn: 0
   turnAction: 
   turnTarget: 
@@ -7803,6 +7804,7 @@ MonoBehaviour:
   chaosSpeed: 0
   turnActions: []
   turnActionRecorded: 
+  nextTurnReady: 0
 --- !u!4 &5799134396844069365
 Transform:
   m_ObjectHideFlags: 0

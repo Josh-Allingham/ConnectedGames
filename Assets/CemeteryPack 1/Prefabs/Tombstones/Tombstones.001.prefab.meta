@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 545bc70b14cbc644f99069a2183f9228
+timeCreated: 1455730689
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 56402
+  packageName: Stylized Cemetery Pack
+  packageVersion: 1.0
+  assetPath: Assets/CemeteryPack/Prefabs/Tombstones/Tombstones.001.prefab
+  uploadId: 106261

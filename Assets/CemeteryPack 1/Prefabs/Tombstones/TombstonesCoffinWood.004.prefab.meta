@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 94dd782b6fff6b54a96e39748ebdb6c1
+timeCreated: 1455730664
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 56402
+  packageName: Stylized Cemetery Pack
+  packageVersion: 1.0
+  assetPath: Assets/CemeteryPack/Prefabs/Tombstones/TombstonesCoffinWood.004.prefab
+  uploadId: 106261

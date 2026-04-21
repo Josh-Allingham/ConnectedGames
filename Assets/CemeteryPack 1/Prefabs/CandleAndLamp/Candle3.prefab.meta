@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: b3f1e6ca73ac49f4daf119bac54af48a
+timeCreated: 1455730919
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 56402
+  packageName: Stylized Cemetery Pack
+  packageVersion: 1.0
+  assetPath: Assets/CemeteryPack/Prefabs/CandleAndLamp/Candle3.prefab
+  uploadId: 106261

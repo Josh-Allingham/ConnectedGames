@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 81d12a97fccc3e4409a8b327cfced098
+timeCreated: 1455728172
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 56402
+  packageName: Stylized Cemetery Pack
+  packageVersion: 1.0
+  assetPath: Assets/CemeteryPack/Prefabs/CryptMini/CryptMiniCoffin1.prefab
+  uploadId: 106261

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: d847bc58012c6b14aad118076573900d
+timeCreated: 1455727860
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 56402
+  packageName: Stylized Cemetery Pack
+  packageVersion: 1.0
+  assetPath: Assets/CemeteryPack/Prefabs/Floor/Floor1.prefab
+  uploadId: 106261

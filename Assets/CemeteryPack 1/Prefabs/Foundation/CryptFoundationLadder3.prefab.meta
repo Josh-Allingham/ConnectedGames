@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 565389aadd6e3404486a373b72bec7d9
+timeCreated: 1455731035
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 56402
+  packageName: Stylized Cemetery Pack
+  packageVersion: 1.0
+  assetPath: Assets/CemeteryPack/Prefabs/Foundation/CryptFoundationLadder3.prefab
+  uploadId: 106261
