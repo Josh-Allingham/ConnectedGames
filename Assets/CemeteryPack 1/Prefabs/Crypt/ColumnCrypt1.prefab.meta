@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: c0c734b85c7fb644eb6e5e8ce8a7e2cd
+timeCreated: 1455730437
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 56402
+  packageName: Stylized Cemetery Pack
+  packageVersion: 1.0
+  assetPath: Assets/CemeteryPack/Prefabs/Crypt/ColumnCrypt1.prefab
+  uploadId: 106261

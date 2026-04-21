@@ -2,15 +2,31 @@ using UnityEngine;
 
 public class LobbyMenu : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public GameObject mainMenu;
+    public GameObject lobbyMenu;
+    public GameObject joinMenu;
+    public GameObject createRoomMenu;
+    public GameObject lobbyRoom;
+
+
+
+    public void createRoom()
     {
-        
+        lobbyMenu.SetActive(false);
+        createRoomMenu.SetActive(true);
     }
 
-    // Update is called once per frame
-    void Update()
+
+    public void joinRoom()
     {
-        
+        lobbyMenu.SetActive(false);
+        joinMenu.SetActive(true);
+    }
+
+
+    public void backToMainMenu()
+    {
+        lobbyMenu.SetActive(false);
+        mainMenu.SetActive(true);
     }
 }

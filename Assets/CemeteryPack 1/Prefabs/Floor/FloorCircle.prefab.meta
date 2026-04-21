@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 2e079fa6794b13044918f75f4a1d0b7e
+timeCreated: 1455730955
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 56402
+  packageName: Stylized Cemetery Pack
+  packageVersion: 1.0
+  assetPath: Assets/CemeteryPack/Prefabs/Floor/FloorCircle.prefab
+  uploadId: 106261

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: f0e7b81ebde4e2b44964f71e40d695c8
+timeCreated: 1455730846
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 56402
+  packageName: Stylized Cemetery Pack
+  packageVersion: 1.0
+  assetPath: Assets/CemeteryPack/Prefabs/Gate/MetObj_Fence3.prefab
+  uploadId: 106261

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: a06679084f081954fb14a6b2d2eb98a1
+timeCreated: 1455730481
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 56402
+  packageName: Stylized Cemetery Pack
+  packageVersion: 1.0
+  assetPath: Assets/CemeteryPack/Prefabs/Crypt/CryptBorder1.prefab
+  uploadId: 106261

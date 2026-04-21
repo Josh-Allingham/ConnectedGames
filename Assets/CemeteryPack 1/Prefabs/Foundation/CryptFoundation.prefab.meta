@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 7c693f41a08569c4eb31af6a5dbec227
+timeCreated: 1455731039
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 56402
+  packageName: Stylized Cemetery Pack
+  packageVersion: 1.0
+  assetPath: Assets/CemeteryPack/Prefabs/Foundation/CryptFoundation.prefab
+  uploadId: 106261

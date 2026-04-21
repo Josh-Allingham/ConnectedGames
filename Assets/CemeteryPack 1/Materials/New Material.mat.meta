@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: a844613c6cd25364ab2e6b54a44eb502
+timeCreated: 1455732415
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 56402
+  packageName: Stylized Cemetery Pack
+  packageVersion: 1.0
+  assetPath: Assets/CemeteryPack/Materials/New Material.mat
+  uploadId: 106261

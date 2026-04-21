@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 133420c698793e249b20be43f277d610
+timeCreated: 1455582086
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 56402
+  packageName: Stylized Cemetery Pack
+  packageVersion: 1.0
+  assetPath: Assets/CemeteryPack/Materials/MeterialColumn.mat
+  uploadId: 106261

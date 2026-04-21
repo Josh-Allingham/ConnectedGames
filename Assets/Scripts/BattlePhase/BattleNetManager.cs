@@ -8,6 +8,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.UIElements;
+
 public class BattleNetManager : MonoBehaviourPunCallbacks
 {
     string playerName = "P1";
@@ -66,9 +67,9 @@ public class BattleNetManager : MonoBehaviourPunCallbacks
                         timer = PhotonNetwork.Time - start;
                     }
 
-                    if (timer >= 8 && !cpuLoaded)
+                    if (timer >= 5 && !cpuLoaded)
                     {
-                        int numCPU = 4 - PhotonNetwork.CurrentRoom.PlayerCount;
+                        int numCPU = 5 - PhotonNetwork.CurrentRoom.PlayerCount;
                         loadCPU(numCPU);
                     }
                 }
@@ -254,7 +255,6 @@ public class BattleNetManager : MonoBehaviourPunCallbacks
         }
         photonView.RPC("addPlayerToList", RpcTarget.AllBuffered, newPlayer.GetComponent<BattlePlayer>().playerName);
         photonView.RPC("addElementToList", RpcTarget.AllBuffered, newPlayer.GetComponent<BattlePlayer>().playerElement);
-
     }
 
     [PunRPC]
@@ -296,11 +296,17 @@ public class BattleNetManager : MonoBehaviourPunCallbacks
                 elementsNeeded[e] = "Wind";
                 photonView.RPC("addElementToList", RpcTarget.AllBuffered, elementsNeeded[e]);
             }
+            else if (!elements.Contains("Chaos"))
+            {
+                elementsNeeded[e] = "Chaos";
+                photonView.RPC("addElementToList", RpcTarget.AllBuffered, elementsNeeded[e]);
+            }
         }
 
         for (int i = 0; i < cpuNeeded; i++)
         {
             GameObject newCPU = PhotonNetwork.Instantiate(cpuPrefab.name, new Vector3(0, 1, 0), Quaternion.identity, 0);
+            newCPU.transform.parent = myPlayerManager.transform;
             newCPU.GetComponent<BattleCPU>().playerName = "CPU " + (i + 1);
             newCPU.GetComponent<BattleCPU>().playerElement = elementsNeeded[i];
             photonView.RPC("addPlayerToList", RpcTarget.AllBuffered, newCPU.GetComponent<BattlePlayer>().playerName);
