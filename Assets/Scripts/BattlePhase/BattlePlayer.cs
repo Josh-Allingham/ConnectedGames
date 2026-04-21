@@ -68,16 +68,16 @@ public class BattlePlayer : MonoBehaviourPunCallbacks
         switch (playerElement)
         {
             case "Water":
-                this.transform.position = new Vector3 (-0.289f, 2.17f, -10.26f);
+                this.transform.position = new Vector3 (4.16f, 2.17f, -8.95f);
                 break;
             case "Fire":
-                this.transform.position = new Vector3(-6.02f, 1.97f, -6.49f);
+                this.transform.position = new Vector3(1.24f, 1.97f, -4.13f);
                 break;
             case "Earth":
                 this.transform.position = new Vector3(7.045f, 2.57f, -5.074f);
                 break;
             case "Wind":
-                this.transform.position = new Vector3(11.145f, 2.39f, -8.15f);
+                this.transform.position = new Vector3(10.16f, 2.39f, -8.15f);
                 break;
         }
 
