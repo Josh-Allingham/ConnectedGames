@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 using Photon.Pun;
 using Photon.Realtime;
 using TMPro;
@@ -22,7 +23,8 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
     public PlayerType currentType;
     public Color currentColour;
     public string playerName;
-    public SpriteRenderer iconSprite;
+    public Image iconBGSprite;
+    public Image iconFGSprite;
     public SpriteRenderer bodySprite;
 
     //Wind
@@ -30,6 +32,7 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
     public GameObject windTunnelInstance;
     public GameObject earthCube;
     public List<GameObject> earthCubeInstances;
+    public float earthCubeRiseTimeInSeconds = 2f;
 
     private Animator anim;
     private Rigidbody rb;
@@ -44,9 +47,11 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
         anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody>();
         RPCEndDialogue();
-        GetComponent<PlayerFootsteps>().SetType(currentType);
+        GetComponent<PlayerPowers>().SetType(currentType);
         GetComponentInChildren<SpriteRenderer>().sprite = waterIcon;
         RPCSetPlayerName(playerName);
+
+        
     }
 
     void Update()
@@ -60,25 +65,29 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
             
             RPCSetElementPowerActive(Input.GetKey(KeyCode.E));
             RPCSetPlayerName(playerName);
-
             anim.SetBool("IsWalking", rb.linearVelocity.magnitude > .1f);
-
-            if (currentInteractee != null)
-            {
-                if (Input.GetKeyDown(KeyCode.R) && currentInteractee.dialogueIndex != -1) //check the player has R'd and there is valid dialogue stored
-                {
-                    Debug.Log("H");
-                    RPCShowDialogue(currentInteractee.GetDialogue());
-                }
-                else if (currentInteractee.dialogueIndex == -1)
-                {
-                    RPCEndDialogue();
-                }
-            }
+            RPCHandleNPCInteractions();
         }
         
     }
 
+    [PunRPC] void RPCHandleNPCInteractions()
+    {
+        if (currentInteractee != null)
+        {
+            HighlightText.transform.position = Camera.main.WorldToScreenPoint(currentInteractee.transform.position) + Vector3.up;
+
+            if (Input.GetKeyDown(KeyCode.R) && !currentInteractee.HasFinishedDialogue()) //check the player has R'd and there is valid dialogue stored
+            {
+                RPCShowDialogue(currentInteractee.GetDialogue());
+            }
+            else if (currentInteractee.HasFinishedDialogue())
+            {
+                StartCoroutine(CameraManager.main.DisableCameraAfterXSeconds("OldMan", 0, "Player"));
+                RPCEndDialogue();
+            }
+        }
+    }
     [PunRPC]  void RPCSetPlayerName(string _playerName)
     {
         GetComponentInChildren<TMP_Text>().text = _playerName;
@@ -93,7 +102,7 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
         //Change our colour
         currentColour = new Color(colour.x, colour.y, colour.z, 1f);
 
-        GetComponent<PlayerFootsteps>().SetColour(currentColour);
+        GetComponent<PlayerPowers>().SetColour(currentColour);
 
         GetComponentsInChildren<SpriteRenderer>()[1].color = currentColour;
 
@@ -105,7 +114,7 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
     }
     [PunRPC] void RPCSetElementPowerActive(bool isActive)
     {
-        GetComponent<PlayerFootsteps>().isActive = isActive;
+        GetComponent<PlayerPowers>().isActive = isActive;
 
        
         //Tell everyone else what our new colour is
@@ -116,36 +125,37 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
     }
     [PunRPC] void RPCChangeTypeTo(PlayerType newType)
     {
+        //Reset Animations
+        anim.SetInteger("ElementID", -1);
+        anim.SetTrigger("Switch");
 
         currentType = newType;
-        GetComponent<PlayerFootsteps>().SetType(currentType);
+        GetComponent<PlayerPowers>().SetType(currentType);
 
-        Sprite iconSprite = waterIcon;
         switch (currentType)
         {
             case PlayerType.Water:
-                iconSprite = waterIcon;
+                SetIconSprite(waterIcon);
                 bodySprite.sprite = waterSprite;
                 anim.SetInteger("ElementID", 0);
                 break;
             case PlayerType.Fire:
-                iconSprite = fireIcon;
+                SetIconSprite(fireIcon);
                 bodySprite.sprite = fireSprite;
                 anim.SetInteger("ElementID", 1);
                 break;
             case PlayerType.Earth:
-                iconSprite = earthIcon;
+                SetIconSprite(earthIcon);
                 bodySprite.sprite = earthSprite;
                 anim.SetInteger("ElementID", 2);
                 break;
             case PlayerType.Wind:
-                iconSprite = windIcon;
+                SetIconSprite(windIcon);
                 bodySprite.sprite = windSprite;
                 anim.SetInteger("ElementID", 3);
                 break;
         }
 
-        GetComponentInChildren<SpriteRenderer>().sprite = iconSprite;
         //Tell everyone else what our new type is
         if (photonView.IsMine)
         {
@@ -153,13 +163,21 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
         }
     }
 
-    public void setInteractee(NPC interactee)
+    public void SetPowerChargeBar(float percentageFilled)
+    {
+        iconFGSprite.fillAmount = percentageFilled;
+    }
+    private void SetIconSprite(Sprite sprite)
+    {
+        iconBGSprite.sprite = sprite;
+        iconFGSprite.sprite = sprite;
+    }
+    public void SetInteractee(NPC interactee)
     {
         this.currentInteractee = interactee;
-        if (interactee != null)
-        {
-            HighlightText.text = interactee.highlightText;
-        }
+        HighlightText.alpha = interactee == null ? 0 : 1;
+        HighlightText.text = interactee == null ? "" : interactee.highlightText;
+        
         
     }
     [PunRPC] public void RPCShowDialogue(string dialogue)
@@ -177,6 +195,7 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
     {
         DialogueUI.alpha = 0f;
         DialogueUIText.text = "";
+        HighlightText.text = "";
         currentInteractee = null;
         if (photonView.IsMine)
         {
@@ -203,9 +222,7 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
     }
     void ToggleElementSwitch()
     {
-        anim.SetInteger("ElementID", -1);
-        anim.SetTrigger("Switch");
-
+        
         switch (currentType)
         {
             case PlayerType.Water:
@@ -228,10 +245,14 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
         //windTunnelInstance.transform.localScale = Vector3.one * Mathf.Min(powerTimer, 3);
     }
 
-    public void SpawnEarthCube()
+    [PunRPC] public void RPCSpawnEarthCube()
     {
-        GameObject newCube = PhotonNetwork.Instantiate(earthCube.name, transform.position + Vector3.down, Quaternion.identity);
-        earthCubeInstances.Add(newCube);
+        if (photonView.IsMine)
+        {
+            GameObject newCube = PhotonNetwork.Instantiate(earthCube.name, transform.position + Vector3.down, Quaternion.identity);
+            newCube.GetComponent<EarthCube>().riseTime = earthCubeRiseTimeInSeconds;
+            earthCubeInstances.Add(newCube);
+        }
     }
     private void OnTriggerEnter(Collider other)
     {

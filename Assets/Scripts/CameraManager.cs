@@ -18,6 +18,7 @@ public class CameraManager : MonoBehaviour
         cameraDict.Add("WindmillBroken", cameras[3]);
         cameraDict.Add("WindmillWater", cameras[4]);
         cameraDict.Add("OldMan", cameras[5]);
+        cameraDict.Add("AllWindmills", cameras[6]);
 
         for (int i = 1; i < cameras.Length; i++) //exclude player camera, default
         {
@@ -35,22 +36,21 @@ public class CameraManager : MonoBehaviour
 
     public void ActivateCamera(string cameraName)
     {
-        //disable movement
+        //TODO disable movement
 
         GameObject cam = cameraDict[cameraName];
         cam.SetActive(true);
         SetPlayerCam(false); //turn player camera off
-        //tell everyone else, RPC it out
         
     }
 
-    public IEnumerator DisableCameraAfterXSeconds(string cameraName, float x)
+    public IEnumerator DisableCameraAfterXSeconds(string cameraName, float x, string endCameraName)
     {
         GameObject cam = cameraDict[cameraName];
+        GameObject endCam = cameraDict[endCameraName];
         yield return new WaitForSeconds(x); 
         cam.SetActive(false);
-        SetPlayerCam(true);
-        //enable movement
+        endCam.SetActive(true);
     }
 
     public void SetPlayerCam(bool val)
