@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 42101d7d3547bea4096ca6b924f525a3
+timeCreated: 1455730466
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 56402
+  packageName: Stylized Cemetery Pack
+  packageVersion: 1.0
+  assetPath: Assets/CemeteryPack/Prefabs/Crypt/CryptRootf3.prefab
+  uploadId: 106261

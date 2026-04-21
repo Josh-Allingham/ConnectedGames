@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 48448dff58a870e46807fff44dd2e5f9
+timeCreated: 1455730921
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 56402
+  packageName: Stylized Cemetery Pack
+  packageVersion: 1.0
+  assetPath: Assets/CemeteryPack/Prefabs/CandleAndLamp/MetObj_Lamp.prefab
+  uploadId: 106261

@@ -7,10 +7,12 @@ public class MainMenu : MonoBehaviour
     public GameObject mainMenu;
     public GameObject settingsMenu;
     public GameObject exitMenu;
+    public GameObject lobbyMenu;
 
     public void play()
     {
-
+        mainMenu.SetActive(false);
+        lobbyMenu.SetActive(true);
     }
 
     public void settings()

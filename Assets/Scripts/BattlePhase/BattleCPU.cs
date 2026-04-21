@@ -3,50 +3,52 @@ using UnityEngine;
 
 public class BattleCPU : BattlePlayer 
 {
+    public GameObject chaos;
 
-    void elementalAction()
+    public override void spawnElemental()
     {
-        switch(playerElement)
+        switch (playerElement)
         {
             case "Water":
-                waterCPUAction();
+                Instantiate(water, transform.position, Quaternion.identity, this.transform);
                 break;
             case "Fire":
-                fireCPUAction();
+                Instantiate(fire, transform.position, Quaternion.identity, this.transform);
                 break;
             case "Earth":
-                earthCPUAction();
+                Instantiate(earth, transform.position, Quaternion.identity, this.transform);
                 break;
             case "Wind":
-                windCPUAction();
+                Instantiate(wind, transform.position, Quaternion.identity, this.transform);
+                break;
+            case "Chaos":
+                Instantiate(chaos, transform.position, Quaternion.identity, this.transform);
                 break;
         }
     }
 
-    public void waterCPUAction()
+    public override void positionElemental()
     {
-        Debug.Log("Heal ally with no current health buff, if they are below 30%");
-        Debug.Log("Attack enemy if effective");
-        Debug.Log("Heal ally with no current health buff");
+        switch (playerElement)
+        {
+            case "Water":
+                this.transform.position = new Vector3(-0.289f, 2.17f, -10.26f);
+                break;
+            case "Fire":
+                this.transform.position = new Vector3(-6.02f, 1.97f, -6.49f);
+                break;
+            case "Earth":
+                this.transform.position = new Vector3(7.045f, 2.57f, -5.074f);
+                break;
+            case "Wind":
+                this.transform.position = new Vector3(11.145f, 2.39f, -8.15f);
+                break;
+            case "Chaos":
+                this.transform.position = new Vector3(5.5f, 4.3f, 7f);
+                break;
+        }
+
     }
 
-    public void fireCPUAction()
-    {
-        Debug.Log("Attack enemy if effective");
-        Debug.Log("Buff ally with no current speed buff");
-    }
-
-    public void earthCPUAction()
-    {
-        Debug.Log("Shield ally with no current shield buff, if they are below 30%");
-        Debug.Log("Attack enemy if effective");
-        Debug.Log("Shield ally with no current shield buff");
-    }
-
-    public void windCPUAction()
-    {
-        Debug.Log("Attack enemy if effective");
-        Debug.Log("Wind cast");
-    }
 }
 

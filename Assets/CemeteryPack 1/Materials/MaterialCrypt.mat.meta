@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 2efe488cb9bec5e47ad1af38bc005121
+timeCreated: 1455585248
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 56402
+  packageName: Stylized Cemetery Pack
+  packageVersion: 1.0
+  assetPath: Assets/CemeteryPack/Materials/MaterialCrypt.mat
+  uploadId: 106261

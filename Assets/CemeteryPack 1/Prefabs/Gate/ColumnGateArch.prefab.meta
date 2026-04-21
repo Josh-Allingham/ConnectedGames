@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 8aa4e3250b7f97641bec55b29b9a0f05
+timeCreated: 1455730863
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 56402
+  packageName: Stylized Cemetery Pack
+  packageVersion: 1.0
+  assetPath: Assets/CemeteryPack/Prefabs/Gate/ColumnGateArch.prefab
+  uploadId: 106261

@@ -66,6 +66,13 @@ MonoBehaviour:
   - addElementToList
   - addPlayerToList
   - loadMenu
+  - RPCAddMove
+  - announceStats
+  - RPCRecordTurnActions
+  - RPCUpdateOthersOnMyStatus
+  - resetTurns
+  - RPCresetTurns
+  - RPCResetTurns
   - RPCSpawnEarthCube
   - RPCHandleNPCInteractions
   DisableAutoOpenWizard: 1

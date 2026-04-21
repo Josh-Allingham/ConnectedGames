@@ -3,6 +3,7 @@ using System.Collections;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.Rendering;
 using static System.Net.WebRequestMethods;
 
 public class Element : MonoBehaviour
@@ -13,6 +14,7 @@ public class Element : MonoBehaviour
     public float defence;
     public float attack;
     public float speed;
+    public float currStatera;
     public float elementStatera;
     public bool alive;
     public string[,] myMoves = new string[3,7];
@@ -51,10 +53,17 @@ public class Element : MonoBehaviour
         set { speed = value; }
     }
 
+    public float CurrentElementStatera
+    {
+        get { return currStatera; }
+        set { currStatera = value; }
+    }
+
     public float ElementStatera
     {
         get { return elementStatera; }
         set { elementStatera = value; }
+
     }
 
     public bool IsAlive
@@ -164,6 +173,7 @@ public class Element : MonoBehaviour
                         Attack = float.Parse(stats[i + 3]);
                         Speed = float.Parse(stats[i + 4]);
                         ElementStatera = float.Parse(stats[i + 5]);
+                        CurrentElementStatera = ElementStatera;
 
                         if (CurrentHealth > 0)
                         {

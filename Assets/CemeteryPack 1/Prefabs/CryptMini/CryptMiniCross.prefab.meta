@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 83612e077e2019d4cac6e62e4f4a8231
+timeCreated: 1455728173
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 56402
+  packageName: Stylized Cemetery Pack
+  packageVersion: 1.0
+  assetPath: Assets/CemeteryPack/Prefabs/CryptMini/CryptMiniCross.prefab
+  uploadId: 106261

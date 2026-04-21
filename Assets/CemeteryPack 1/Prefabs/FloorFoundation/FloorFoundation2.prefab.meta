@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: c52c09e3a3e965447be3f3b3126eec00
+timeCreated: 1455730208
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 56402
+  packageName: Stylized Cemetery Pack
+  packageVersion: 1.0
+  assetPath: Assets/CemeteryPack/Prefabs/FloorFoundation/FloorFoundation2.prefab
+  uploadId: 106261
