@@ -276,14 +276,14 @@ public class PlayerManager : MonoBehaviourPun
                 randomAction = Random.Range(0, 1);
                 if(randomAction <= .75f)
                 {
-                    lockInCPUAction = "Attack";
+                    lockInCPUAction = cpuElement.myMoves[0,1];
                 }
                 else
                 {
-                    lockInCPUAction = "Cast";
+                    lockInCPUAction = cpuElement.myMoves[1,1];
                 }
 
-                if(lockInCPUAction == "Attack")
+                if(lockInCPUAction == cpuElement.myMoves[0, 1])
                 {
                     lockInCPUTarget = "All Players";
                 }
@@ -313,22 +313,22 @@ public class PlayerManager : MonoBehaviourPun
                 //Check other players health to heal, otheriwse copy others actions
                 if((fireHealth / fireMaxHealth) < 0.33f)
                 {
-                    lockInCPUAction = "Cast";
+                    lockInCPUAction = cpuElement.myMoves[1, 1];
                     lockInCPUTarget = "Fire";
                 }
                 else if((earthHealth / earthMaxHealth) < 0.33f)
                 {
-                    lockInCPUAction = "Cast";
+                    lockInCPUAction = cpuElement.myMoves[1, 1];
                     lockInCPUTarget = "Earth";
                 }
                 else if((windHealth / windMaxHealth) < 0.33f)
                 {
-                    lockInCPUAction = "Cast";
+                    lockInCPUAction = cpuElement.myMoves[1, 1];
                     lockInCPUTarget = "Wind";
                 }
                 else
                 {
-                    lockInCPUAction = "Attack";
+                    lockInCPUAction = cpuElement.myMoves[0, 1];
                     lockInCPUTarget = "The Guardian";
                 }
                 photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, cpuElement.elementType, lockInCPUAction, lockInCPUTarget);
@@ -337,14 +337,14 @@ public class PlayerManager : MonoBehaviourPun
                 randomAction = Random.Range(0, 1);
                 if (randomAction <= .75f)
                 {
-                    lockInCPUAction = "Attack";
+                    lockInCPUAction = cpuElement.myMoves[0, 1];
                 }
                 else
                 {
-                    lockInCPUAction = "Cast";
+                    lockInCPUAction = cpuElement.myMoves[1, 1];
                 }
 
-                if (lockInCPUAction == "Attack")
+                if (lockInCPUAction == cpuElement.myMoves[0, 1])
                 {
                     lockInCPUTarget = "The Guardian";
                 }
@@ -369,22 +369,22 @@ public class PlayerManager : MonoBehaviourPun
             case "Earth":
                 if ((fireHealth / fireMaxHealth) < 0.33f)
                 {
-                    lockInCPUAction = "Cast";
+                    lockInCPUAction = cpuElement.myMoves[1, 1];
                     lockInCPUTarget = "Fire";
                 }
                 else if ((waterHealth / waterMaxHealth) < 0.33f)
                 {
-                    lockInCPUAction = "Cast";
+                    lockInCPUAction = cpuElement.myMoves[1, 1];
                     lockInCPUTarget = "Water";
                 }
                 else if ((windHealth / windMaxHealth) < 0.33f)
                 {
-                    lockInCPUAction = "Cast";
+                    lockInCPUAction = cpuElement.myMoves[1, 1];
                     lockInCPUTarget = "Wind";
                 }
                 else
                 {
-                    lockInCPUAction = "Attack";
+                    lockInCPUAction = cpuElement.myMoves[0, 1];
                     lockInCPUTarget = "The Guardian";
                 }
                 photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, cpuElement.elementType, lockInCPUAction, lockInCPUTarget);
@@ -393,14 +393,14 @@ public class PlayerManager : MonoBehaviourPun
                 randomAction = Random.Range(0, 1);
                 if (randomAction <= .75f)
                 {
-                    lockInCPUAction = "Attack";
+                    lockInCPUAction = cpuElement.myMoves[0, 1];
                 }
                 else
                 {
-                    lockInCPUAction = "Cast";
+                    lockInCPUAction = cpuElement.myMoves[1, 1];
                 }
 
-                if (lockInCPUAction == "Attack")
+                if (lockInCPUAction == cpuElement.myMoves[0, 1])
                 {
                     lockInCPUTarget = "The Guardian";
                 }

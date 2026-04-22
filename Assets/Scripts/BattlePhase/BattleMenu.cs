@@ -227,23 +227,23 @@ public class BattleMenu : MonoBehaviour
         switch (target.text)
         {
             case "Fire":
-                actionSelection = "Cast";
+                actionSelection = playerManager.castName;
                 targetSelection = "Fire";
                 break;
             case "Water":
-                actionSelection = "Cast";
+                actionSelection = playerManager.castName;
                 targetSelection = "Water";
                 break;
             case "Earth":
-                actionSelection = "Cast";
+                actionSelection = playerManager.castName;
                 targetSelection = "Earth";
                 break;
             case "Wind":
-                actionSelection = "Cast";
+                actionSelection = playerManager.castName;
                 targetSelection = "Wind";
                 break;
             case "The Guardian":
-                actionSelection = "Attack";
+                actionSelection = playerManager.attackName;
                 targetSelection = "The Guardian";
                 break;
         }
