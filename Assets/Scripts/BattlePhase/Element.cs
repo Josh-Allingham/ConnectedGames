@@ -36,11 +36,13 @@ public class Element : MonoBehaviour
         get { return maxHealth; }
         set { maxHealth = value; }
     }
+
     public float Defence
     {
         get { return defence; }
         set { defence = value; }
     }
+
     public float Attack
     {
         get { return attack; }
@@ -129,6 +131,7 @@ public class Element : MonoBehaviour
             heal(maxHealth / 3);
         }
     }
+
     public void getPlayerStats(string element)
     {
         StartCoroutine(LoadStats(element));
@@ -248,7 +251,6 @@ public class Element : MonoBehaviour
                         moveNum++;
                     }
                 }
-                Debug.Log("Moves acquired successfully");
             }
         }
     }

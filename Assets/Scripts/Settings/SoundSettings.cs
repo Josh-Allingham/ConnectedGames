@@ -20,7 +20,7 @@ public class VolumeSettings : MonoBehaviour
 
     public void Start()
     {
-        if(PlayerPrefs.HasKey("MasterVolume") && PlayerPrefs.HasKey("MusicVolume") && PlayerPrefs.HasKey("SFXVolume"))
+        if(PlayerPrefs.HasKey("MasterVolumeLevel") && PlayerPrefs.HasKey("MusicVolumeLevel") && PlayerPrefs.HasKey("SFXVolumeLevel"))
         {
             loadVolume();
         }
@@ -32,32 +32,37 @@ public class VolumeSettings : MonoBehaviour
         }
     }
 
+    private void Update()
+    {
+
+    }
+
     public void setMasterVolume()
     {
         masterVolume = masterSlider.value;
         masterMixer.SetFloat("MasterVolume", Mathf.Log10(masterVolume) * 20);
-        PlayerPrefs.SetFloat("MasterVolume", masterVolume);
+        PlayerPrefs.SetFloat("MasterVolumeLevel", masterVolume);
     }
 
     public void setSFXVolume()
     {
-        musicVolume = musicSlider.value;
-        masterMixer.SetFloat("MusicVolume", Mathf.Log10(musicVolume) * 20);
-        PlayerPrefs.SetFloat("MusicVolume", musicVolume);
+        sfxVolume = sfxSlider.value;
+        masterMixer.SetFloat("SFXVolume", Mathf.Log10(sfxVolume) * 20);
+        PlayerPrefs.SetFloat("SFXVolumeLevel", sfxVolume);
     }
 
     public void setMusicVolume()
     {
-        sfxVolume = sfxSlider.value;
-        masterMixer.SetFloat("SFXVolume", Mathf.Log10(sfxVolume) * 20);
-        PlayerPrefs.SetFloat("SFXVolume", sfxVolume);
+        musicVolume = musicSlider.value;
+        masterMixer.SetFloat("MusicVolume", Mathf.Log10(musicVolume) * 20);
+        PlayerPrefs.SetFloat("MusicVolumeLevel", musicVolume);
     }
 
     public void loadVolume()
     {
-        masterSlider.value = PlayerPrefs.GetFloat("MasterVolume");
-        musicSlider.value = PlayerPrefs.GetFloat("MusicVolume");
-        sfxSlider.value = PlayerPrefs.GetFloat("SFXVolume");
+        masterSlider.value = PlayerPrefs.GetFloat("MasterVolumeLevel");
+        musicSlider.value = PlayerPrefs.GetFloat("MusicVolumeLevel");
+        sfxSlider.value = PlayerPrefs.GetFloat("SFXVolumeLevel");
 
         setMasterVolume();
         setMusicVolume();

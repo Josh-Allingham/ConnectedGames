@@ -26,6 +26,8 @@ public class BattleMenu : MonoBehaviour
     public GameObject targetEnemy;
     [SerializeField]
     public GameObject waitingScreen;
+    [SerializeField]
+    public GameObject actionWindow;
 
     [Header("Text")]    
     [SerializeField]
@@ -40,6 +42,8 @@ public class BattleMenu : MonoBehaviour
     public TMP_Text actionInfoTxt;
     [SerializeField]
     public TMP_Text actionTitleTxt;
+    [SerializeField]
+    public TMP_Text actionDescriptionTxt;
 
     [Header("Fire Status Bars")]
     [SerializeField]
@@ -126,6 +130,12 @@ public class BattleMenu : MonoBehaviour
         updateStatuses();
 
         checkStatuses();
+
+        if(playerManager.fighting)
+        {
+            actionDescriptionTxt.text = playerManager.actionOccuring;
+            actionWindow.SetActive(true);
+        }
     }
 
     public void attack()
@@ -146,7 +156,6 @@ public class BattleMenu : MonoBehaviour
             target(playerManager.attackTarget);
         }
     }
-
 
     public void cast()
     {
@@ -227,29 +236,30 @@ public class BattleMenu : MonoBehaviour
         switch (target.text)
         {
             case "Fire":
-                actionSelection = playerManager.castName;
+                actionSelection = "Cast";
                 targetSelection = "Fire";
                 break;
             case "Water":
-                actionSelection = playerManager.castName;
+                actionSelection = "Cast";
                 targetSelection = "Water";
                 break;
             case "Earth":
-                actionSelection = playerManager.castName;
+                actionSelection = "Cast";
                 targetSelection = "Earth";
                 break;
             case "Wind":
-                actionSelection = playerManager.castName;
+                actionSelection = "Cast";
                 targetSelection = "Wind";
                 break;
             case "The Guardian":
-                actionSelection = playerManager.attackName;
+                actionSelection = "Attack";
                 targetSelection = "The Guardian";
                 break;
         }
         endTurn();
         addMove(actionSelection, targetSelection);
     }
+
     public void endTurn()
     {
         targetEnemy.SetActive(false);
@@ -322,11 +332,19 @@ public class BattleMenu : MonoBehaviour
             drain = drainBar(firePrevHealthBar, fireCurrHealthBar);
             StartCoroutine(drain);
         }
+        else
+        {
+            firePrevHealthBar.fillAmount = fireCurrHealthBar.fillAmount;
+        }
         //Statera
         if (fireCurrStateraBar.fillAmount < firePrevStateraBar.fillAmount)
         {
             drain = drainBar(firePrevStateraBar, fireCurrStateraBar);
             StartCoroutine(drain);
+        }
+        else
+        {
+            firePrevStateraBar.fillAmount = fireCurrStateraBar.fillAmount;
         }
 
         //Check Water
@@ -336,11 +354,19 @@ public class BattleMenu : MonoBehaviour
             drain = drainBar(waterPrevHealthBar, waterCurrHealthBar);
             StartCoroutine(drain);
         }
+        else
+        {
+            waterPrevHealthBar.fillAmount = waterCurrHealthBar.fillAmount;
+        }
         //Statera
         if (waterCurrStateraBar.fillAmount < waterPrevStateraBar.fillAmount)
         {
             drain = drainBar(waterPrevStateraBar, waterCurrStateraBar);
             StartCoroutine(drain);
+        }
+        else
+        {
+            waterPrevStateraBar.fillAmount = waterCurrStateraBar.fillAmount;
         }
 
         //Check Earth
@@ -350,11 +376,19 @@ public class BattleMenu : MonoBehaviour
             drain = drainBar(earthPrevHealthBar, earthCurrHealthBar);
             StartCoroutine(drain);
         }
+        else
+        {
+            earthPrevHealthBar.fillAmount = earthCurrHealthBar.fillAmount;
+        }
         //Statera
         if (earthCurrStateraBar.fillAmount < earthPrevStateraBar.fillAmount)
         {
             drain = drainBar(earthPrevStateraBar, earthCurrStateraBar);
             StartCoroutine(drain);
+        }
+        else
+        {
+            earthPrevStateraBar.fillAmount = earthCurrStateraBar.fillAmount;
         }
 
         //Check Wind
@@ -364,11 +398,19 @@ public class BattleMenu : MonoBehaviour
             drain = drainBar(windPrevHealthBar, windCurrHealthBar);
             StartCoroutine(drain);
         }
+        else
+        {
+            windPrevHealthBar.fillAmount = windCurrHealthBar.fillAmount;
+        }
         //Statera
         if (windCurrStateraBar.fillAmount < windPrevStateraBar.fillAmount)
         {
             drain = drainBar(windPrevStateraBar, windCurrStateraBar);
             StartCoroutine(drain);
+        }
+        else
+        {
+            windPrevStateraBar.fillAmount = windCurrStateraBar.fillAmount;
         }
 
         //Check Chaos
@@ -383,13 +425,11 @@ public class BattleMenu : MonoBehaviour
 
     private IEnumerator drainBar(Image previousHealth, Image newHealth)
     {
-        while(true)
+        while(previousHealth.fillAmount > newHealth.fillAmount)
         {
-            if(previousHealth.fillAmount > newHealth.fillAmount)
-            {
-                previousHealth.fillAmount = previousHealth.fillAmount - 0.01f;
-            }
-            yield return new WaitForSeconds(.5f);
+            previousHealth.fillAmount = previousHealth.fillAmount - 0.01f;
+            yield return new WaitForSeconds(1f);
         }
     }
+
 }
