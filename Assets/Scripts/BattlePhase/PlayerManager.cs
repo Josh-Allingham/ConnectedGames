@@ -174,9 +174,11 @@ public class PlayerManager : MonoBehaviourPun
 
         if(nextTurnReady)
         {
+            fighting = false;
             photonView.RPC("RPCResetTurns", RpcTarget.AllBuffered);
             nextTurnReady = false;
         }
+
 
     }
 
@@ -670,85 +672,6 @@ public class PlayerManager : MonoBehaviourPun
                             actionOccuring = turnActions[i];
                             yield return new WaitForSeconds(4);
                             Debug.Log(actionOccuring);
-
-                            //if (myElementType == player)
-                            //{
-                            //    float hitchance = UnityEngine.Random.Range(0, 100);
-
-                            //    if (turnActions[i].Contains(attackName))
-                            //    {
-                            //        if (hitchance < attackAccuracy)
-                            //        {
-                            //            //Attack hits
-                            //            yield return new WaitForSeconds(4);
-                            //        }
-                            //        else
-                            //        {
-                            //            //Miss
-                            //            actionOccuring = player + " Missed their attack!";
-                            //            yield return new WaitForSeconds(4);
-                            //        }
-                            //    }
-                            //    else if (turnActions[i].Contains(castName))
-                            //    {
-                            //        if (hitchance < castAccuracy)
-                            //        {
-                            //            //Success cast
-                            //            yield return new WaitForSeconds(4);
-                            //        }
-                            //        else
-                            //        {
-                            //            //cast missed
-                            //            actionOccuring = player + " Missed their cast!";
-                            //            yield return new WaitForSeconds(4);
-
-                            //        }
-
-                            //    }
-                            //}
-                            //else if (PhotonNetwork.IsMasterClient)
-                            //{
-                            //    for (int e = 0; e < cpuElement.Count; e++)
-                            //    {
-                            //        if (cpuElement[e].elementType == player)
-                            //        {
-                            //            float hitchance = UnityEngine.Random.Range(0, 100);
-                            //            int cpuAttackAccu = Convert.ToInt32(cpuElement[e].myMoves[0, 3]);
-                            //            int cpuCastAccu = Convert.ToInt32(cpuElement[e].myMoves[1, 3]);
-
-                            //            if (turnActions[i].Contains(cpuElement[e].myMoves[0, 1]))
-                            //            {
-                            //                if (hitchance < cpuAttackAccu)
-                            //                {
-                            //                    //Attack hits
-                            //                    yield return new WaitForSeconds(4);
-                            //                }
-                            //                else
-                            //                {
-                            //                    //Missed attack
-                            //                    actionOccuring = player + " Missed their attack!";
-                            //                    yield return new WaitForSeconds(4);
-                            //                }
-                            //            }
-                            //            else if (turnActions[i].Contains(castName))
-                            //            {
-                            //                if (hitchance < cpuCastAccu)
-                            //                {
-                            //                    //Success cast
-                            //                    yield return new WaitForSeconds(4);
-                            //                }
-                            //                else
-                            //                {
-                            //                    //cast missed
-                            //                    actionOccuring = player + " Missed their cast!";
-                            //                    yield return new WaitForSeconds(4);
-
-                            //                }
-
-                            //            }
-                            //        }
-                            //    }
-                            //}
                         }
                     }
                 }
@@ -758,6 +681,9 @@ public class PlayerManager : MonoBehaviourPun
                 actionOccuring = player + " succumbed to their wounds...";
             }
         }
+        Debug.Log("All moves finished");
+        nextTurnReady = true;
+        actionOccuring = "";
     }
 
     [PunRPC]

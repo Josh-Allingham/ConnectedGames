@@ -136,6 +136,13 @@ public class BattleMenu : MonoBehaviour
             actionDescriptionTxt.text = playerManager.actionOccuring;
             actionWindow.SetActive(true);
         }
+
+        if(playerManager.nextTurnReady)
+        {
+            actionDescriptionTxt.text = "";
+            actionWindow.SetActive(false);
+            resetSelection();
+        }
     }
 
     public void attack()
