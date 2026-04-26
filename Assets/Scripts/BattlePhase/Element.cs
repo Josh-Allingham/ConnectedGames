@@ -3,8 +3,6 @@ using System.Collections;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
-using UnityEngine.Rendering;
-using static System.Net.WebRequestMethods;
 
 public class Element : MonoBehaviour
 {
@@ -237,7 +235,7 @@ public class Element : MonoBehaviour
 
                 string[] moves = playerMoves.Split(',', StringSplitOptions.RemoveEmptyEntries);
                 int moveNum = 0;
-                for (int i = 0; i <= moves.Length; i += 7)
+                for (int i = 0; i <= moves.Length-1; i += 7)
                 {
                     if (element.Equals(moves[i]))
                     {

@@ -1,12 +1,7 @@
-using Photon.Pun;
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Threading;
-using System.Xml;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class BattleMenu : MonoBehaviour
@@ -21,13 +16,22 @@ public class BattleMenu : MonoBehaviour
     [SerializeField]
     public GameObject targetAlly;
     [SerializeField]
-    public GameObject lockInMenu;
+    public GameObject topMenu;
     [SerializeField]
     public GameObject targetEnemy;
     [SerializeField]
     public GameObject waitingScreen;
     [SerializeField]
     public GameObject actionWindow;
+    [SerializeField]
+    public GameObject statusMenu;
+    [SerializeField]
+    public GameObject fadeScreen;
+    [SerializeField]
+    public GameObject winMsg;
+    [SerializeField]
+    public GameObject loseMsg;
+
 
     [Header("Text")]    
     [SerializeField]
@@ -110,11 +114,11 @@ public class BattleMenu : MonoBehaviour
 
     private IEnumerator drain;
 
-    private Animator anim;
+    private Animator bottomAnim;
 
     public void Start()
     {
-        anim = bottomMenu.GetComponent<Animator>();
+        bottomAnim = bottomMenu.GetComponent<Animator>();
         resetSelection();
         resetStatuses();
     }
@@ -143,6 +147,23 @@ public class BattleMenu : MonoBehaviour
             actionWindow.SetActive(false);
             resetSelection();
         }
+
+        if (playerManager.gameWinFlag)
+        {
+            topMenu.SetActive(false);
+            bottomMenu.SetActive(false);
+            statusMenu.SetActive(false);
+            fadeScreenWin();
+        }
+
+        if (playerManager.gameOverFlag)
+        {
+            topMenu.SetActive(false);
+            bottomMenu.SetActive(false);
+            statusMenu.SetActive(false);
+            fadeScreenLose();
+        }
+
     }
 
     public void attack()
@@ -235,7 +256,12 @@ public class BattleMenu : MonoBehaviour
         attackStudy = false;
         castStudy = false;
         targetStudy = false;
-        anim.SetBool("HideMenu", false);
+
+        if(owner.alive)
+        {
+            bottomAnim.SetBool("HideMenu", false);
+        }
+        
     }
 
     public void lockIn(TMP_Text target)
@@ -272,7 +298,7 @@ public class BattleMenu : MonoBehaviour
         targetEnemy.SetActive(false);
         targetAlly.SetActive(false);
         targetMenu.SetActive(false);
-        anim.SetBool("HideMenu", true);
+        bottomAnim.SetBool("HideMenu", true);
         waitingScreen.SetActive(true);
     }
 
@@ -326,6 +352,7 @@ public class BattleMenu : MonoBehaviour
         //Wind Update
         windCurrHealthBar.fillAmount = playerManager.windHealth / playerManager.windMaxHealth;
         windCurrStateraBar.fillAmount = playerManager.windStatera / playerManager.windMaxStatera;
+
         //Chaos Update
         chaosCurrHealthBar.fillAmount = playerManager.chaosHealth / playerManager.chaosMaxHealth;
     }
@@ -427,7 +454,10 @@ public class BattleMenu : MonoBehaviour
             drain = drainBar(chaosPrevHealthBar, chaosCurrHealthBar);
             StartCoroutine(drain);
         }
-
+        else
+        {
+            chaosPrevHealthBar.fillAmount = chaosCurrHealthBar.fillAmount;
+        }
     }
 
     private IEnumerator drainBar(Image previousHealth, Image newHealth)
@@ -435,8 +465,37 @@ public class BattleMenu : MonoBehaviour
         while(previousHealth.fillAmount > newHealth.fillAmount)
         {
             previousHealth.fillAmount = previousHealth.fillAmount - 0.01f;
-            yield return new WaitForSeconds(1f);
+            yield return new WaitForSeconds(2f);
         }
+    }
+
+
+    public void fadeScreenWin()
+    {
+        fadeScreen.SetActive(true);
+        StartCoroutine(waitAndPopUp(winMsg));
+    }
+
+    public void fadeScreenLose()
+    {
+        fadeScreen.SetActive(true);
+        StartCoroutine(waitAndPopUp(loseMsg));
+    }
+
+    public IEnumerator waitAndPopUp(GameObject message)
+    {
+        yield return new WaitForSeconds(5);
+        message.SetActive(true);
+    }
+
+    public void exitGame()
+    {
+        Application.Quit();
+    }
+
+    public void returnToMenu()
+    {
+        SceneManager.LoadScene("StartMenu");
     }
 
 }

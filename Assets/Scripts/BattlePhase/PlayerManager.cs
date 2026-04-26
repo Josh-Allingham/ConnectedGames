@@ -1,17 +1,13 @@
-using ExitGames.Client.Photon.StructWrapping;
 using Photon.Pun;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Xml.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Assertions.Must;
-using static UnityEditor.Rendering.FilterWindow;
 
 
-public class PlayerManager : MonoBehaviourPun 
+
+public class PlayerManager : MonoBehaviourPun
 {
     public Element myElement;
 
@@ -19,6 +15,8 @@ public class PlayerManager : MonoBehaviourPun
     public int numOfCPU;
     public List<Element> cpuElement = new List<Element>();
 
+    public bool gameWinFlag = false;
+    public bool gameOverFlag = false;
 
     public string attackName;
     public string attackType;
@@ -80,7 +78,9 @@ public class PlayerManager : MonoBehaviourPun
 
     public Dictionary<string, float> playerSpeeds = new Dictionary<string, float>();
     public Dictionary<string, float> turnOrder = new Dictionary<string, float>();
+    public Dictionary<string, float> turnPower = new Dictionary<string, float>();
     public List<string> alivePlayers = new List<string>();
+    public List<Element> deadPlayers = new List<Element>();
     public bool fighting = false;
 
     public void Update()
@@ -118,14 +118,16 @@ public class PlayerManager : MonoBehaviourPun
         {
             getMyPlayerStats(myElement);
             photonView.RPC("RPCAnnounceStats", RpcTarget.AllBuffered, myElementType, myElement.maxHealth, myElement.currHealth, myElement.elementStatera, myElement.currStatera, myElement.speed, myElement.alive);
+
         }
 
         if(turnLockedIn)
         {
+            turnLockedIn = false;
+
             if (turnAction == "Attack")
             {
                 int attackHitProb = UnityEngine.Random.Range(0, 100);
-                Debug.Log(attackHitProb);
                 if (attackHitProb <= attackAccuracy)
                 {
                     photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, myElementType, turnAction, turnTarget, attackName, attackPower, castName, castPower);
@@ -136,10 +138,9 @@ public class PlayerManager : MonoBehaviourPun
                     photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, myElementType, turnAction, turnTarget, attackName, attackPower, castName, castPower);
                 }
             }
-            else
+            if(turnAction == "Cast")
             {
                 int castHitProb = UnityEngine.Random.Range(0, 100);
-                Debug.Log(castHitProb);
                 if (castHitProb <= castAccuracy)
                 {
                     photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, myElementType, turnAction, turnTarget, attackName, attackPower, castName, castPower);
@@ -150,8 +151,7 @@ public class PlayerManager : MonoBehaviourPun
                     photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, myElementType, turnAction, turnTarget, attackName, attackPower, castName, castPower);
                 }
             }
-            turnLockedIn = false;
-
+            
             if(PhotonNetwork.IsMasterClient)
             {
                 if (!cpuTurnsLockedIn && cpuElement.Count == numOfCPU)
@@ -165,11 +165,12 @@ public class PlayerManager : MonoBehaviourPun
             }
         }
 
-        if(turnActions.Count == 5 && !fighting)
+        if(turnActions.Count == 5 - deadPlayers.Count && !fighting)
         {
             fighting = true;
+            photonView.RPC("RPCCheckSpeed", RpcTarget.AllBuffered);
+            photonView.RPC("RPCCheckAlive", RpcTarget.AllBuffered);
             StartCoroutine(commenceFight());
-            //photonView.RPC("RPCCommenceFight", RpcTarget.AllBuffered);
         }
 
         if(nextTurnReady)
@@ -177,8 +178,36 @@ public class PlayerManager : MonoBehaviourPun
             fighting = false;
             photonView.RPC("RPCResetTurns", RpcTarget.AllBuffered);
             nextTurnReady = false;
-        }
+            if(!chaosAlive)
+            {
+                foreach(Element cpu in cpuElement)
+                {
+                    if(cpu.elementType == "Chaos")
+                    {
+                        photonView.RPC("RPCDespawn", RpcTarget.AllBuffered, cpu.elementType);
+                    }
+                }
+                photonView.RPC("RPCGameWin", RpcTarget.AllBuffered);
+            }
 
+            if (!fireAlive && !waterAlive && !earthAlive && !windAlive)
+            {
+                photonView.RPC("RPCGameOver", RpcTarget.AllBuffered);
+            }
+
+            if (!myElement.alive)
+            {
+                photonView.RPC("RPCDespawn", RpcTarget.AllBuffered, myElement.elementType);
+            }
+
+            foreach (Element cpu in cpuElement)
+            {
+                if (!cpu.alive)
+                {
+                    photonView.RPC("RPCDespawn", RpcTarget.AllBuffered, cpu.elementType);
+                }
+            }
+        }
 
     }
 
@@ -305,15 +334,18 @@ public class PlayerManager : MonoBehaviourPun
     {
         if (action == "Attack")
         {
+            turnPower.Add(element, attackPower);
             turnActions.Add(element + " is using " + attackMoveName + " on " + target);
         }
         else if (action == "Cast")
         {
+            turnPower.Add(element, castPower);
             turnActions.Add(element + " is using " + castMoveName + " on " + target);
         }
         else if (action == "Miss")
         {
-            turnActions.Add(element + " missed thier attack on " + target);
+            turnPower.Add(element, 0);
+            turnActions.Add(element + " missed their attack on " + target);
         }
     }
 
@@ -321,6 +353,7 @@ public class PlayerManager : MonoBehaviourPun
     public void RPCResetTurns()
     {
         turnActions.Clear();
+        turnPower.Clear();
         turnLockedIn = false;
         cpuTurnsLockedIn = false;
     }
@@ -332,305 +365,317 @@ public class PlayerManager : MonoBehaviourPun
         float randomAction;
         float randomTarget;
 
-        switch (cpuElement.elementType)
+        if (cpuElement.alive)
         {
-            case "Chaos":
-                randomAction = UnityEngine.Random.Range(0, 1);
-                if(randomAction <= .75f)
-                {
-                    lockInCPUAction = "Attack";
-                }
-                else
-                {
-                    lockInCPUAction = "Cast";
-                }
-
-                if (lockInCPUAction == "Attack")
-                {
-                    lockInCPUTarget = "All Players";
-                }
-                else
-                {
-                    randomTarget = UnityEngine.Random.Range(0, 1);
-                    if (randomTarget <= 0.25f)
+            switch (cpuElement.elementType)
+            {
+                case "Chaos":
+                    randomAction = UnityEngine.Random.Range(0, 1);
+                    if (randomAction <= .75f)
                     {
+                        lockInCPUAction = "Attack";
+                    }
+                    else
+                    {
+                        lockInCPUAction = "Cast";
+                    }
+
+                    if (lockInCPUAction == "Attack")
+                    {
+                        lockInCPUTarget = "All Players";
+                    }
+                    else
+                    {
+                        randomTarget = UnityEngine.Random.Range(0, 1);
+                        if (randomTarget <= 0.25f)
+                        {
+                            lockInCPUTarget = "Fire";
+                        }
+                        else if (randomTarget <= 0.5f)
+                        {
+                            lockInCPUTarget = "Water";
+                        }
+                        else if (randomTarget <= 0.75f)
+                        {
+                            lockInCPUTarget = "Earth";
+                        }
+                        else
+                        {
+                            lockInCPUTarget = "Wind";
+                        }
+                    }
+
+                    if (lockInCPUAction == "Attack")
+                    {
+                        int attackHitProb = UnityEngine.Random.Range(0, 100);
+
+                        if (cpuElement.currHealth <= cpuElement.MaxHealth / 2)
+                        {
+                            if (attackHitProb <= Convert.ToInt32(cpuElement.MyMoves[1, 3]))
+                            {
+                                photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, cpuElement.elementType, lockInCPUAction, lockInCPUTarget, cpuElement.MyMoves[1, 1], Convert.ToInt32(cpuElement.MyMoves[1, 2]), cpuElement.MyMoves[2, 1], Convert.ToInt32(cpuElement.MyMoves[2, 2]));
+                            }
+                            else
+                            {
+                                lockInCPUAction = "Miss";
+                            }
+                        }
+                        else
+                        {
+                            if (attackHitProb <= Convert.ToInt32(cpuElement.MyMoves[0, 3]))
+                            {
+                                photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, cpuElement.elementType, lockInCPUAction, lockInCPUTarget, cpuElement.MyMoves[0, 1], Convert.ToInt32(cpuElement.MyMoves[0, 2]), cpuElement.MyMoves[2, 1], Convert.ToInt32(cpuElement.MyMoves[2, 2]));
+                            }
+                            else
+                            {
+                                lockInCPUAction = "Miss";
+                                photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, cpuElement.elementType, lockInCPUAction, lockInCPUTarget, cpuElement.MyMoves[0, 1], Convert.ToInt32(cpuElement.MyMoves[0, 2]), cpuElement.MyMoves[2, 1], Convert.ToInt32(cpuElement.MyMoves[2, 2]));
+                            }
+                        }
+                    }
+                    else
+                    {
+
+                        int castHitProb = UnityEngine.Random.Range(0, 100);
+                        if (castHitProb <= Convert.ToInt32(cpuElement.MyMoves[2, 3]))
+                        {
+                            photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, cpuElement.elementType, lockInCPUAction, lockInCPUTarget, cpuElement.MyMoves[0, 1], Convert.ToInt32(cpuElement.MyMoves[0, 2]), cpuElement.MyMoves[2, 1], Convert.ToInt32(cpuElement.MyMoves[2, 2]));
+                        }
+                        else
+                        {
+                            lockInCPUAction = "Miss";
+                            photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, cpuElement.elementType, lockInCPUAction, lockInCPUTarget, cpuElement.MyMoves[0, 1], Convert.ToInt32(cpuElement.MyMoves[0, 2]), cpuElement.MyMoves[2, 1], Convert.ToInt32(cpuElement.MyMoves[2, 2]));
+                        }
+                    }
+
+                    break;
+                case "Water":
+                    //Check other players health to heal, otheriwse copy others actions
+                    if ((fireHealth / fireMaxHealth) < 0.33f)
+                    {
+                        lockInCPUAction = "Cast";
                         lockInCPUTarget = "Fire";
                     }
-                    else if (randomTarget <= 0.5f)
+                    else if ((earthHealth / earthMaxHealth) < 0.33f)
                     {
-                        lockInCPUTarget = "Water";
-                    }
-                    else if (randomTarget <= 0.75f)
-                    {
+                        lockInCPUAction = "Cast";
                         lockInCPUTarget = "Earth";
                     }
-                    else
+                    else if ((windHealth / windMaxHealth) < 0.33f)
                     {
+                        lockInCPUAction = "Cast";
                         lockInCPUTarget = "Wind";
                     }
-                }
-
-                if(lockInCPUAction == "Attack")
-                {
-                    int attackHitProb = UnityEngine.Random.Range(0, 100);
-                    Debug.Log(attackHitProb);
-                    if (attackHitProb <= Convert.ToInt32(cpuElement.MyMoves[0, 3]))
+                    else
                     {
-                        photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, cpuElement.elementType, lockInCPUAction, lockInCPUTarget, cpuElement.MyMoves[0, 1], Convert.ToInt32(cpuElement.MyMoves[0, 2]), cpuElement.MyMoves[1, 1], Convert.ToInt32(cpuElement.MyMoves[1, 2]));
+                        lockInCPUAction = "Attack";
+                        lockInCPUTarget = "The Guardian";
+                    }
+
+                    if (lockInCPUAction == "Attack")
+                    {
+                        int attackHitProb = UnityEngine.Random.Range(0, 100);
+                        if (attackHitProb <= Convert.ToInt32(cpuElement.MyMoves[0, 3]))
+                        {
+                            photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, cpuElement.elementType, lockInCPUAction, lockInCPUTarget, cpuElement.MyMoves[0, 1], Convert.ToInt32(cpuElement.MyMoves[0, 2]), cpuElement.MyMoves[1, 1], Convert.ToInt32(cpuElement.MyMoves[1, 2]));
+                        }
+                        else
+                        {
+                            lockInCPUAction = "Miss";
+                            photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, cpuElement.elementType, lockInCPUAction, lockInCPUTarget, cpuElement.MyMoves[0, 1], Convert.ToInt32(cpuElement.MyMoves[0, 2]), cpuElement.MyMoves[1, 1], Convert.ToInt32(cpuElement.MyMoves[1, 2]));
+                        }
                     }
                     else
                     {
-                        lockInCPUAction = "Miss";
-                        photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, cpuElement.elementType, lockInCPUAction, lockInCPUTarget, cpuElement.MyMoves[0, 1], Convert.ToInt32(cpuElement.MyMoves[0, 2]), cpuElement.MyMoves[1, 1], Convert.ToInt32(cpuElement.MyMoves[1, 2]));
-                    }
-                }
-                else
-                {
 
-                    int castHitProb = UnityEngine.Random.Range(0, 100);
-                    if (castHitProb <= Convert.ToInt32(cpuElement.MyMoves[1, 3]))
+                        int castHitProb = UnityEngine.Random.Range(0, 100);
+                        if (castHitProb <= Convert.ToInt32(cpuElement.MyMoves[1, 3]))
+                        {
+                            photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, cpuElement.elementType, lockInCPUAction, lockInCPUTarget, cpuElement.MyMoves[0, 1], Convert.ToInt32(cpuElement.MyMoves[0, 2]), cpuElement.MyMoves[1, 1], Convert.ToInt32(cpuElement.MyMoves[1, 2]));
+                        }
+                        else
+                        {
+                            lockInCPUAction = "Miss";
+                            photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, cpuElement.elementType, lockInCPUAction, lockInCPUTarget, cpuElement.MyMoves[0, 1], Convert.ToInt32(cpuElement.MyMoves[0, 2]), cpuElement.MyMoves[1, 1], Convert.ToInt32(cpuElement.MyMoves[1, 2]));
+                        }
+                    }
+
+                    break;
+                case "Fire":
+                    randomAction = UnityEngine.Random.Range(0, 1);
+                    if (randomAction <= .75f)
                     {
-                        photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, cpuElement.elementType, lockInCPUAction, lockInCPUTarget, cpuElement.MyMoves[0, 1], Convert.ToInt32(cpuElement.MyMoves[0, 2]), cpuElement.MyMoves[1, 1], Convert.ToInt32(cpuElement.MyMoves[1, 2]));
+                        lockInCPUAction = "Attack";
                     }
                     else
                     {
-                        lockInCPUAction = "Miss";
-                        photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, cpuElement.elementType, lockInCPUAction, lockInCPUTarget, cpuElement.MyMoves[0, 1], Convert.ToInt32(cpuElement.MyMoves[0, 2]), cpuElement.MyMoves[1, 1], Convert.ToInt32(cpuElement.MyMoves[1, 2]));
+                        lockInCPUAction = "Cast";
                     }
-                }
 
-                break;
-            case "Water":
-                //Check other players health to heal, otheriwse copy others actions
-                if((fireHealth / fireMaxHealth) < 0.33f)
-                {
-                    lockInCPUAction = "Cast";
-                    lockInCPUTarget = "Fire";
-                }
-                else if((earthHealth / earthMaxHealth) < 0.33f)
-                {
-                    lockInCPUAction = "Cast";
-                    lockInCPUTarget = "Earth";
-                }
-                else if((windHealth / windMaxHealth) < 0.33f)
-                {
-                    lockInCPUAction = "Cast";
-                    lockInCPUTarget = "Wind";
-                }
-                else
-                {
-                    lockInCPUAction = "Attack";
-                    lockInCPUTarget = "The Guardian";
-                }
-
-                if (lockInCPUAction == "Attack")
-                {
-                    int attackHitProb = UnityEngine.Random.Range(0, 100);
-                    Debug.Log(attackHitProb);
-                    if (attackHitProb <= Convert.ToInt32(cpuElement.MyMoves[0, 3]))
+                    if (lockInCPUAction == "Attack")
                     {
-                        photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, cpuElement.elementType, lockInCPUAction, lockInCPUTarget, cpuElement.MyMoves[0, 1], Convert.ToInt32(cpuElement.MyMoves[0, 2]), cpuElement.MyMoves[1, 1], Convert.ToInt32(cpuElement.MyMoves[1, 2]));
+                        lockInCPUTarget = "The Guardian";
                     }
                     else
                     {
-                        lockInCPUAction = "Miss";
-                        photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, cpuElement.elementType, lockInCPUAction, lockInCPUTarget, cpuElement.MyMoves[0, 1], Convert.ToInt32(cpuElement.MyMoves[0, 2]), cpuElement.MyMoves[1, 1], Convert.ToInt32(cpuElement.MyMoves[1, 2]));
+                        randomTarget = UnityEngine.Random.Range(0, 1);
+                        if (randomTarget <= 0.33f)
+                        {
+                            lockInCPUTarget = "Wind";
+                        }
+                        else if (randomTarget <= 0.66f)
+                        {
+                            lockInCPUTarget = "Water";
+                        }
+                        else
+                        {
+                            lockInCPUTarget = "Earth";
+                        }
                     }
-                }
-                else
-                {
 
-                    int castHitProb = UnityEngine.Random.Range(0, 100);
-                    if (castHitProb <= Convert.ToInt32(cpuElement.MyMoves[1, 3]))
+                    if (lockInCPUAction == "Attack")
                     {
-                        photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, cpuElement.elementType, lockInCPUAction, lockInCPUTarget, cpuElement.MyMoves[0, 1], Convert.ToInt32(cpuElement.MyMoves[0, 2]), cpuElement.MyMoves[1, 1], Convert.ToInt32(cpuElement.MyMoves[1, 2]));
+                        int attackHitProb = UnityEngine.Random.Range(0, 100);
+                        if (attackHitProb <= Convert.ToInt32(cpuElement.MyMoves[0, 3]))
+                        {
+                            photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, cpuElement.elementType, lockInCPUAction, lockInCPUTarget, cpuElement.MyMoves[0, 1], Convert.ToInt32(cpuElement.MyMoves[0, 2]), cpuElement.MyMoves[1, 1], Convert.ToInt32(cpuElement.MyMoves[1, 2]));
+                        }
+                        else
+                        {
+                            lockInCPUAction = "Miss";
+                            photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, cpuElement.elementType, lockInCPUAction, lockInCPUTarget, cpuElement.MyMoves[0, 1], Convert.ToInt32(cpuElement.MyMoves[0, 2]), cpuElement.MyMoves[1, 1], Convert.ToInt32(cpuElement.MyMoves[1, 2]));
+                        }
                     }
                     else
                     {
-                        lockInCPUAction = "Miss";
-                        photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, cpuElement.elementType, lockInCPUAction, lockInCPUTarget, cpuElement.MyMoves[0, 1], Convert.ToInt32(cpuElement.MyMoves[0, 2]), cpuElement.MyMoves[1, 1], Convert.ToInt32(cpuElement.MyMoves[1, 2]));
-                    }
-                }
 
-                break;
-            case "Fire":
-                randomAction = UnityEngine.Random.Range(0, 1);
-                if (randomAction <= .75f)
-                {
-                    lockInCPUAction = "Attack";
-                }
-                else
-                {
-                    lockInCPUAction = "Cast";
-                }
+                        int castHitProb = UnityEngine.Random.Range(0, 100);
+                        if (castHitProb <= Convert.ToInt32(cpuElement.MyMoves[1, 3]))
+                        {
+                            photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, cpuElement.elementType, lockInCPUAction, lockInCPUTarget, cpuElement.MyMoves[0, 1], Convert.ToInt32(cpuElement.MyMoves[0, 2]), cpuElement.MyMoves[1, 1], Convert.ToInt32(cpuElement.MyMoves[1, 2]));
+                        }
+                        else
+                        {
+                            lockInCPUAction = "Miss";
+                            photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, cpuElement.elementType, lockInCPUAction, lockInCPUTarget, cpuElement.MyMoves[0, 1], Convert.ToInt32(cpuElement.MyMoves[0, 2]), cpuElement.MyMoves[1, 1], Convert.ToInt32(cpuElement.MyMoves[1, 2]));
+                        }
+                    }
 
-                if (lockInCPUAction == "Attack")
-                {
-                    lockInCPUTarget = "The Guardian";
-                }
-                else
-                {
-                    randomTarget = UnityEngine.Random.Range(0, 1);
-                    if (randomTarget <= 0.33f)
+                    break;
+                case "Earth":
+                    if ((fireHealth / fireMaxHealth) < 0.33f)
                     {
-                        lockInCPUTarget = "Wind";
-                    }
-                    else if (randomTarget <= 0.66f)
-                    {
-                        lockInCPUTarget = "Water";
-                    }
-                    else
-                    {
-                        lockInCPUTarget = "Earth";
-                    }
-                }
-
-                if (lockInCPUAction == "Attack")
-                {
-                    int attackHitProb = UnityEngine.Random.Range(0, 100);
-                    Debug.Log(attackHitProb);
-                    if (attackHitProb <= Convert.ToInt32(cpuElement.MyMoves[0, 3]))
-                    {
-                        photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, cpuElement.elementType, lockInCPUAction, lockInCPUTarget, cpuElement.MyMoves[0, 1], Convert.ToInt32(cpuElement.MyMoves[0, 2]), cpuElement.MyMoves[1, 1], Convert.ToInt32(cpuElement.MyMoves[1, 2]));
-                    }
-                    else
-                    {
-                        lockInCPUAction = "Miss";
-                        photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, cpuElement.elementType, lockInCPUAction, lockInCPUTarget, cpuElement.MyMoves[0, 1], Convert.ToInt32(cpuElement.MyMoves[0, 2]), cpuElement.MyMoves[1, 1], Convert.ToInt32(cpuElement.MyMoves[1, 2]));
-                    }
-                }
-                else
-                {
-
-                    int castHitProb = UnityEngine.Random.Range(0, 100);
-                    if (castHitProb <= Convert.ToInt32(cpuElement.MyMoves[1, 3]))
-                    {
-                        photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, cpuElement.elementType, lockInCPUAction, lockInCPUTarget, cpuElement.MyMoves[0, 1], Convert.ToInt32(cpuElement.MyMoves[0, 2]), cpuElement.MyMoves[1, 1], Convert.ToInt32(cpuElement.MyMoves[1, 2]));
-                    }
-                    else
-                    {
-                        lockInCPUAction = "Miss";
-                        photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, cpuElement.elementType, lockInCPUAction, lockInCPUTarget, cpuElement.MyMoves[0, 1], Convert.ToInt32(cpuElement.MyMoves[0, 2]), cpuElement.MyMoves[1, 1], Convert.ToInt32(cpuElement.MyMoves[1, 2]));
-                    }
-                }
-
-                break;
-            case "Earth":
-                if ((fireHealth / fireMaxHealth) < 0.33f)
-                {
-                    lockInCPUAction = "Cast";
-                    lockInCPUTarget = "Fire";
-                }
-                else if ((waterHealth / waterMaxHealth) < 0.33f)
-                {
-                    lockInCPUAction = "Cast";
-                    lockInCPUTarget = "Water";
-                }
-                else if ((windHealth / windMaxHealth) < 0.33f)
-                {
-                    lockInCPUAction = "Cast";
-                    lockInCPUTarget = "Wind";
-                }
-                else
-                {
-                    lockInCPUAction = "Attack";
-                    lockInCPUTarget = "The Guardian";
-                }
-
-                if (lockInCPUAction == "Attack")
-                {
-                    int attackHitProb = UnityEngine.Random.Range(0, 100);
-                    Debug.Log(attackHitProb);
-                    if (attackHitProb <= Convert.ToInt32(cpuElement.MyMoves[0, 3]))
-                    {
-                        photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, cpuElement.elementType, lockInCPUAction, lockInCPUTarget, cpuElement.MyMoves[0, 1], Convert.ToInt32(cpuElement.MyMoves[0, 2]), cpuElement.MyMoves[1, 1], Convert.ToInt32(cpuElement.MyMoves[1, 2]));
-                    }
-                    else
-                    {
-                        lockInCPUAction = "Miss";
-                        photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, cpuElement.elementType, lockInCPUAction, lockInCPUTarget, cpuElement.MyMoves[0, 1], Convert.ToInt32(cpuElement.MyMoves[0, 2]), cpuElement.MyMoves[1, 1], Convert.ToInt32(cpuElement.MyMoves[1, 2]));
-                    }
-                }
-                else
-                {
-
-                    int castHitProb = UnityEngine.Random.Range(0, 100);
-                    if (castHitProb <= Convert.ToInt32(cpuElement.MyMoves[1, 3]))
-                    {
-                        photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, cpuElement.elementType, lockInCPUAction, lockInCPUTarget, cpuElement.MyMoves[0, 1], Convert.ToInt32(cpuElement.MyMoves[0, 2]), cpuElement.MyMoves[1, 1], Convert.ToInt32(cpuElement.MyMoves[1, 2]));
-                    }
-                    else
-                    {
-                        lockInCPUAction = "Miss";
-                        photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, cpuElement.elementType, lockInCPUAction, lockInCPUTarget, cpuElement.MyMoves[0, 1], Convert.ToInt32(cpuElement.MyMoves[0, 2]), cpuElement.MyMoves[1, 1], Convert.ToInt32(cpuElement.MyMoves[1, 2]));
-                    }
-                }
-
-                break;
-            case "Wind":
-                randomAction = UnityEngine.Random.Range(0, 1);
-                if (randomAction <= .75f)
-                {
-                    lockInCPUAction = "Attack";
-                }
-                else
-                {
-                    lockInCPUAction = "Cast";
-                }
-
-                if (lockInCPUAction == "Attack")
-                {
-                    lockInCPUTarget = "The Guardian";
-                }
-                else
-                {
-                    randomTarget = UnityEngine.Random.Range(0, 1);
-                    if (randomTarget <= 0.33f)
-                    {
+                        lockInCPUAction = "Cast";
                         lockInCPUTarget = "Fire";
                     }
-                    else if (randomTarget <= 0.66f)
+                    else if ((waterHealth / waterMaxHealth) < 0.33f)
                     {
+                        lockInCPUAction = "Cast";
                         lockInCPUTarget = "Water";
                     }
-                    else
+                    else if ((windHealth / windMaxHealth) < 0.33f)
                     {
-                        lockInCPUTarget = "Earth";
-                    }
-                }
-
-                if (lockInCPUAction == "Attack")
-                {
-                    int attackHitProb = UnityEngine.Random.Range(0, 100);
-                    Debug.Log(attackHitProb);
-                    if (attackHitProb <= Convert.ToInt32(cpuElement.MyMoves[0, 3]))
-                    {
-                        photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, cpuElement.elementType, lockInCPUAction, lockInCPUTarget, cpuElement.MyMoves[0, 1], Convert.ToInt32(cpuElement.MyMoves[0, 2]), cpuElement.MyMoves[1, 1], Convert.ToInt32(cpuElement.MyMoves[1, 2]));
+                        lockInCPUAction = "Cast";
+                        lockInCPUTarget = "Wind";
                     }
                     else
                     {
-                        lockInCPUAction = "Miss";
-                        photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, cpuElement.elementType, lockInCPUAction, lockInCPUTarget, cpuElement.MyMoves[0, 1], Convert.ToInt32(cpuElement.MyMoves[0, 2]), cpuElement.MyMoves[1, 1], Convert.ToInt32(cpuElement.MyMoves[1, 2]));
+                        lockInCPUAction = "Attack";
+                        lockInCPUTarget = "The Guardian";
                     }
-                }
-                else
-                {
 
-                    int castHitProb = UnityEngine.Random.Range(0, 100);
-                    if (castHitProb <= Convert.ToInt32(cpuElement.MyMoves[1, 3]))
+                    if (lockInCPUAction == "Attack")
                     {
-                        photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, cpuElement.elementType, lockInCPUAction, lockInCPUTarget, cpuElement.MyMoves[0, 1], Convert.ToInt32(cpuElement.MyMoves[0, 2]), cpuElement.MyMoves[1, 1], Convert.ToInt32(cpuElement.MyMoves[1, 2]));
+                        int attackHitProb = UnityEngine.Random.Range(0, 100);
+                        if (attackHitProb <= Convert.ToInt32(cpuElement.MyMoves[0, 3]))
+                        {
+                            photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, cpuElement.elementType, lockInCPUAction, lockInCPUTarget, cpuElement.MyMoves[0, 1], Convert.ToInt32(cpuElement.MyMoves[0, 2]), cpuElement.MyMoves[1, 1], Convert.ToInt32(cpuElement.MyMoves[1, 2]));
+                        }
+                        else
+                        {
+                            lockInCPUAction = "Miss";
+                            photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, cpuElement.elementType, lockInCPUAction, lockInCPUTarget, cpuElement.MyMoves[0, 1], Convert.ToInt32(cpuElement.MyMoves[0, 2]), cpuElement.MyMoves[1, 1], Convert.ToInt32(cpuElement.MyMoves[1, 2]));
+                        }
                     }
                     else
                     {
-                        lockInCPUAction = "Miss";
-                        photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, cpuElement.elementType, lockInCPUAction, lockInCPUTarget, cpuElement.MyMoves[0, 1], Convert.ToInt32(cpuElement.MyMoves[0, 2]), cpuElement.MyMoves[1, 1], Convert.ToInt32(cpuElement.MyMoves[1, 2]));
-                    }
-                }
 
-                break;
+                        int castHitProb = UnityEngine.Random.Range(0, 100);
+                        if (castHitProb <= Convert.ToInt32(cpuElement.MyMoves[1, 3]))
+                        {
+                            photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, cpuElement.elementType, lockInCPUAction, lockInCPUTarget, cpuElement.MyMoves[0, 1], Convert.ToInt32(cpuElement.MyMoves[0, 2]), cpuElement.MyMoves[1, 1], Convert.ToInt32(cpuElement.MyMoves[1, 2]));
+                        }
+                        else
+                        {
+                            lockInCPUAction = "Miss";
+                            photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, cpuElement.elementType, lockInCPUAction, lockInCPUTarget, cpuElement.MyMoves[0, 1], Convert.ToInt32(cpuElement.MyMoves[0, 2]), cpuElement.MyMoves[1, 1], Convert.ToInt32(cpuElement.MyMoves[1, 2]));
+                        }
+                    }
+
+                    break;
+                case "Wind":
+                    randomAction = UnityEngine.Random.Range(0, 1);
+                    if (randomAction <= .75f)
+                    {
+                        lockInCPUAction = "Attack";
+                    }
+                    else
+                    {
+                        lockInCPUAction = "Cast";
+                    }
+
+                    if (lockInCPUAction == "Attack")
+                    {
+                        lockInCPUTarget = "The Guardian";
+                    }
+                    else
+                    {
+                        randomTarget = UnityEngine.Random.Range(0, 1);
+                        if (randomTarget <= 0.33f)
+                        {
+                            lockInCPUTarget = "Fire";
+                        }
+                        else if (randomTarget <= 0.66f)
+                        {
+                            lockInCPUTarget = "Water";
+                        }
+                        else
+                        {
+                            lockInCPUTarget = "Earth";
+                        }
+                    }
+
+                    if (lockInCPUAction == "Attack")
+                    {
+                        int attackHitProb = UnityEngine.Random.Range(0, 100);
+                        if (attackHitProb <= Convert.ToInt32(cpuElement.MyMoves[0, 3]))
+                        {
+                            photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, cpuElement.elementType, lockInCPUAction, lockInCPUTarget, cpuElement.MyMoves[0, 1], Convert.ToInt32(cpuElement.MyMoves[0, 2]), cpuElement.MyMoves[1, 1], Convert.ToInt32(cpuElement.MyMoves[1, 2]));
+                        }
+                        else
+                        {
+                            lockInCPUAction = "Miss";
+                            photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, cpuElement.elementType, lockInCPUAction, lockInCPUTarget, cpuElement.MyMoves[0, 1], Convert.ToInt32(cpuElement.MyMoves[0, 2]), cpuElement.MyMoves[1, 1], Convert.ToInt32(cpuElement.MyMoves[1, 2]));
+                        }
+                    }
+                    else
+                    {
+
+                        int castHitProb = UnityEngine.Random.Range(0, 100);
+                        if (castHitProb <= Convert.ToInt32(cpuElement.MyMoves[1, 3]))
+                        {
+                            photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, cpuElement.elementType, lockInCPUAction, lockInCPUTarget, cpuElement.MyMoves[0, 1], Convert.ToInt32(cpuElement.MyMoves[0, 2]), cpuElement.MyMoves[1, 1], Convert.ToInt32(cpuElement.MyMoves[1, 2]));
+                        }
+                        else
+                        {
+                            lockInCPUAction = "Miss";
+                            photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, cpuElement.elementType, lockInCPUAction, lockInCPUTarget, cpuElement.MyMoves[0, 1], Convert.ToInt32(cpuElement.MyMoves[0, 2]), cpuElement.MyMoves[1, 1], Convert.ToInt32(cpuElement.MyMoves[1, 2]));
+                        }
+                    }
+
+                    break;
+            }
         }
-
     }
 
     [PunRPC]
@@ -653,32 +698,91 @@ public class PlayerManager : MonoBehaviourPun
 
     public IEnumerator commenceFight()
     {
-        photonView.RPC("RPCCheckSpeed", RpcTarget.AllBuffered);
-        photonView.RPC("RPCCheckAlive", RpcTarget.AllBuffered);
-
-        foreach (string player in turnOrder.Keys)
+        for (int e = 0; e < turnOrder.Count; e++)
         {
-            if (alivePlayers.Contains(player))
+            if(!chaosAlive)
             {
-                //Debug.Log(player);
+                break;
+            }
+            photonView.RPC("RPCCheckSpeed", RpcTarget.AllBuffered);
+            photonView.RPC("RPCCheckAlive", RpcTarget.AllBuffered);
+            var player = turnOrder.ElementAt(e);
+            if (alivePlayers.Contains(player.Key))
+            {
                 for (int i = 0; i < turnActions.Count; i++)
                 {
-                    //Debug.Log(turnActions[i]);
-                    if (turnActions[i].Contains(player))
+                    if (turnActions[i].Contains(player.Key))
                     {
-                        //Debug.Log(turnAction[i] + " Contains " + player + " at " + player.IndexOf(turnActions[i]));
-                        if (player.IndexOf(turnActions[i]) == -1)
+                        string[] actionArray = turnActions[i].Split(' ');
+                        string actionee = actionArray[0];
+                        bool miss = (actionArray[1] == "missed");
+                        string target = actionArray[actionArray.Length - 1];
+                        float damageToDeal;
+
+                        if (actionee == player.Key)
                         {
                             actionOccuring = turnActions[i];
-                            yield return new WaitForSeconds(4);
-                            Debug.Log(actionOccuring);
+                            yield return new WaitForSeconds(3);
+
+                            if(target == "Players" && !miss)
+                            {
+                                damageToDeal = turnPower[actionee] / 4;
+                                myElement.damage(damageToDeal);
+                            }
+                            else if(myElement.elementType == target && actionee !="The")
+                            {
+                                switch(actionee)
+                                {
+                                    case "Fire":
+
+                                        break;
+                                    case "Water":
+                                        break;
+                                    case "Earth":
+                                        break;
+                                    case "Wind":
+                                        break;
+                                }
+                            }
+
+
+                            for (int cpu = 0; cpu < cpuElement.Count; cpu++)
+                            {
+                                if (target == "Players" && !miss && cpuElement[cpu].elementType != "Chaos")
+                                {
+                                    damageToDeal = turnPower[actionee] / 4;
+                                    cpuElement[cpu].damage(damageToDeal);
+                                }
+                                else if (cpuElement[cpu].elementType == "Chaos" && target == "Guardian" && !miss)
+                                {
+                                    damageToDeal = turnPower[actionee];
+                                    cpuElement[cpu].damage(damageToDeal);
+                                }
+                                else if (cpuElement[cpu].elementType == target && actionee != "The")
+                                {
+                                    switch (actionee)
+                                    {
+                                        case "Fire":
+
+                                            break;
+                                        case "Water":
+                                            break;
+                                        case "Earth":
+                                            break;
+                                        case "Wind":
+                                            break;
+                                    }
+                                }
+                            }
                         }
                     }
+                    yield return new WaitForSeconds(1);
                 }
             }
             else
             {
-                actionOccuring = player + " succumbed to their wounds...";
+                actionOccuring = player.Key + " succumbed to their wounds...";
+                yield return new WaitForSeconds(3);
             }
         }
         Debug.Log("All moves finished");
@@ -714,9 +818,39 @@ public class PlayerManager : MonoBehaviourPun
     }
 
     [PunRPC]
-    public void RPCAnnounceBattleTurn()
-    {
-
+    public void RPCDespawn(string element)
+    {        
+        if(PhotonNetwork.IsMasterClient && myElement.elementType != element)
+        {
+            for (int i = 0; i < cpuElement.Count; i++)
+            {
+                if (cpuElement[i].elementType == element)
+                {
+                    cpuElement[i].transform.parent.gameObject.SetActive(false);
+                    deadPlayers.Add(cpuElement[i]);
+                }
+            }
+        }
+        if(myElement.elementType == element)
+        {
+            myElement.transform.parent.gameObject.SetActive(false);
+            deadPlayers.Add(myElement);
+        }
     }
 
+
+    [PunRPC]
+    public void RPCGameOver()
+    {
+        gameOverFlag = true;
+        Debug.Log("YOU LOSE!");
+    }
+
+    
+    [PunRPC]
+    public void RPCGameWin()
+    {
+        gameWinFlag = true;
+        Debug.Log("YOU WIN!");
+    }
 }
