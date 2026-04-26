@@ -126,7 +126,7 @@ public class BattleMenu : MonoBehaviour
     public void Update()
     {
         owner = playerManager.myElement;
-        if(playerManager.turnActions.Count == 5)
+        if(playerManager.turnActions.Count == 5 - playerManager.deadPlayers.Count)
         {
             waitingScreen.SetActive(false);
         }

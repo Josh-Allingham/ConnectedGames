@@ -80,7 +80,7 @@ public class PlayerManager : MonoBehaviourPun
     public Dictionary<string, float> turnOrder = new Dictionary<string, float>();
     public Dictionary<string, float> turnPower = new Dictionary<string, float>();
     public List<string> alivePlayers = new List<string>();
-    public List<Element> deadPlayers = new List<Element>();
+    public List<string> deadPlayers = new List<string>();
     public bool fighting = false;
 
     public void Update()
@@ -197,7 +197,7 @@ public class PlayerManager : MonoBehaviourPun
 
             if (!myElement.alive)
             {
-                photonView.RPC("RPCDespawn", RpcTarget.AllBuffered, myElement.elementType);
+                photonView.RPC("RPCDespawn", RpcTarget.AllBuffered, myElement.elementType); ;
             }
 
             foreach (Element cpu in cpuElement)
@@ -826,15 +826,17 @@ public class PlayerManager : MonoBehaviourPun
             {
                 if (cpuElement[i].elementType == element)
                 {
-                    cpuElement[i].transform.parent.gameObject.SetActive(false);
-                    deadPlayers.Add(cpuElement[i]);
+                    cpuElement[i].transform.parent.GetComponent<BattleCPU>().playerElement = null;
+                    Destroy(cpuElement[i].transform.gameObject);
+                    deadPlayers.Add(cpuElement[i].elementType);
                 }
             }
         }
         if(myElement.elementType == element)
         {
-            myElement.transform.parent.gameObject.SetActive(false);
-            deadPlayers.Add(myElement);
+            myElement.transform.parent.GetComponent<BattlePlayer>().playerElement = null;
+            Destroy(myElement.transform.gameObject);
+            deadPlayers.Add(myElement.elementType);
         }
     }
 

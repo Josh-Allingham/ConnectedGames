@@ -5,6 +5,7 @@ public class BattlePlayer : MonoBehaviourPunCallbacks
 {
     public string playerName;
     public string playerElement;
+    public bool spawned;
 
     [SerializeField]
     public GameObject water, fire, earth, wind;
@@ -21,6 +22,18 @@ public class BattlePlayer : MonoBehaviourPunCallbacks
     {
         RPCSetPlayerName(playerName);
         RPCSetPlayerElement(playerElement);
+
+        if(this.transform.GetComponentInChildren<Element>().alive && playerElement != null)
+        {
+            spawned = true;
+        }
+
+        if (spawned && !this.transform.GetComponentInChildren<Element>().alive)
+        {
+            playerElement = null;
+            this.transform.GetChild(0).gameObject.SetActive(false);
+        }
+
     }
 
     [PunRPC]

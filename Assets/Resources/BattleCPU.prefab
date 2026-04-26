@@ -47,6 +47,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerName: 
   playerElement: 
+  spawned: 0
   water: {fileID: 4627488194687650311, guid: de71da7238a513d438bf200dcbac0671, type: 3}
   fire: {fileID: 603291502574154812, guid: 365b692c560ab88489f77fe743548fe5, type: 3}
   earth: {fileID: 4927288088306852543, guid: a2863b7371eca0d428773c52e632f363, type: 3}
