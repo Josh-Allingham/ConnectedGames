@@ -75,6 +75,19 @@ MonoBehaviour:
   - RPCResetTurns
   - RPCSpawnEarthCube
   - RPCHandleNPCInteractions
+  - RPCCheckAlive
+  - RPCCheckSpeed
+  - RPCCommenceFight
+  - RPCCarryOutAction
+  - addCPUElement
+  - RPCAnnounceStats
+  - test
+  - RPCAnnounceBattleTurn
+  - gameOver
+  - gameWin
+  - RPCDespawn
+  - RPCGameOver
+  - RPCGameWin
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

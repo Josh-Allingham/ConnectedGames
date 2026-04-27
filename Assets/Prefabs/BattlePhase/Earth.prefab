@@ -106,5 +106,6 @@ MonoBehaviour:
   defence: 0
   attack: 0
   speed: 0
+  currStatera: 0
   elementStatera: 0
   alive: 0

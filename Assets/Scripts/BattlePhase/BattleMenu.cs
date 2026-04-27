@@ -1,12 +1,7 @@
-using Photon.Pun;
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Threading;
-using System.Xml;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class BattleMenu : MonoBehaviour
@@ -21,11 +16,22 @@ public class BattleMenu : MonoBehaviour
     [SerializeField]
     public GameObject targetAlly;
     [SerializeField]
-    public GameObject lockInMenu;
+    public GameObject topMenu;
     [SerializeField]
     public GameObject targetEnemy;
     [SerializeField]
     public GameObject waitingScreen;
+    [SerializeField]
+    public GameObject actionWindow;
+    [SerializeField]
+    public GameObject statusMenu;
+    [SerializeField]
+    public GameObject fadeScreen;
+    [SerializeField]
+    public GameObject winMsg;
+    [SerializeField]
+    public GameObject loseMsg;
+
 
     [Header("Text")]    
     [SerializeField]
@@ -40,6 +46,8 @@ public class BattleMenu : MonoBehaviour
     public TMP_Text actionInfoTxt;
     [SerializeField]
     public TMP_Text actionTitleTxt;
+    [SerializeField]
+    public TMP_Text actionDescriptionTxt;
 
     [Header("Fire Status Bars")]
     [SerializeField]
@@ -106,9 +114,11 @@ public class BattleMenu : MonoBehaviour
 
     private IEnumerator drain;
 
+    private Animator bottomAnim;
 
     public void Start()
     {
+        bottomAnim = bottomMenu.GetComponent<Animator>();
         resetSelection();
         resetStatuses();
     }
@@ -116,7 +126,7 @@ public class BattleMenu : MonoBehaviour
     public void Update()
     {
         owner = playerManager.myElement;
-        if(playerManager.turnActions.Count == 5)
+        if(playerManager.turnActions.Count == 5 - playerManager.deadPlayers.Count)
         {
             waitingScreen.SetActive(false);
         }
@@ -124,6 +134,36 @@ public class BattleMenu : MonoBehaviour
         updateStatuses();
 
         checkStatuses();
+
+        if(playerManager.fighting)
+        {
+            actionDescriptionTxt.text = playerManager.actionOccuring;
+            actionWindow.SetActive(true);
+        }
+
+        if(playerManager.nextTurnReady)
+        {
+            actionDescriptionTxt.text = "";
+            actionWindow.SetActive(false);
+            resetSelection();
+        }
+
+        if (playerManager.gameWinFlag)
+        {
+            topMenu.SetActive(false);
+            bottomMenu.SetActive(false);
+            statusMenu.SetActive(false);
+            fadeScreenWin();
+        }
+
+        if (playerManager.gameOverFlag)
+        {
+            topMenu.SetActive(false);
+            bottomMenu.SetActive(false);
+            statusMenu.SetActive(false);
+            fadeScreenLose();
+        }
+
     }
 
     public void attack()
@@ -144,7 +184,6 @@ public class BattleMenu : MonoBehaviour
             target(playerManager.attackTarget);
         }
     }
-
 
     public void cast()
     {
@@ -217,7 +256,12 @@ public class BattleMenu : MonoBehaviour
         attackStudy = false;
         castStudy = false;
         targetStudy = false;
-        bottomMenu.SetActive(true);
+
+        if(owner.alive)
+        {
+            bottomAnim.SetBool("HideMenu", false);
+        }
+        
     }
 
     public void lockIn(TMP_Text target)
@@ -248,12 +292,13 @@ public class BattleMenu : MonoBehaviour
         endTurn();
         addMove(actionSelection, targetSelection);
     }
+
     public void endTurn()
     {
         targetEnemy.SetActive(false);
         targetAlly.SetActive(false);
         targetMenu.SetActive(false);
-        bottomMenu.SetActive(false);
+        bottomAnim.SetBool("HideMenu", true);
         waitingScreen.SetActive(true);
     }
 
@@ -307,6 +352,7 @@ public class BattleMenu : MonoBehaviour
         //Wind Update
         windCurrHealthBar.fillAmount = playerManager.windHealth / playerManager.windMaxHealth;
         windCurrStateraBar.fillAmount = playerManager.windStatera / playerManager.windMaxStatera;
+
         //Chaos Update
         chaosCurrHealthBar.fillAmount = playerManager.chaosHealth / playerManager.chaosMaxHealth;
     }
@@ -320,11 +366,19 @@ public class BattleMenu : MonoBehaviour
             drain = drainBar(firePrevHealthBar, fireCurrHealthBar);
             StartCoroutine(drain);
         }
+        else
+        {
+            firePrevHealthBar.fillAmount = fireCurrHealthBar.fillAmount;
+        }
         //Statera
         if (fireCurrStateraBar.fillAmount < firePrevStateraBar.fillAmount)
         {
             drain = drainBar(firePrevStateraBar, fireCurrStateraBar);
             StartCoroutine(drain);
+        }
+        else
+        {
+            firePrevStateraBar.fillAmount = fireCurrStateraBar.fillAmount;
         }
 
         //Check Water
@@ -334,11 +388,19 @@ public class BattleMenu : MonoBehaviour
             drain = drainBar(waterPrevHealthBar, waterCurrHealthBar);
             StartCoroutine(drain);
         }
+        else
+        {
+            waterPrevHealthBar.fillAmount = waterCurrHealthBar.fillAmount;
+        }
         //Statera
         if (waterCurrStateraBar.fillAmount < waterPrevStateraBar.fillAmount)
         {
             drain = drainBar(waterPrevStateraBar, waterCurrStateraBar);
             StartCoroutine(drain);
+        }
+        else
+        {
+            waterPrevStateraBar.fillAmount = waterCurrStateraBar.fillAmount;
         }
 
         //Check Earth
@@ -348,11 +410,19 @@ public class BattleMenu : MonoBehaviour
             drain = drainBar(earthPrevHealthBar, earthCurrHealthBar);
             StartCoroutine(drain);
         }
+        else
+        {
+            earthPrevHealthBar.fillAmount = earthCurrHealthBar.fillAmount;
+        }
         //Statera
         if (earthCurrStateraBar.fillAmount < earthPrevStateraBar.fillAmount)
         {
             drain = drainBar(earthPrevStateraBar, earthCurrStateraBar);
             StartCoroutine(drain);
+        }
+        else
+        {
+            earthPrevStateraBar.fillAmount = earthCurrStateraBar.fillAmount;
         }
 
         //Check Wind
@@ -362,11 +432,19 @@ public class BattleMenu : MonoBehaviour
             drain = drainBar(windPrevHealthBar, windCurrHealthBar);
             StartCoroutine(drain);
         }
+        else
+        {
+            windPrevHealthBar.fillAmount = windCurrHealthBar.fillAmount;
+        }
         //Statera
         if (windCurrStateraBar.fillAmount < windPrevStateraBar.fillAmount)
         {
             drain = drainBar(windPrevStateraBar, windCurrStateraBar);
             StartCoroutine(drain);
+        }
+        else
+        {
+            windPrevStateraBar.fillAmount = windCurrStateraBar.fillAmount;
         }
 
         //Check Chaos
@@ -376,18 +454,48 @@ public class BattleMenu : MonoBehaviour
             drain = drainBar(chaosPrevHealthBar, chaosCurrHealthBar);
             StartCoroutine(drain);
         }
-
+        else
+        {
+            chaosPrevHealthBar.fillAmount = chaosCurrHealthBar.fillAmount;
+        }
     }
 
     private IEnumerator drainBar(Image previousHealth, Image newHealth)
     {
-        while(true)
+        while(previousHealth.fillAmount > newHealth.fillAmount)
         {
-            if(previousHealth.fillAmount > newHealth.fillAmount)
-            {
-                previousHealth.fillAmount = previousHealth.fillAmount - 0.01f;
-            }
-            yield return new WaitForSeconds(.5f);
+            previousHealth.fillAmount = previousHealth.fillAmount - 0.01f;
+            yield return new WaitForSeconds(2f);
         }
     }
+
+
+    public void fadeScreenWin()
+    {
+        fadeScreen.SetActive(true);
+        StartCoroutine(waitAndPopUp(winMsg));
+    }
+
+    public void fadeScreenLose()
+    {
+        fadeScreen.SetActive(true);
+        StartCoroutine(waitAndPopUp(loseMsg));
+    }
+
+    public IEnumerator waitAndPopUp(GameObject message)
+    {
+        yield return new WaitForSeconds(5);
+        message.SetActive(true);
+    }
+
+    public void exitGame()
+    {
+        Application.Quit();
+    }
+
+    public void returnToMenu()
+    {
+        SceneManager.LoadScene("StartMenu");
+    }
+
 }

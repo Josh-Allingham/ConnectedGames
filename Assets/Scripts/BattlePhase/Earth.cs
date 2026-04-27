@@ -7,6 +7,7 @@ using UnityEngine.Rendering.Universal;
 
 public class Earth : Element
 {
+    private Animator anim;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -18,6 +19,7 @@ public class Earth : Element
     void Update()
     {
         transform.LookAt(transform.position - (Camera.main.transform.position - transform.position));
+
     }
 
 }
