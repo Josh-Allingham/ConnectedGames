@@ -820,24 +820,7 @@ public class PlayerManager : MonoBehaviourPun
     [PunRPC]
     public void RPCDespawn(string element)
     {        
-        if(PhotonNetwork.IsMasterClient && myElement.elementType != element)
-        {
-            for (int i = 0; i < cpuElement.Count; i++)
-            {
-                if (cpuElement[i].elementType == element)
-                {
-                    cpuElement[i].transform.parent.GetComponent<BattleCPU>().playerElement = null;
-                    Destroy(cpuElement[i].transform.gameObject);
-                    deadPlayers.Add(cpuElement[i].elementType);
-                }
-            }
-        }
-        if(myElement.elementType == element)
-        {
-            myElement.transform.parent.GetComponent<BattlePlayer>().playerElement = null;
-            Destroy(myElement.transform.gameObject);
-            deadPlayers.Add(myElement.elementType);
-        }
+        
     }
 
 

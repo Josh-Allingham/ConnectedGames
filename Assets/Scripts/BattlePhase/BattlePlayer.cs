@@ -31,7 +31,7 @@ public class BattlePlayer : MonoBehaviourPunCallbacks
         if (spawned && !this.transform.GetComponentInChildren<Element>().alive)
         {
             playerElement = null;
-            this.transform.GetChild(0).gameObject.SetActive(false);
+            this.transform.GetComponentInChildren<SpriteRenderer>().enabled = false;
         }
 
     }

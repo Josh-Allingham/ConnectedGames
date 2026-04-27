@@ -67,7 +67,7 @@ public class BattleNetManager : MonoBehaviourPunCallbacks
                         timer = PhotonNetwork.Time - start;
                     }
 
-                    if (timer >= 5 && !cpuLoaded)
+                    if (timer >= 8 && !cpuLoaded)
                     {
                         int numCPU = 5 - PhotonNetwork.CurrentRoom.PlayerCount;
                         loadCPU(numCPU);
