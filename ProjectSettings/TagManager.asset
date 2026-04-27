@@ -8,6 +8,7 @@ TagManager:
   - TutorialJump
   - TutorialWindmill
   - TutorialCauldron
+  - Lobby
   layers:
   - Default
   - TransparentFX

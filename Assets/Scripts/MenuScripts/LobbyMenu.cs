@@ -18,8 +18,7 @@ public class LobbyMenu : MonoBehaviour
     public TMP_InputField createRoomName;
     public TMP_InputField chosenName;
     public TMP_InputField makePassword;
-    public TMP_InputField joinRoomName;
-    public TMP_InputField joinPassword;
+    public TMP_InputField joinChosenName;
 
     [Header("Objects")]
     public GameObject lockImg;
@@ -100,12 +99,14 @@ public class LobbyMenu : MonoBehaviour
     {
         createRoomMenu.SetActive(false);
         lobbyRoom.SetActive(true);
-        lobbyRoomManager.RPCHostJoin(chosenName.text, createRoomName.text);
+        lobbyRoomManager.hostJoin(chosenName.text, createRoomName.text);
     }
 
     public void joinRoom()
     {
-
+        createRoomMenu.SetActive(false);
+        lobbyRoom.SetActive(true);
+        lobbyRoomManager.playerJoin(joinChosenName.text);
     }
 
 

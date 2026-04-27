@@ -98,6 +98,12 @@ MonoBehaviour:
   - RPCGameWin
   - RPCHostJoin
   - RPCUpdatePlayerCount
+  - RPCPlayerJoin
+  - changeElement
+  - RPCSetProfileElement
+  - RPCSetProfileNumber
+  - RPCSetProfileName
+  - RPCAnnounceProfile
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

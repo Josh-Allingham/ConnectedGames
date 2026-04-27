@@ -23,16 +23,16 @@ public class BattlePlayer : MonoBehaviourPunCallbacks
         RPCSetPlayerName(playerName);
         RPCSetPlayerElement(playerElement);
 
-        if(this.transform.GetComponentInChildren<Element>().alive && playerElement != null)
-        {
-            spawned = true;
-        }
+        //if(this.transform.GetComponentInChildren<Element>().alive && playerElement != null)
+        //{
+        //    spawned = true;
+        //}
 
-        if (spawned && !this.transform.GetComponentInChildren<Element>().alive)
-        {
-            playerElement = null;
-            this.transform.GetComponentInChildren<SpriteRenderer>().enabled = false;
-        }
+        //if (spawned && !this.transform.GetComponentInChildren<Element>().alive)
+        //{
+        //    playerElement = null;
+        //    this.transform.GetComponentInChildren<SpriteRenderer>().enabled = false;
+        //}
 
     }
 

@@ -1,17 +1,26 @@
 using Photon.Pun;
 using Photon.Realtime;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 public class MainMenuNetManager : MonoBehaviourPunCallbacks
 {
     [SerializeField]
-    public TMP_InputField roomName;
+    public TMP_InputField createRoomName;
     [SerializeField]
-    public TMP_InputField playerName;
+    public TMP_InputField createPlayerName;
     [SerializeField]
     public TMP_InputField setPassword;
+
+    [SerializeField]
+    public TMP_InputField joinRoomName;
+    [SerializeField]
+    public TMP_InputField joinPlayerName;
+    [SerializeField]
+    public TMP_InputField joinUsingPassword;
 
     public string gameVersion = "0.1";
     public bool isPrivate;
@@ -22,7 +31,7 @@ public class MainMenuNetManager : MonoBehaviourPunCallbacks
     Vector2 roomListScroll = Vector2.zero;
     bool render = true;
 
-
+    public LobbyMenu lobbyMenu;
 
     void Start()
     {
@@ -49,6 +58,12 @@ public class MainMenuNetManager : MonoBehaviourPunCallbacks
         }
     }
 
+    public override void OnLeftRoom()
+    {
+        Debug.Log("Room Left!");
+    }
+
+
     public override void OnDisconnected(DisconnectCause cause)
     {
         Debug.Log("Disconnected: " + cause.ToString());
@@ -67,54 +82,66 @@ public class MainMenuNetManager : MonoBehaviourPunCallbacks
 
     public override void OnJoinedRoom()
     {
-        Debug.Log("Connected to Room");
-        print(PhotonNetwork.CurrentRoom.Players.Count);
+        string correctPassword = (string)PhotonNetwork.CurrentRoom.CustomProperties["Password"];
+
+        if (PhotonNetwork.CurrentRoom.PlayerCount == 1)
+        {
+            Debug.Log("Connected to Room");
+            lobbyMenu.createRoom();
+        }
+        else if (joinUsingPassword.text == correctPassword)
+        {
+            Debug.Log("Connected to Room");
+            print(PhotonNetwork.CurrentRoom.Players.Count);
+            lobbyMenu.joinRoom();
+        }
+        else if(PhotonNetwork.CurrentRoom.PlayerCount == 4)
+        {
+            PhotonNetwork.LeaveRoom();
+            lobbyMenu.toPreviousMenu("Lobby Menu");
+        }
+        else
+        {
+            PhotonNetwork.LeaveRoom();
+            lobbyMenu.toPreviousMenu("Lobby Menu");
+        }
+
     }
 
-    public void createLobby()
+public void createRoom()
     {
-        if (roomName.text != "")
+        Debug.Log("Called create");
+        if (createRoomName.text != "")
         {
             joiningRoom = true;
-
             RoomOptions roomOptions = new RoomOptions();
+            if (setPassword.text !="")
+            {
+                Hashtable customProps = new Hashtable();
+                customProps.Add("Password", setPassword.text);
+                roomOptions.CustomRoomProperties = customProps;
+            }
+
             roomOptions.IsOpen = true;
             roomOptions.IsVisible = true;
             roomOptions.MaxPlayers = (byte)maxPlayers;
 
-            PhotonNetwork.JoinOrCreateRoom(roomName.text, roomOptions, TypedLobby.Default); 
+            PhotonNetwork.JoinOrCreateRoom(createRoomName.text, roomOptions, TypedLobby.Default);
+            Debug.Log("Room created " + createRoomName.text);
         }
     }
 
 
-    public void joinLobby()
+    public void joinPasswordRoom()
     {
-        roomListScroll = GUILayout.BeginScrollView(roomListScroll, true, true);
+        joiningRoom = true;
+        PhotonNetwork.NickName = joinPlayerName.text;
+        PhotonNetwork.JoinRoom(joinRoomName.text);
+    }
 
-        if (createdRooms.Count == 0)
-        {
-            GUILayout.Label("No Rooms exist.");
-        }
-        else
-        {
-            for (int i = 0; i < createdRooms.Count; i++)
-            {
-                GUILayout.BeginHorizontal("box");
-                GUILayout.Label(createdRooms[i].Name, GUILayout.Width(400));
-                GUILayout.Label(createdRooms[i].PlayerCount + "/" + createdRooms[i].MaxPlayers);
-
-                GUILayout.FlexibleSpace();
-
-                if (GUILayout.Button("Join Room"))
-                {
-                    joiningRoom = true;
-                    PhotonNetwork.NickName = playerName.text;
-                    PhotonNetwork.JoinRoom(createdRooms[i].Name);
-                }
-                GUILayout.EndHorizontal();
-            }
-        }
-
-        GUILayout.EndScrollView();        
+    public void leaveRoom()
+    {
+        lobbyMenu.toPreviousMenu("Lobby Room");
+        PhotonNetwork.LeaveRoom();
     }
 }
