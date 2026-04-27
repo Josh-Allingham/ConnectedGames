@@ -3,8 +3,6 @@ using System.Collections;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
-using UnityEngine.Rendering;
-using static System.Net.WebRequestMethods;
 
 public class Element : MonoBehaviour
 {
@@ -36,11 +34,13 @@ public class Element : MonoBehaviour
         get { return maxHealth; }
         set { maxHealth = value; }
     }
+
     public float Defence
     {
         get { return defence; }
         set { defence = value; }
     }
+
     public float Attack
     {
         get { return attack; }
@@ -129,6 +129,7 @@ public class Element : MonoBehaviour
             heal(maxHealth / 3);
         }
     }
+
     public void getPlayerStats(string element)
     {
         StartCoroutine(LoadStats(element));
@@ -234,7 +235,7 @@ public class Element : MonoBehaviour
 
                 string[] moves = playerMoves.Split(',', StringSplitOptions.RemoveEmptyEntries);
                 int moveNum = 0;
-                for (int i = 0; i <= moves.Length; i += 7)
+                for (int i = 0; i <= moves.Length-1; i += 7)
                 {
                     if (element.Equals(moves[i]))
                     {
@@ -248,7 +249,6 @@ public class Element : MonoBehaviour
                         moveNum++;
                     }
                 }
-                Debug.Log("Moves acquired successfully");
             }
         }
     }
