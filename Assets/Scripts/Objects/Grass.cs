@@ -62,7 +62,7 @@ public class Grass : MonoBehaviour, IElementInteractable
         }
     }
 
-    public void TouchFire()
+    public void TouchFire(bool isCharged)
     {
         switch (currentState)
         {

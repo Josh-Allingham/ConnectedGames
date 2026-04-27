@@ -30,7 +30,7 @@ public class WindmillWaterWheel : MonoBehaviour, IElementInteractable
         
     }
 
-    public void TouchFire()
+    public void TouchFire(bool isCharged)
     {
         
     }

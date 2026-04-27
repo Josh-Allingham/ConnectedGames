@@ -1,8 +1,9 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
+using Photon.Pun;
 
-public class CameraManager : MonoBehaviour
+public class CameraManager : MonoBehaviourPunCallbacks
 {
     public static CameraManager main;
     public Dictionary<string, GameObject> cameraDict = new Dictionary<string, GameObject>();
@@ -19,6 +20,8 @@ public class CameraManager : MonoBehaviour
         cameraDict.Add("WindmillWater", cameras[4]);
         cameraDict.Add("OldMan", cameras[5]);
         cameraDict.Add("AllWindmills", cameras[6]);
+        cameraDict.Add("GateCam", cameras[7]);
+        cameraDict.Add("OldManBridge", cameras[8]);
 
         for (int i = 1; i < cameras.Length; i++) //exclude player camera, default
         {
@@ -36,21 +39,31 @@ public class CameraManager : MonoBehaviour
 
     public void ActivateCamera(string cameraName)
     {
+        Debug.Log("Activating " + cameraName);
+        photonView.RPC("RPCActivateCamera", RpcTarget.All, cameraName);
+    }
+
+    [PunRPC] public void RPCDisableCamera(string cameraName)
+    {
+        GameObject cam = cameraDict[cameraName];
+        cam.SetActive(false);
+    }
+
+    [PunRPC] public void RPCActivateCamera(string cameraName)
+    {
         //TODO disable movement
 
         GameObject cam = cameraDict[cameraName];
         cam.SetActive(true);
-        SetPlayerCam(false); //turn player camera off
         
     }
 
-    public IEnumerator DisableCameraAfterXSeconds(string cameraName, float x, string endCameraName)
+    public IEnumerator DisableCameraAfterXSeconds(string cameraName, float x)
     {
-        GameObject cam = cameraDict[cameraName];
-        GameObject endCam = cameraDict[endCameraName];
-        yield return new WaitForSeconds(x); 
-        cam.SetActive(false);
-        endCam.SetActive(true);
+        yield return new WaitForSeconds(x);
+        Debug.Log("Deactivating " + cameraName);
+        photonView.RPC("RPCDisableCamera", RpcTarget.All, cameraName);
+        
     }
 
     public void SetPlayerCam(bool val)

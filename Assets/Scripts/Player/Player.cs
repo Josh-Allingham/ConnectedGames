@@ -36,21 +36,29 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
 
     private Animator anim;
     private Rigidbody rb;
+    public PlayerPowers powers;
+    public PlayerMovement movement;
 
     public NPC currentInteractee;
+    
 
-    [SerializeField] private CanvasGroup DialogueUI;
-    [SerializeField] private TMP_Text DialogueUIText;
-    [SerializeField] private TMP_Text HighlightText;
+
     void Start()
     {
         anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody>();
-        RPCEndDialogue();
+        powers = GetComponent<PlayerPowers>();
+        movement = GetComponent<PlayerMovement>();
+        
         GetComponent<PlayerPowers>().SetType(currentType);
         GetComponentInChildren<SpriteRenderer>().sprite = waterIcon;
         RPCSetPlayerName(playerName);
 
+        if (photonView.IsMine)
+        {
+            PlayerUI.main.ActivateHintButton(PlayerUI.main.controlsTutorial);
+            PlayerUI.main.ShowTutorialOverlay();
+        }
         
     }
 
@@ -66,28 +74,44 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
             RPCSetElementPowerActive(Input.GetKey(KeyCode.E));
             RPCSetPlayerName(playerName);
             anim.SetBool("IsWalking", rb.linearVelocity.magnitude > .1f);
-            RPCHandleNPCInteractions();
+            HandleNPCInteractions();
         }
         
     }
 
-    [PunRPC] void RPCHandleNPCInteractions()
+    void HandleNPCInteractions()
     {
         if (currentInteractee != null)
         {
-            HighlightText.transform.position = Camera.main.WorldToScreenPoint(currentInteractee.transform.position) + Vector3.up;
+            PlayerUI.main.UpdateHighlightText(currentInteractee.highlightText, currentInteractee.transform.position, 1f);
+            
 
-            if (Input.GetKeyDown(KeyCode.R) && !currentInteractee.HasFinishedDialogue()) //check the player has R'd and there is valid dialogue stored
+            if (Input.GetKeyDown(KeyCode.F) && !currentInteractee.HasFinishedDialogue()) //check the player has F'd and there is valid dialogue stored
             {
-                RPCShowDialogue(currentInteractee.GetDialogue());
+                photonView.RPC("RPCShowDialogue", RpcTarget.All, currentInteractee.GetDialogue());
             }
             else if (currentInteractee.HasFinishedDialogue())
             {
-                StartCoroutine(CameraManager.main.DisableCameraAfterXSeconds("OldMan", 0, "Player"));
-                RPCEndDialogue();
+                switch (currentInteractee.isEvil)
+                {
+                    case true:
+                        RPCEndDialogue();
+                        //START BATTLE SCENE
+                        break;
+
+                    case false:
+                        ProgressionManager.main.ChangeState(ProgressionManager.ProgressionState.PostOldMan);
+                        photonView.RPC("RPCEndDialogue", RpcTarget.All);
+                        
+                        //StartCoroutine(CameraManager.main.DisableCameraAfterXSeconds("OldMan", 0, "Player"));
+                        //CameraManager.main.ActivateCamera("Player");
+                        break;
+                }
+                
             }
         }
     }
+    
     [PunRPC]  void RPCSetPlayerName(string _playerName)
     {
         GetComponentInChildren<TMP_Text>().text = _playerName;
@@ -175,32 +199,35 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
     public void SetInteractee(NPC interactee)
     {
         this.currentInteractee = interactee;
-        HighlightText.alpha = interactee == null ? 0 : 1;
-        HighlightText.text = interactee == null ? "" : interactee.highlightText;
+        if (interactee == null)
+        {
+            PlayerUI.main.UpdateHighlightText("", Vector3.zero, 0);
+        }
+        else
+        {
+            PlayerUI.main.UpdateHighlightText(interactee.highlightText, interactee.transform.position, 1);
+        }
+        
         
         
     }
     [PunRPC] public void RPCShowDialogue(string dialogue)
     {
-        DialogueUI.alpha = 1f;
-        DialogueUIText.text = dialogue;
-        if (photonView.IsMine)
-        {
-            photonView.RPC("RPCShowDialogue", RpcTarget.OthersBuffered, dialogue);
-        }
+        PlayerUI.main.ShowDialogue(dialogue);
+        movement.canMove = false;
+        
     }
 
     [PunRPC]
     public void RPCEndDialogue()
     {
-        DialogueUI.alpha = 0f;
-        DialogueUIText.text = "";
-        HighlightText.text = "";
+        
+        PlayerUI.main.EndDialogue();
+        CameraManager.main.SetPlayerCam(true);
         currentInteractee = null;
-        if (photonView.IsMine)
-        {
-            photonView.RPC("RPCEndDialogue", RpcTarget.OthersBuffered);
-        }
+        movement.canMove = true;
+        PlayerUI.main.ActivateHintButton(PlayerUI.main.windmillTutorial);
+        PlayerUI.main.ShowTutorialOverlay();
     }
     void AssignElementColour()
     {
@@ -222,8 +249,40 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
     }
     void ToggleElementSwitch()
     {
+        PlayerType[] types = new PlayerType[4];
+        HashSet<PlayerType> currentTypesInGame = new HashSet<PlayerType>();
         
-        switch (currentType)
+        types[0] = PlayerType.Water;
+        types[1] = PlayerType.Fire;
+        types[2] = PlayerType.Earth;
+        types[3] = PlayerType.Wind;
+        int typeIndex = -1;
+
+        foreach (GameObject player in NetManager.main.players)
+        {
+            currentTypesInGame.Add(player.GetComponent<Player>().currentType);
+        }
+        Debug.Log(currentTypesInGame);
+        for (int i = 0; i < 4; i++)
+        {
+            if (types[i] == currentType)
+                typeIndex = i;
+        }
+
+        for (int i = 1; i < 4; i++)
+        {
+            int desiredIndex = (typeIndex + i) % 4;
+            PlayerType desiredType = types[desiredIndex];
+            if (!currentTypesInGame.Contains(desiredType))
+            {
+                RPCChangeTypeTo(desiredType);
+                return;
+            }
+        }
+        
+
+
+        /*switch (currentType)
         {
             case PlayerType.Water:
                 RPCChangeTypeTo(PlayerType.Fire);
@@ -237,7 +296,7 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
             case PlayerType.Wind:
                 RPCChangeTypeTo(PlayerType.Water);
                 break;
-        }
+        }*/
     }
     public void SpawnWindTunnel()
     {
@@ -254,14 +313,34 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
             earthCubeInstances.Add(newCube);
         }
     }
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.TryGetComponent(out IElementInteractable enviroObject))
         {
+            Debug.Log("Player hit");
             if (currentType == PlayerType.Fire)
             {
-                enviroObject.TouchFire();
+                enviroObject.TouchFire(powers.isCharged);
             }
+        }
+        if (other.tag == "TutorialJump")
+        {
+            if (photonView.IsMine)
+            {
+                PlayerUI.main.ActivateHintButton(PlayerUI.main.jumpTutorial);
+                PlayerUI.main.ShowTutorialOverlay();
+            }
+            
+        }
+        if (other.tag == "TutorialCauldron")
+        {
+            if (photonView.IsMine)
+            {
+                PlayerUI.main.ActivateHintButton(PlayerUI.main.cauldronTutorial);
+                PlayerUI.main.ShowTutorialOverlay();
+            }
+            
         }
         /*if (enviroObject != null)
         {

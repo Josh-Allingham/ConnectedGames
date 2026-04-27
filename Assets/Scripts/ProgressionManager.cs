@@ -1,13 +1,19 @@
 using UnityEngine;
-
-public class ProgressionManager : MonoBehaviour
+using Photon.Pun;
+public class ProgressionManager : MonoBehaviourPunCallbacks, IPunObservable
 {
+    public static ProgressionManager main;
     [SerializeField] private ProgressionState currentState = ProgressionState.PreOldMan;
     [SerializeField] private Windmill[] windmills = new Windmill[3];
+    [SerializeField] private GameObject Rockbridge;
+    [SerializeField] private Cauldron cauldron;
+    [SerializeField] private Animator GateAnimator;
+    [SerializeField] private GameObject oldMan;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
+        main = this;
+        GateAnimator.SetBool("GateOpen", false);
     }
 
     // Update is called once per frame
@@ -16,6 +22,7 @@ public class ProgressionManager : MonoBehaviour
         switch (currentState)
         {
             case ProgressionState.PreOldMan:
+                //once spoken to, pan away and vanish
                 break;
             case ProgressionState.PostOldMan:
                 bool allWindmillsSpinning = true;
@@ -23,27 +30,48 @@ public class ProgressionManager : MonoBehaviour
                 {
                     allWindmillsSpinning &= w.isSpinning;
                 }
+                Debug.Log(allWindmillsSpinning + "spin");
                 if (allWindmillsSpinning)
-                    //OpenGate();
+                {
+                    //Pan to gate
+                    CameraManager.main.ActivateCamera("GateCam");
+                    StartCoroutine(CameraManager.main.DisableCameraAfterXSeconds("GateCam", 2));
+                    GateAnimator.SetBool("GateOpen", true);
                     ChangeState(ProgressionState.WindmillsActive);
+                }
                 break;
 
             case ProgressionState.WindmillsActive:
-                // if (cauldron.isActive()){
-                // RaiseBridge();
-                // ChangeState(ProgressionState.PlatformsSpawned;
-                //}
+                 if (cauldron.IsActive())
+                {
+                    // spawn bridge to boss
+                    Rockbridge.GetComponent<Animator>().SetTrigger("RaiseBridge");
+                    CameraManager.main.ActivateCamera("Bridge");
+                    ChangeState(ProgressionState.PlatformsSpawned);
+                    StartCoroutine(CameraManager.main.DisableCameraAfterXSeconds("Bridge", 4));
+                    oldMan.GetComponentInChildren<NPC>().PrepareForBattle();
+                }
                 break;
             case ProgressionState.PlatformsSpawned:
                 break;
         }
     }
+    public void ChangeState(ProgressionState state)
+    {
+        photonView.RPC("RPCChangeState", RpcTarget.All, state);
+    }
 
-    private void ChangeState(ProgressionState state)
+    [PunRPC]
+    public void RPCChangeState(ProgressionState state)
     {
         currentState = state;
     }
-    private enum ProgressionState
+
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+    }
+
+    public enum ProgressionState
     {
         PreOldMan,
         PostOldMan,

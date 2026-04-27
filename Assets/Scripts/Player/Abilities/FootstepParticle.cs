@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class FootstepParticle : MonoBehaviour
 {
-    public Player.PlayerType InteractionType = Player.PlayerType.NULL;
+    public Player.PlayerType InteractionType;
     public PlayerPowers player;
    
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -33,8 +33,10 @@ public class FootstepParticle : MonoBehaviour
     }
     private void OnTriggerEnter(Collider other)
     {
+        /*
         if (InteractionType == Player.PlayerType.NULL)
             return;
+
 
         if (other.TryGetComponent(out FootstepParticle particle))
         {
@@ -53,16 +55,25 @@ public class FootstepParticle : MonoBehaviour
                 
             
         }
+        */
+
+        
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+        
 
         if (other.TryGetComponent(out IElementInteractable interactable))
         {
+            
             switch (InteractionType)
             {
                 case Player.PlayerType.Water:
                     interactable.TouchWater();
                     return;
                 case Player.PlayerType.Fire:
-                    interactable.TouchFire();
+                    interactable.TouchFire(player.isCharged);
                     return;
                 case Player.PlayerType.Earth:
                     interactable.TouchEarth();

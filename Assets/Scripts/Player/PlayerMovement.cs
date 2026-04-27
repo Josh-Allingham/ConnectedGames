@@ -11,16 +11,18 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
     private Rigidbody rb;
     [SerializeField] private Transform sprite;
     public Vector2 prevInput = Vector2.zero;
-   
+    private Transform playerSpawn;
+    public bool canMove = true;
     void Start()
     {
+        playerSpawn = NetManager.main.playerSpawn;
         rb = GetComponent<Rigidbody>();
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
-        if (photonView.IsMine)
+        if (photonView.IsMine && canMove)
         {
             InputMovement();
         }
@@ -50,12 +52,20 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
         {
             prevInput = inputs;
         }
+        if (transform.position.y < -17)
+        {
+            transform.position = playerSpawn.position;
+        }
     }
     private void Jump()
     {
-        if (Physics.Raycast(transform.position, Vector3.down, .5f))
+        Debug.Log(Physics.Raycast(transform.position, Vector3.down, 2f));
+        Debug.DrawRay(transform.position, Vector3.down, Color.red, 2f);
+        if (Physics.Raycast(transform.position, Vector3.down, 2f))
         {
+            rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
             rb.AddForce(Vector3.up * jumpStrength, ForceMode.Impulse);
+            
         }
         
     }
