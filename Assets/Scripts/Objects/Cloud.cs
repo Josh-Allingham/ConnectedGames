@@ -10,6 +10,7 @@ public class Cloud : MonoBehaviour
     [SerializeField] private int maxBallRange = 3;
     [SerializeField] private float speedMultiplier = 0.5f;
     public bool isAlive = true;
+    private float timer = 0;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -65,18 +66,17 @@ public class Cloud : MonoBehaviour
         Vector3 startingPos = transform.position;
         Vector3 finalPos = transform.position + (direction * 10);
 
-        float timePassed = 0;
-
-        while (timePassed < duration)
+        yield return new WaitForSeconds(1f);
+        while (timer < duration)
         {
-            transform.position = Vector3.Lerp(startingPos, finalPos, (timePassed / duration));
-            timePassed += Time.deltaTime;
+            transform.position = Vector3.Lerp(startingPos, finalPos, (timer / duration));
+            timer += Time.deltaTime;
             yield return null;
         }
-        while (timePassed < duration + 2)
+        while (timer < duration + 2)
         {
-            transform.localScale = Vector3.Lerp(Vector3.one, Vector3.zero, (timePassed - duration) / 2);
-            timePassed += Time.deltaTime;
+            transform.localScale = Vector3.Lerp(Vector3.one, Vector3.zero, (timer - duration) / 2);
+            timer += Time.deltaTime;
             yield return null;
         }
         isAlive = false;

@@ -3,7 +3,8 @@ using System.Collections.Generic;
 
 public class NPC : MonoBehaviour
 {
-    public string highlightText = "[R]";
+    public string highlightText = "[F]";
+    public bool isEvil = false;
 
     public string[] dialogueStrings = new string[] {"Hey, you there!", //0
                                                     "Another band of drifters, daring to test their luck. How many more will come, I wonder?", //1
@@ -15,7 +16,7 @@ public class NPC : MonoBehaviour
                                                     "" //7 NULL
                                                      };
     public int dialogueIndex = 0;
-
+    [SerializeField] private Transform newSpawnPos;
     void Start()
     {   
     }
@@ -29,36 +30,52 @@ public class NPC : MonoBehaviour
     public string GetDialogue()
     {
         string dialogue = dialogueStrings[dialogueIndex];
-
-        if (dialogueIndex == 5)
+        if (!isEvil)
         {
-            CameraManager.main.ActivateCamera("AllWindmills");            
+            if (dialogueIndex == 5)
+            {
+                CameraManager.main.ActivateCamera("AllWindmills");
+            }
+            else if (dialogueIndex == 6)
+            {
+                StartCoroutine(CameraManager.main.DisableCameraAfterXSeconds("AllWindmills", 0));
+                CameraManager.main.ActivateCamera("OldMan");
+            }
         }
-        else if (dialogueIndex == 6)
-        {
-            StartCoroutine(CameraManager.main.DisableCameraAfterXSeconds("AllWindmills", 0, "OldMan"));
-        }
-
         dialogueIndex++;
 
         if (dialogueIndex >= dialogueStrings.Length)
         {
             //Dialogue Finished
+            StartCoroutine(CameraManager.main.DisableCameraAfterXSeconds("OldMan", 0));
             dialogueIndex = -1;
         }
         return dialogue;
     }
 
+    public void PrepareForBattle()
+    {
+        transform.parent.transform.position = newSpawnPos.position;
+        dialogueStrings = new string[] {"You are quite persistent travelers. I didn’t expect anyone else capable of driving away those storm clouds.",
+                                        "But that won’t help you much…",
+                                        "You don’t seriously think I’ll let you pass, do you?",
+                                        "" //NULL
+                                        };
+        isEvil = true;
+        dialogueIndex = 0;
+    }
     public bool HasFinishedDialogue()
     {
         return dialogueIndex == -1;
     }
-    private void OnTriggerEnter(Collider other)
+    private void OnTriggerStay(Collider other)
     {
-        if (other.TryGetComponent(out Player player))
+        if (other.TryGetComponent(out Player player) && !HasFinishedDialogue())
         {
+            Debug.Log("FOUND IT");
             player.SetInteractee(this);
-            CameraManager.main.ActivateCamera("OldMan");
+            string camString = isEvil ? "OldManBridge" : "OldMan";
+            CameraManager.main.ActivateCamera(camString);
         }
     }
 
@@ -68,7 +85,7 @@ public class NPC : MonoBehaviour
         {
             Debug.Log("Left");
             player.SetInteractee(null);
-            StartCoroutine(CameraManager.main.DisableCameraAfterXSeconds("OldMan", 0, "Player"));
+            StartCoroutine(CameraManager.main.DisableCameraAfterXSeconds("OldMan", 0));
         }
     }
 }

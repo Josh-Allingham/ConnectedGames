@@ -9,6 +9,7 @@ public class PlayerPowers : MonoBehaviour
     public float footstepDistance;
     public float timeBetweenIdleSpawns = 0.2f;
     public bool isActive = false;
+    public bool isCharged;
 
     private Color footstepColour;
     private Vector3 prevPosition;
@@ -52,6 +53,7 @@ public class PlayerPowers : MonoBehaviour
     void Update()
     {
         player.SetPowerChargeBar(powerTimer / PowerChargeTimeInSeconds);
+        isCharged = powerTimer / PowerChargeTimeInSeconds >= 1;
 
         if (!isActive)
         {
@@ -104,13 +106,13 @@ public class PlayerPowers : MonoBehaviour
         switch (playerType) //spawn particle
         {
             case Player.PlayerType.Water:
-                SpawnParticles(waterParticles, Vector3.one * 0.1f);
+                SpawnParticles(waterParticles, Vector3.one * .5f);
                 break;
             case Player.PlayerType.Fire:
-                SpawnParticles(flameParticles, Vector3.one * 0.1f * Mathf.Min(powerTimer, 3));
+                SpawnParticles(flameParticles, Vector3.one * 1f * Mathf.Min(powerTimer, 3));
                 break;
             case Player.PlayerType.Earth:
-                SpawnParticles(earthParticles, Vector3.one * 0.1f);
+                SpawnParticles(earthParticles, Vector3.one * 1f);
 
                 if (powerTimer >= PowerChargeTimeInSeconds)
                 {
@@ -119,7 +121,7 @@ public class PlayerPowers : MonoBehaviour
                 }
                 break;
             case Player.PlayerType.Wind:
-                SpawnParticles(windParticles, Vector3.one * 0.1f * Mathf.Min(powerTimer / 2, 2));
+                SpawnParticles(windParticles, Vector3.one * 1f * Mathf.Min(powerTimer / 2, 2));
                 if (powerTimer >= PowerChargeTimeInSeconds)
                 {
                     player.SpawnWindTunnel();
@@ -152,6 +154,7 @@ public class PlayerPowers : MonoBehaviour
         ParticleSystem newParticle = Instantiate(particles, transform.position + Vector3.back * 0.1f, Quaternion.identity);
         newParticle.transform.localScale = scale;
         newParticle.GetComponent<FootstepParticle>().player = this;
+
     }
     void ConstructLookupTable()
     {

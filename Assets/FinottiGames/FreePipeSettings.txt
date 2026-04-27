@@ -1,0 +1,48 @@
+[ITA}
+Questa è la versione iniziale del mio Modular Pipes Kit (Kit Tubi Modulari). Sono previsti aggiornamenti futuri per migliorare ed espandere ulteriormente questo pacchetto.
+
+COME USARE QUESTO KIT:
+
+1. Utilizzo della Hierarchy (Gerarchia): È importante trascinare ogni prefab direttamente nella finestra Hierarchy (e non solo nella Scene view). Risoluzione Problemi: Se i Prefab appaiono con posizioni del Transform errate quando li trascini, controlla questa impostazione: Vai su Edit > Preferences > Scene View e assicurati che la voce "Use Prefab Asset Position" sia spuntata (Unity 6.0). Per le versioni precedenti, cerca un'impostazione con un nome simile.
+
+2. Impostazione Snap alla Griglia (Fondamentale): Per facilitare notevolmente il tuo flusso di lavoro, assicurati che il Grid Snapping (agganciamento alla griglia) sia attivo e imposta la dimensione della griglia (Grid Size) a 0.5.
+
+3. Modalità Pivot: Nella barra degli strumenti in alto a sinistra della Scene view, cambia l'impostazione da "Center" a "Pivot". Questo assicura che tu stia utilizzando i punti di ancoraggio personalizzati, progettati specificamente per la modularità.
+
+4. Spazio Globale vs Locale (Global vs Local):
+
+Local: Usalo quando ruoti i tubi; è molto più intuitivo.
+
+Global: Usalo quando sposti gli oggetti.
+
+Grazie! Grazie per il tuo acquisto! Non esitare a contattarmi per feedback, suggerimenti per miglioramenti o se riscontri problemi. Questi sono i miei primi pacchetti e ho intenzione di rilasciarne altri in futuro.
+
+Grazie infinite per il tuo supporto.
+
+Finotti Games
+
+
+
+[ENG]
+
+This is the initial release of my Modular Pipes Kit. Future updates are planned to further improve and expand this package.
+
+HOW TO USE THIS KIT:
+
+1. Hierarchy Usage: It is important to drag and drop each prefab directly into the Hierarchy window (not just the Scene view). Troubleshooting: If your Prefabs appear with incorrect Transform positions when dragging them in, please check the following setting: Go to Edit > Preferences > Scene View and ensure "Use Prefab Asset Position" is checked (Unity 6.0). For older versions, look for a similarly named setting.
+
+2. Grid Snapping Setup (Crucial): To make your workflow much easier, ensure that Grid Snapping is active and set the Grid Size to 0.5.
+
+3. Pivot Mode: In the top-left toolbar of the Scene view, switch the handle toggle from "Center" to "Pivot". This ensures you are using the custom pivot points specifically designed for modularity.
+
+4. Global vs. Local Space:
+
+Local: Use this when rotating pipes; it is much more intuitive.
+
+Global: Use this when moving objects.
+
+Thank you! Thank you for your purchase! Please don't hesitate to contact me with feedback, suggestions for improvements, or if you encounter any issues. These are my first packs, and I plan to release more in the future.
+
+Thank you so much for your support.
+
+Finotti Games.  

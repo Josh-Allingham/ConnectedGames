@@ -38,7 +38,7 @@ public class EarthCube : MonoBehaviour, IElementInteractable
         //destroy? sand/mud
     }
 
-    public void TouchFire()
+    public void TouchFire(bool isCharged)
     {
         //harden    
     }

@@ -7,11 +7,13 @@ using UnityEngine.UI;
 using TMPro;
 public class NetManager : MonoBehaviourPunCallbacks
 {
+    public static NetManager main;
+
     string playerName = "P1";
     string playerElement = "0";
     string gameVersion = "0.1";
     List<RoomInfo> createdRooms = new List<RoomInfo> ();
-    string roomName = "Room 1";
+    string roomName = "eddieroom";
     int maxPlayers = 4;
     Vector2 roomListScroll = Vector2.zero;
     bool joiningRoom = false;
@@ -19,10 +21,11 @@ public class NetManager : MonoBehaviourPunCallbacks
 
     public GameObject playerPrefab;
     public List<GameObject> players = new List<GameObject> ();
-    [SerializeField] private Transform playerSpawn;
+    [SerializeField] public Transform playerSpawn;
     
     void Start()
     {
+        main = this;
         PhotonNetwork.AutomaticallySyncScene = true;
 
         if (!PhotonNetwork.IsConnected)

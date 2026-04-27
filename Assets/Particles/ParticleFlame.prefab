@@ -9,9 +9,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 41639060328946927}
+  - component: {fileID: 46693355406557903}
   - component: {fileID: 1494279176249264221}
   - component: {fileID: 8674431827852785998}
-  - component: {fileID: 46693355406557903}
   - component: {fileID: -194511229349111174}
   - component: {fileID: -2630244105270435341}
   m_Layer: 0
@@ -36,6 +36,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 270, y: 0, z: 0}
+--- !u!114 &46693355406557903
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2373515668868989574}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aedfd20a04332ef488a29838d25c2439, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  InteractionType: 1
+  player: {fileID: 0}
 --- !u!198 &1494279176249264221
 ParticleSystem:
   m_ObjectHideFlags: 0
@@ -4836,20 +4850,6 @@ ParticleSystemRenderer:
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
   m_MaskInteraction: 0
---- !u!114 &46693355406557903
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2373515668868989574}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aedfd20a04332ef488a29838d25c2439, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  InteractionType: 1
-  player: {fileID: 0}
 --- !u!136 &-194511229349111174
 CapsuleCollider:
   m_ObjectHideFlags: 0
