@@ -1,5 +1,14 @@
 using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
 
+public enum WindmillDamageState
+{
+    tangled,
+    snapped,
+    needsWater,
+    canSpin
+}
 public class Windmill : MonoBehaviour, IElementInteractable
 {
     [Header("Windmill")]
@@ -12,23 +21,29 @@ public class Windmill : MonoBehaviour, IElementInteractable
     private string windmillID;
     private float cloudMoveAwayTime = 10;
     public bool isSpinning = false;
-    private enum WindmillDamageState
-    {
-        tangled,
-        snapped,
-        needsWater,
-        canSpin
-    }
+    
 
     [Header("State & Interaction")]
-    [SerializeField] private WindmillDamageState currentState = WindmillDamageState.canSpin;
-    public ParticleSystem flameParticles;
+    [SerializeField] public WindmillDamageState currentState = WindmillDamageState.canSpin;
+
+    [Header("TangledMill")]
+    [SerializeField] private GameObject trees;
+    [SerializeField] private GameObject flames;
+    [SerializeField] private GameObject smoke;
+
+    
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-
+        if (trees && flames && smoke)
+        {
+            trees.SetActive(true);
+            flames.SetActive(false);
+            smoke.SetActive(false);
+        }
+        
     }
 
     // Update is called once per frame
@@ -57,11 +72,11 @@ public class Windmill : MonoBehaviour, IElementInteractable
 
             case WindmillDamageState.canSpin:
 
-                if (windmillSpeed > maxWindmillSpeed / 2)
+                if (windmillSpeed > maxWindmillSpeed / 2 && !isSpinning)
                 {
                     isSpinning = true;
                     CameraManager.main.ActivateCamera(windmillID);
-                    StartCoroutine(CameraManager.main.DisableCameraAfterXSeconds(windmillID, cloudMoveAwayTime, "Player"));
+                    StartCoroutine(CameraManager.main.DisableCameraAfterXSeconds(windmillID, cloudMoveAwayTime));
                     StartCoroutine(cloud.MoveCloud((cloud.transform.position - transform.position).normalized, cloudMoveAwayTime));
                     
                 }
@@ -89,15 +104,23 @@ public class Windmill : MonoBehaviour, IElementInteractable
         
     }
 
-    public void TouchFire()
+    public void TouchFire(bool isCharged)
     {
-        if (currentState == WindmillDamageState.tangled)
+        Debug.Log("HELLO");
+        if (currentState == WindmillDamageState.tangled && isCharged)
         {
-            currentState = WindmillDamageState.canSpin;
-            
-            for (int i = 0; i < 10; i++)
-                Instantiate(flameParticles, windmillAxis.position + Random.insideUnitSphere, Quaternion.identity);
+            StartCoroutine(BurnTrees());
+         
         }
+    }
+    IEnumerator BurnTrees()
+    {
+        Debug.Log("H");
+        flames.SetActive(true);
+        yield return new WaitForSeconds(2f);
+        trees.SetActive(false);
+        smoke.SetActive(true);
+        currentState = WindmillDamageState.canSpin;
     }
 
     public void TouchWater()
@@ -111,17 +134,8 @@ public class Windmill : MonoBehaviour, IElementInteractable
             windmillAcceleration += 0.1f;
     }
 
-    private void OnTriggerEnter(Collider other)
-    {
-        if (currentState == WindmillDamageState.snapped && other.TryGetComponent(out Player player))
-        {
-            Debug.Log(player);
-            //UI display press R to repair
-            if (Input.GetKey(KeyCode.R) && player.currentType == Player.PlayerType.Earth)
-            {
-                ReadyToSpin();
-                
-            }
-        }
-    }
+    
+    
+
+    
 }

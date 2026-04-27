@@ -75,6 +75,14 @@ MonoBehaviour:
   - RPCResetTurns
   - RPCSpawnEarthCube
   - RPCHandleNPCInteractions
+  - ShowTutorialOverlay
+  - HideTutorialOverlay
+  - RPCChangeState
+  - DisableCameraAfterXSeconds
+  - RPCActivateCamera
+  - RPCDisableCamera
+  - RepairWindmill
+  - RPCRepairWindmill
   - RPCCheckAlive
   - RPCCheckSpeed
   - RPCCommenceFight

@@ -19,14 +19,18 @@ public class CameraController : MonoBehaviour
     }
     private void LateUpdate()
     {
-        Vector3 targetPos = target.position + target.forward * followOffset.z + target.up * followOffset.y + target.right * followOffset.x;
-        transform.position = Vector3.SmoothDamp(transform.position, targetPos, ref smoothV, smoothTime);
+        if (target != null)
+        {
+            Vector3 targetPos = target.position + target.forward * followOffset.z + target.up * followOffset.y + target.right * followOffset.x;
+            transform.position = Vector3.SmoothDamp(transform.position, targetPos, ref smoothV, smoothTime);
 
-        Quaternion rot = transform.rotation;
-        transform.LookAt(target.position + target.forward * lookAheadDst);
-        Quaternion targetRot = transform.rotation;
+            Quaternion rot = transform.rotation;
+            transform.LookAt(target.position + target.forward * lookAheadDst);
+            Quaternion targetRot = transform.rotation;
 
-        transform.rotation = Quaternion.Slerp(rot, targetRot, Time.deltaTime * rotSmoothSpeed);
+            transform.rotation = Quaternion.Slerp(rot, targetRot, Time.deltaTime * rotSmoothSpeed);
+        }
+        
 
     }
 

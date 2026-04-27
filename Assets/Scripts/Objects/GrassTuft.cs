@@ -13,7 +13,7 @@ public class GrassTuft : MonoBehaviour, IElementInteractable
     
     void Start()
     {
-        burnParticle.GetComponent<FootstepParticle>().InteractionType = Player.PlayerType.NULL;
+        
     }
 
     void Update()
@@ -23,7 +23,10 @@ public class GrassTuft : MonoBehaviour, IElementInteractable
         grassAnchor.localEulerAngles = new Vector3(0,0, currentRot.z + restForce);
 
         if (isAblaze)
-            Instantiate(burnParticle, transform.position, Quaternion.identity);
+        {
+            ParticleSystem newParticle = Instantiate(burnParticle, transform.position, Quaternion.identity);
+            newParticle.GetComponent<FootstepParticle>().InteractionType = Player.PlayerType.NULL;
+        }
         if (isDead)
             Destroy(this.gameObject);
     }
@@ -46,7 +49,7 @@ public class GrassTuft : MonoBehaviour, IElementInteractable
         isAblaze = false;   
     }
 
-    public void TouchFire()
+    public void TouchFire(bool isCharged)
     {
         //burn
         StartCoroutine(Burn());
