@@ -96,6 +96,8 @@ MonoBehaviour:
   - RPCDespawn
   - RPCGameOver
   - RPCGameWin
+  - RPCHostJoin
+  - RPCUpdatePlayerCount
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
