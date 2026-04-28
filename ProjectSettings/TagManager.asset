@@ -9,6 +9,11 @@ TagManager:
   - TutorialWindmill
   - TutorialCauldron
   - Lobby
+  - Chaos
+  - Fire
+  - Water
+  - Earth
+  - Wind
   layers:
   - Default
   - TransparentFX

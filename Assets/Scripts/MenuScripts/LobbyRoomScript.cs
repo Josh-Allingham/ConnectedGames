@@ -1,12 +1,10 @@
 using Photon.Pun;
-using Photon.Realtime;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
 
-
-public class LobbyRoomScript : MonoBehaviourPunCallbacks
+public class LobbyRoomScript : MonoBehaviourPunCallbacks, IPunOwnershipCallbacks
 {
     [Header("Lobby Room Player Info")]
     public GameObject playerProfile1;
@@ -27,6 +25,12 @@ public class LobbyRoomScript : MonoBehaviourPunCallbacks
     public string[] elementsTaken = new string[4];
 
     public GameObject myProfile;
+    public int myNumProfile;
+
+    public void Start()
+    {
+        photonView.OwnershipTransfer = OwnershipOption.Takeover;
+    }
 
     public void Update()
     {
@@ -34,9 +38,11 @@ public class LobbyRoomScript : MonoBehaviourPunCallbacks
         {
             playerCount.text = PhotonNetwork.CurrentRoom.PlayerCount.ToString();
         }
-        
+
+
 
     }
+
 
     public void hostJoin(string chosenName, string roomName)
     {
@@ -60,22 +66,33 @@ public class LobbyRoomScript : MonoBehaviourPunCallbacks
             case 1:
                 playerProfile1.transform.GetChild(1).gameObject.SetActive(true);
                 myProfile = playerProfile1;
-                photonView.RPC("RPCAnnounceProfile", RpcTarget.AllBuffered, 1, playerName);
+                myNumProfile = 1;
+                photonView.RPC("RPCAnnounceProfile", RpcTarget.AllBuffered, 1, "(HOST) " + playerName);
                 break;
             case 2:
                 playerProfile2.transform.GetChild(1).gameObject.SetActive(true);
                 myProfile = playerProfile2;
+                var id = playerProfile2.GetComponent<PhotonView>().ViewID;
+                PhotonView view = PhotonView.Find(id);
+                view.TransferOwnership(PhotonNetwork.LocalPlayer);
+                myNumProfile = 2;
                 photonView.RPC("RPCAnnounceProfile", RpcTarget.AllBuffered, 2, playerName);
                 break;
             case 3:
                 playerProfile3.transform.GetChild(1).gameObject.SetActive(true);
-                photonView.RPC("RPCAnnounceProfile", RpcTarget.AllBuffered, 3, playerName);
                 myProfile = playerProfile3;
+                playerProfile3.GetComponent<PhotonView>().TransferOwnership(PhotonNetwork.LocalPlayer);
+                myNumProfile = 3;
+                photonView.RPC("RPCAnnounceProfile", RpcTarget.AllBuffered, 3, playerName);
+                
                 break;
             case 4:
                 playerProfile4.transform.GetChild(1).gameObject.SetActive(true);
-                photonView.RPC("RPCAnnounceProfile", RpcTarget.AllBuffered, 4, playerName);
                 myProfile = playerProfile4;
+                playerProfile4.GetComponent<PhotonView>().TransferOwnership(PhotonNetwork.LocalPlayer);
+                myNumProfile = 4;
+                photonView.RPC("RPCAnnounceProfile", RpcTarget.AllBuffered, 4, playerName);
+                
                 break;
         }
     }
@@ -99,8 +116,9 @@ public class LobbyRoomScript : MonoBehaviourPunCallbacks
                 }
             }
         }
-
-        myProfile.GetComponent<PlayerProfile>().elementSelected = newElem;
+        Debug.Log(newElem);
+        myProfile.GetComponent<PlayerProfile>().updateProfile(myProfile.GetComponent<PlayerProfile>().profileName, newElem);
+        //myProfile.GetComponent<PlayerProfile>().elementSelected = newElem;
     }
 
     public void leftArrowElem()
@@ -115,14 +133,19 @@ public class LobbyRoomScript : MonoBehaviourPunCallbacks
                 {
                     newElem = elementsAvailable[i - 1];
                 }
+                else if(i - 1 == 0)
+                {
+                    newElem = elementsAvailable[0];
+                }
                 else
                 {
-                    newElem = elementsAvailable[elementsAvailable.Length-1];
+                    newElem = elementsAvailable[elementsAvailable.Length - 1];
                 }
             }
         }
-
-        myProfile.GetComponent<PlayerProfile>().elementSelected = newElem;
+        Debug.Log(newElem);
+        myProfile.GetComponent<PlayerProfile>().updateProfile(myProfile.GetComponent<PlayerProfile>().profileName, newElem);
+        //myProfile.GetComponent<PlayerProfile>().elementSelected = newElem;
     }
 
     [PunRPC]
@@ -154,4 +177,19 @@ public class LobbyRoomScript : MonoBehaviourPunCallbacks
 
     }
 
+    public void OnOwnershipRequest(PhotonView targetView, Photon.Realtime.Player requestingPlayer)
+    {
+        Debug.Log(requestingPlayer);
+        targetView.TransferOwnership(requestingPlayer);
+    }
+
+    public void OnOwnershipTransfered(PhotonView targetView, Photon.Realtime.Player previousOwner)
+    {
+        Debug.Log("Transfer Successfull!");
+    }
+
+    public void OnOwnershipTransferFailed(PhotonView targetView, Photon.Realtime.Player senderOfFailedRequest)
+    {
+        Debug.Log("Transfer Failed!");
+    }
 }

@@ -98,12 +98,12 @@ public class MainMenuNetManager : MonoBehaviourPunCallbacks
         else if(PhotonNetwork.CurrentRoom.PlayerCount == 4)
         {
             PhotonNetwork.LeaveRoom();
-            lobbyMenu.toPreviousMenu("Lobby Menu");
+            lobbyMenu.toPreviousMenu("Lobby Room");
         }
         else
         {
             PhotonNetwork.LeaveRoom();
-            lobbyMenu.toPreviousMenu("Lobby Menu");
+            lobbyMenu.toPreviousMenu("Lobby Room");
         }
 
     }

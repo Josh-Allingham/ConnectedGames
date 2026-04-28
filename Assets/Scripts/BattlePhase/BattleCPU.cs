@@ -1,10 +1,12 @@
 using Photon.Pun;
 using UnityEngine;
 
+//This class is derived from the BattlePlayer class, to work as a controller for the CPUs that will occupy the battle
 public class BattleCPU : BattlePlayer 
 {
     public GameObject chaos;
 
+    //Overrides the base class spawnElemental to also include if the CPU is Chaos for the boss
     public override void spawnElemental()
     {
         switch (playerElement)
@@ -27,6 +29,7 @@ public class BattleCPU : BattlePlayer
         }
     }
 
+    //Overrides the base class positionElemental to also include if the CPU is Chaos for the boss
     public override void positionElemental()
     {
         switch (playerElement)

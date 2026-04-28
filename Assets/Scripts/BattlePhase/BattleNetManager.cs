@@ -1,13 +1,7 @@
 using Photon.Pun;
 using Photon.Realtime;
-using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
-using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.UIElements;
 
 public class BattleNetManager : MonoBehaviourPunCallbacks
 {
@@ -35,6 +29,7 @@ public class BattleNetManager : MonoBehaviourPunCallbacks
     public double timer = 0;
 
     public GameObject battleMenu;
+    public GameObject disconnectScreen;
 
     void Start()
     {
@@ -50,6 +45,7 @@ public class BattleNetManager : MonoBehaviourPunCallbacks
 
     private void Update()
     {
+        //If you are host and players are spawned in, load the cpus needed to fill the rest of the scene
         if(PhotonNetwork.IsMasterClient)
         {
             if (PhotonNetwork.CurrentRoom != null)
@@ -67,7 +63,7 @@ public class BattleNetManager : MonoBehaviourPunCallbacks
                         timer = PhotonNetwork.Time - start;
                     }
 
-                    if (timer >= 8 && !cpuLoaded)
+                    if ((timer >= 8) && !cpuLoaded)
                     {
                         int numCPU = 5 - PhotonNetwork.CurrentRoom.PlayerCount;
                         loadCPU(numCPU);
@@ -76,6 +72,7 @@ public class BattleNetManager : MonoBehaviourPunCallbacks
             }
         }
 
+        //Loads the battle menu for all
         if(cpuLoaded)
         {
             photonView.RPC("loadMenu", RpcTarget.AllBuffered);
@@ -83,23 +80,40 @@ public class BattleNetManager : MonoBehaviourPunCallbacks
 
     }
 
+    //If the master client switches, this means the host disconnected.
+    //The way the scene is set up, the cpus will be destroyed, so return non host players back to the main menu if host disconnects
+    public override void OnMasterClientSwitched(Photon.Realtime.Player newMasterClient)
+    {
+        disconnectScreen.SetActive(true);
+    }
+
+    //Records in console when the room is left
+    public override void OnLeftRoom()
+    {
+        Debug.Log("Room Left!");
+    }
+
+    //Records in console reason for disconnection
     public override void OnDisconnected(DisconnectCause cause)
     {
         Debug.Log("Disconnected: " + cause.ToString());
     }
 
+    //Connected to master server, record info
     public override void OnConnectedToMaster()
     {
         Debug.Log("Connection made to " + PhotonNetwork.CloudRegion + " server.");
         PhotonNetwork.JoinLobby(TypedLobby.Default);
     }
 
+    //Update list of rooms
     public override void OnRoomListUpdate(List<RoomInfo> roomList)
     {
         Debug.Log("Rooms received");
         createdRooms = roomList;
     }
 
+    //GUI update -- remove in stitch --
     private void OnGUI()
     {
         if (render)
@@ -108,6 +122,7 @@ public class BattleNetManager : MonoBehaviourPunCallbacks
         }
     }
 
+    //Lobby window -- remove in stitch --
     void LobbyWindow(int index)
     {
         GUILayout.BeginHorizontal();
@@ -217,11 +232,13 @@ public class BattleNetManager : MonoBehaviourPunCallbacks
 
     }
 
+    //Records in console when lobby is joined
     public override void OnJoinedLobby()
     {
         Debug.Log("Joined Lobby");
     }
 
+    //Records when the room joined
     public override void OnJoinedRoom()
     {
         Debug.Log("Connected to Room");
@@ -230,6 +247,7 @@ public class BattleNetManager : MonoBehaviourPunCallbacks
         addPlayer(int.Parse(playerElement));
     }
 
+    //Adds the battleplayer to the scene with the correct element and name
     public void addPlayer(int element = 0)
     {
         //spawn player
@@ -257,19 +275,21 @@ public class BattleNetManager : MonoBehaviourPunCallbacks
         photonView.RPC("addElementToList", RpcTarget.AllBuffered, newPlayer.GetComponent<BattlePlayer>().playerElement);
     }
 
+    //Adds the battleplayer to the player list for all players
     [PunRPC]
     public void addPlayerToList(string playerName)
     {
         playerNames.Add(playerName);
     }
 
+    //Adds the element to the element list for all players
     [PunRPC]
     public void addElementToList(string element)
     {
         elements.Add(element);
     }
 
-
+    //Loads the cpu to the scene and adds the cpu names and elements to the respective lists
     void loadCPU(int cpuNeeded)
     {
         string[] elementsNeeded = new string[cpuNeeded];
@@ -315,10 +335,16 @@ public class BattleNetManager : MonoBehaviourPunCallbacks
 
     }
 
+    //Loads the battle menu for all players
     [PunRPC]
     public void loadMenu()
     {
         battleMenu.SetActive(true);
     }
 
+    //Leaves the room
+    public void leaveRoom()
+    {
+        PhotonNetwork.LeaveRoom();
+    }
 }
