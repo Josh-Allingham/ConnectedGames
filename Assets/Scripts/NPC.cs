@@ -21,6 +21,7 @@ public class NPC : MonoBehaviour
     [SerializeField] private Transform newSpawnPos;
     void Start()
     {   
+        oldManAudioSource = GetComponent<AudioSource>();
     }
 
     void Update()
