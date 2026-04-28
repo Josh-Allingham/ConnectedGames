@@ -21,10 +21,7 @@ public class ProgressionManager : MonoBehaviourPunCallbacks, IPunObservable
     void Update()
     {
 
-        if (Input.GetKeyDown(KeyCode.P))
-        {
-            StartBattleScene();
-        }
+
         switch (currentState)
         {
             case ProgressionState.PreOldMan:

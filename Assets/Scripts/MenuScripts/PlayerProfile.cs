@@ -2,35 +2,51 @@ using Photon.Pun;
 using Photon.Pun.Demo.PunBasics;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerProfile : MonoBehaviourPunCallbacks, IPunObservable
 {
     public string profileName;
     public string elementSelected;
+    public bool readyUp = false;
+
+    [Header("Element Icon Sprites")]
+    public Sprite waterIcon;
+    public Sprite fireIcon;
+    public Sprite earthIcon;
+    public Sprite windIcon;
+
+    public int elemNumber;
+
 
     public void Start()
     {
         updateProfile(profileName, elementSelected);
-        //RPCSetProfile(profileName, elementSelected);
     }
 
     public void Update()
     {
         updateProfile(profileName, elementSelected);
+       
+        switch(elementSelected)
+        {
+            case "Water":
+                elemNumber = 0;
+                break;
+            case "Fire":
+                elemNumber = 1;
+                break;
+            case "Earth":
+                elemNumber = 2;
+                break;
+            case "Wind":
+                elemNumber = 3;
+                break;
+        }
+
+        WorldToBattleTransfer.playerName = profileName;
+        WorldToBattleTransfer.element = elemNumber;
     }
-
-
-    //[PunRPC]
-    //public void RPCSetProfile(string name, string elem)
-    //{
-    //    profileName = name;
-    //    elementSelected = elem;
-    //    Debug.Log(elementSelected);
-    //    if (photonView.IsMine)
-    //    {
-    //        photonView.RPC("RPCSetProfile", RpcTarget.OthersBuffered, name, elem);
-    //    }
-    //}
 
     public void updateProfile(string name, string elem)
     {
@@ -38,6 +54,33 @@ public class PlayerProfile : MonoBehaviourPunCallbacks, IPunObservable
         elementSelected = elem;
         this.transform.GetChild(0).GetChild(0).GetComponent<TMP_Text>().text = name;
         this.transform.GetChild(0).GetChild(2).GetComponentInChildren<TMP_Text>().text = elem;
+        
+        if(readyUp)
+        {
+            transform.GetChild(2).GetComponent<Image>().enabled = false;
+            transform.GetChild(3).GetComponent<Image>().enabled = true;
+        }
+        else
+        {
+            transform.GetChild(2).GetComponent<Image>().enabled = true;
+            transform.GetChild(3).GetComponent<Image>().enabled = false;
+        }
+
+            switch (elem)
+            {
+                case "Water":
+                    transform.GetChild(0).GetChild(1).GetComponent<Image>().sprite = waterIcon;
+                    break;
+                case "Fire":
+                    transform.GetChild(0).GetChild(1).GetComponent<Image>().sprite = fireIcon;
+                    break;
+                case "Earth":
+                    transform.GetChild(0).GetChild(1).GetComponent<Image>().sprite = earthIcon;
+                    break;
+                case "Wind":
+                    transform.GetChild(0).GetChild(1).GetComponent<Image>().sprite = windIcon;
+                    break;
+            }
     }
 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
@@ -46,11 +89,13 @@ public class PlayerProfile : MonoBehaviourPunCallbacks, IPunObservable
         {
             stream.SendNext(profileName);
             stream.SendNext(elementSelected);
+            stream.SendNext(readyUp);
         }
         else
         {
             profileName = (string)stream.ReceiveNext();
             elementSelected = (string)stream.ReceiveNext();
+            readyUp = (bool)stream.ReceiveNext();
 
         }
     }
