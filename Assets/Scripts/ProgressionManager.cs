@@ -61,8 +61,7 @@ public class ProgressionManager : MonoBehaviourPunCallbacks, IPunObservable
         photonView.RPC("RPCChangeState", RpcTarget.All, state);
     }
 
-    [PunRPC]
-    public void RPCChangeState(ProgressionState state)
+    [PunRPC] public void RPCChangeState(ProgressionState state)
     {
         currentState = state;
     }

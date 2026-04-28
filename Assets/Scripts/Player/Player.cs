@@ -16,22 +16,24 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
         NULL
     };
 
-    #region spriteIcons;
-    [SerializeField] public Sprite waterIcon, fireIcon, earthIcon, windIcon;
-    [SerializeField] public Sprite waterSprite, fireSprite, earthSprite, windSprite;
-    #endregion
-    public PlayerType currentType;
-    public Color currentColour;
+    [Header("Sprites")]
+    public Sprite waterIcon, fireIcon, earthIcon, windIcon;
+    public Sprite waterSprite, fireSprite, earthSprite, windSprite;
+    
+    [Header("Canvas")]
     public string playerName;
     public Image iconBGSprite;
     public Image iconFGSprite;
+
+    
+    public PlayerType currentType;
+    public Color currentColour;
     public SpriteRenderer bodySprite;
 
-    //Wind
     public GameObject windTunnel;
-    public GameObject windTunnelInstance;
+    private GameObject windTunnelInstance;
     public GameObject earthCube;
-    public List<GameObject> earthCubeInstances;
+    private List<GameObject> earthCubeInstances;
     public float earthCubeRiseTimeInSeconds = 2f;
 
     private Animator anim;
@@ -40,8 +42,6 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
     public PlayerMovement movement;
 
     public NPC currentInteractee;
-    
-
 
     void Start()
     {
@@ -94,17 +94,19 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
             {
                 switch (currentInteractee.isEvil)
                 {
-                    case true:
+                    case true: //Bridge Conversation Ended
                         RPCEndDialogue();
                         //START BATTLE SCENE
+                        if(PhotonNetwork.IsMasterClient)
+                        {
+                            PhotonNetwork.LoadLevel("BattleScene");
+                        }
                         break;
 
-                    case false:
+                    case false: //Intro Conversation Ended
                         ProgressionManager.main.ChangeState(ProgressionManager.ProgressionState.PostOldMan);
                         photonView.RPC("RPCEndDialogue", RpcTarget.All);
                         
-                        //StartCoroutine(CameraManager.main.DisableCameraAfterXSeconds("OldMan", 0, "Player"));
-                        //CameraManager.main.ActivateCamera("Player");
                         break;
                 }
                 
@@ -138,10 +140,8 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
     }
     [PunRPC] void RPCSetElementPowerActive(bool isActive)
     {
-        GetComponent<PlayerPowers>().isActive = isActive;
+        powers.isActive = isActive;
 
-       
-        //Tell everyone else what our new colour is
         if (photonView.IsMine)
         {
             photonView.RPC("RPCSetElementPowerActive", RpcTarget.OthersBuffered, isActive);
@@ -180,7 +180,6 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
                 break;
         }
 
-        //Tell everyone else what our new type is
         if (photonView.IsMine)
         {
             photonView.RPC("RPCChangeTypeTo", RpcTarget.OthersBuffered, newType);
@@ -207,9 +206,6 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
         {
             PlayerUI.main.UpdateHighlightText(interactee.highlightText, interactee.transform.position, 1);
         }
-        
-        
-        
     }
     [PunRPC] public void RPCShowDialogue(string dialogue)
     {
@@ -217,9 +213,7 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
         movement.canMove = false;
         
     }
-
-    [PunRPC]
-    public void RPCEndDialogue()
+    [PunRPC] public void RPCEndDialogue()
     {
         
         PlayerUI.main.EndDialogue();
@@ -250,7 +244,7 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
     void ToggleElementSwitch()
     {
         PlayerType[] types = new PlayerType[4];
-        HashSet<PlayerType> currentTypesInGame = new HashSet<PlayerType>();
+        List<PlayerType> currentTypesInGame = new List<PlayerType>();
         
         types[0] = PlayerType.Water;
         types[1] = PlayerType.Fire;
@@ -260,6 +254,7 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
 
         foreach (GameObject player in NetManager.main.players)
         {
+            Debug.Log(player.GetComponent<Player>().currentType);
             currentTypesInGame.Add(player.GetComponent<Player>().currentType);
         }
         Debug.Log(currentTypesInGame);
@@ -268,7 +263,7 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
             if (types[i] == currentType)
                 typeIndex = i;
         }
-
+        Debug.Log($"Type index: {typeIndex}");
         for (int i = 1; i < 4; i++)
         {
             int desiredIndex = (typeIndex + i) % 4;
@@ -303,7 +298,6 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
         windTunnelInstance = Instantiate(windTunnel, transform.position, Quaternion.identity);
         //windTunnelInstance.transform.localScale = Vector3.one * Mathf.Min(powerTimer, 3);
     }
-
     [PunRPC] public void RPCSpawnEarthCube()
     {
         if (photonView.IsMine)
@@ -316,24 +310,25 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.TryGetComponent(out IElementInteractable enviroObject))
+        if (other.TryGetComponent(out IElementInteractable enviroObject)) //interactable object
         {
             Debug.Log("Player hit");
-            if (currentType == PlayerType.Fire)
+            if (currentType == PlayerType.Fire) //fire affects the environment passively
             {
                 enviroObject.TouchFire(powers.isCharged);
             }
         }
-        if (other.tag == "TutorialJump")
+        if (other.tag == "TutorialJump") //Show jumping tutorial UI
         {
             if (photonView.IsMine)
             {
                 PlayerUI.main.ActivateHintButton(PlayerUI.main.jumpTutorial);
                 PlayerUI.main.ShowTutorialOverlay();
+                
             }
             
         }
-        if (other.tag == "TutorialCauldron")
+        if (other.tag == "TutorialCauldron") //Show Cauldron tutorial UI
         {
             if (photonView.IsMine)
             {
@@ -361,7 +356,7 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
             }
         }*/
     }
-
+    
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
         if (stream.IsWriting)
@@ -377,3 +372,6 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
         }
     }
 }
+
+
+

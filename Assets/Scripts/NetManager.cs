@@ -1,10 +1,7 @@
-using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
 using System.Collections.Generic;
-using System.Collections;
-using UnityEngine.UI;
-using TMPro;
+using UnityEngine;
 public class NetManager : MonoBehaviourPunCallbacks
 {
     public static NetManager main;
@@ -188,6 +185,7 @@ public class NetManager : MonoBehaviourPunCallbacks
         
     }
 
+    //Instantiates a player with a given elementID. setCameraTarget determines whether this is the instance that the clients camera should follow
     void AddPlayer(int element = 0, bool setCameraTarget = false)
     {
         //spawn player
@@ -214,6 +212,7 @@ public class NetManager : MonoBehaviourPunCallbacks
         if (setCameraTarget)
         {
             CameraController.main.SetTarget(newPlayer.transform);
+
         }
     }
 }
