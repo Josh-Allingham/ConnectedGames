@@ -9,7 +9,7 @@ public class NetManager : MonoBehaviourPunCallbacks
     string playerName = "P1";
     //string playerElement = "0";
     string gameVersion = "0.1";
-    //List<RoomInfo> createdRooms = new List<RoomInfo> ();
+    //List<RoomInfo> createdRooms = new List<RoomInfo>();
     //string roomName = "eddieroom";
     //int maxPlayers = 4;
     //Vector2 roomListScroll = Vector2.zero;
@@ -17,7 +17,7 @@ public class NetManager : MonoBehaviourPunCallbacks
     //bool render = true;
 
     public GameObject playerPrefab;
-    public List<GameObject> players = new List<GameObject> ();
+    public List<int> players = new List<int> ();
     [SerializeField] public Transform playerSpawn;
     
     void Start()
@@ -89,7 +89,7 @@ public class NetManager : MonoBehaviourPunCallbacks
     //            roomOptions.IsOpen = true;
     //            roomOptions.IsVisible = true;
     //            roomOptions.MaxPlayers = (byte)maxPlayers;
-                
+
     //            PhotonNetwork.JoinOrCreateRoom(roomName, roomOptions, TypedLobby.Default);
     //        }
     //    }
@@ -150,7 +150,7 @@ public class NetManager : MonoBehaviourPunCallbacks
     //    GUILayout.Label(elementChosen, GUILayout.Width(85));
 
     //    GUILayout.FlexibleSpace();
-        
+
     //    GUI.enabled = (PhotonNetwork.NetworkClientState == ClientState.JoinedLobby || PhotonNetwork.NetworkClientState == ClientState.Disconnected) && !joiningRoom;
     //    if (GUILayout.Button("Refresh", GUILayout.Width(100)))
     //    {
@@ -185,7 +185,7 @@ public class NetManager : MonoBehaviourPunCallbacks
     //    print(PhotonNetwork.CurrentRoom.Players.Count);
     //    render = false;
     //    AddPlayer(int.Parse(playerElement), true);
-        
+
     //}
 
     //Instantiates a player with a given elementID. setCameraTarget determines whether this is the instance that the clients camera should follow
@@ -194,7 +194,7 @@ public class NetManager : MonoBehaviourPunCallbacks
         //spawn player
         GameObject newPlayer = PhotonNetwork.Instantiate(playerPrefab.name, playerSpawn.position, Quaternion.identity, 0);
         newPlayer.GetComponent<Player>().playerName = playerName;
-        
+
         switch (element)
         {
             case 0:
@@ -210,12 +210,36 @@ public class NetManager : MonoBehaviourPunCallbacks
                 newPlayer.GetComponent<Player>().currentType = Player.PlayerType.Wind;
                 break;
         }
-        
-        players.Add(newPlayer);
+
         if (setCameraTarget)
         {
             CameraController.main.SetTarget(newPlayer.transform);
 
         }
+
+        photonView.RPC("addPlayerList", RpcTarget.AllBuffered, element);
+
+    }
+
+    public void addElem(int element)
+    {
+        photonView.RPC("addPlayerList", RpcTarget.AllBuffered, element);
+    }
+
+    public void removeElem(int element)
+    {
+        photonView.RPC("removePlayerList", RpcTarget.AllBuffered, element);
+    }
+
+    [PunRPC]
+    public void addPlayerList(int playerType)
+    {
+        players.Add(playerType);
+    }
+
+    [PunRPC]
+    public void removePlayerList(int playerType)
+    {
+        players.Remove(playerType);
     }
 }
