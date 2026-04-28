@@ -258,28 +258,22 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
     }
     void ToggleElementSwitch()
     {
-        PlayerType[] types = new PlayerType[4];
-        List<PlayerType> currentTypesInGame = new List<PlayerType>();
+        PlayerType[] types = { PlayerType.Water, PlayerType.Fire, PlayerType.Earth, PlayerType.Wind};
+
+        HashSet<PlayerType> currentTypesInGame = new HashSet<PlayerType>();
+
         
-        types[0] = PlayerType.Water;
-        types[1] = PlayerType.Fire;
-        types[2] = PlayerType.Earth;
-        types[3] = PlayerType.Wind;
-        int typeIndex = -1;
 
         foreach (GameObject player in NetManager.main.players)
         {
             Debug.Log(player.GetComponent<Player>().currentType);
             currentTypesInGame.Add(player.GetComponent<Player>().currentType);
         }
-        Debug.Log(currentTypesInGame);
-        for (int i = 0; i < 4; i++)
-        {
-            if (types[i] == currentType)
-                typeIndex = i;
-        }
+
+        int typeIndex = System.Array.IndexOf(types, currentType);
+
         Debug.Log($"Type index: {typeIndex}");
-        for (int i = 1; i < 4; i++)
+        for (int i = 1; i <= 4; i++)
         {
             int desiredIndex = (typeIndex + i) % 4;
             PlayerType desiredType = types[desiredIndex];
