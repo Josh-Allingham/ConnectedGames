@@ -21,41 +21,27 @@ public class Windmill : MonoBehaviour, IElementInteractable
     private string windmillID;
     private float cloudMoveAwayTime = 10;
     public bool isSpinning = false;
-    
+    private AudioSource source;
 
     [Header("State & Interaction")]
     [SerializeField] public WindmillDamageState currentState = WindmillDamageState.canSpin;
 
-    [Header("TangledMill")]
+    [Header("Specifics")]
     [SerializeField] private GameObject trees;
     [SerializeField] private GameObject flames;
     [SerializeField] private GameObject smoke;
 
-    
 
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        source = GetComponent<AudioSource>();
         if (trees && flames && smoke)
         {
             trees.SetActive(true);
             flames.SetActive(false);
             smoke.SetActive(false);
         }
-        
-    }
 
-    // Update is called once per frame
-    void Update()
-    {
-        windmillAcceleration = Mathf.Max(0, windmillAcceleration - Time.deltaTime * windmillDrag);
-        windmillSpeed = Mathf.Min(windmillSpeed + windmillAcceleration, maxWindmillSpeed);
-        windmillSpeed = Mathf.Max(windmillSpeed - Time.deltaTime * windmillDrag * windmillDrag, isSpinning ? maxWindmillSpeed / 2f : 0f);
-        
-        windmillAxis.Rotate(Vector3.up, windmillSpeed * Time.deltaTime, Space.Self);
-
-        
         switch (currentState)
         {
             case WindmillDamageState.tangled:
@@ -69,25 +55,35 @@ public class Windmill : MonoBehaviour, IElementInteractable
             case WindmillDamageState.needsWater:
                 windmillID = "WindmillWater";
                 break;
+        }
 
-            case WindmillDamageState.canSpin:
+    }
 
-                if (windmillSpeed > maxWindmillSpeed / 2 && !isSpinning)
-                {
-                    isSpinning = true;
-                    CameraManager.main.ActivateCamera(windmillID);
-                    StartCoroutine(CameraManager.main.DisableCameraAfterXSeconds(windmillID, cloudMoveAwayTime));
-                    StartCoroutine(cloud.MoveCloud((cloud.transform.position - transform.position).normalized, cloudMoveAwayTime));
-                    
-                }
-                break;
+    void Update()
+    {
+        windmillAcceleration = Mathf.Max(0, windmillAcceleration - Time.deltaTime * windmillDrag);
+        windmillSpeed = Mathf.Min(windmillSpeed + windmillAcceleration, maxWindmillSpeed);
+        windmillSpeed = Mathf.Max(windmillSpeed - Time.deltaTime * windmillDrag * windmillDrag, isSpinning ? maxWindmillSpeed / 2f : 0f);
+        
+        windmillAxis.Rotate(Vector3.up, windmillSpeed * Time.deltaTime, Space.Self);
+
+        if (currentState == WindmillDamageState.canSpin && windmillSpeed > maxWindmillSpeed / 2 && !isSpinning)
+        {
+            source.Play();
+            isSpinning = true;
+            CameraManager.main.ActivateCamera(windmillID);
+            StartCoroutine(CameraManager.main.DisableCameraAfterXSeconds(windmillID, cloudMoveAwayTime));
+            StartCoroutine(cloud.MoveCloud((cloud.transform.position - transform.position).normalized, cloudMoveAwayTime));
         }
     }
 
+    //Called when the windmill has been repaired
     public void ReadyToSpin()
     {
         currentState = WindmillDamageState.canSpin;
     }
+    
+    //Toggles the water windmill's ability to spin.
     public void IsReceivingPowerFromWheel(bool isPowered)
     {
         if (isPowered && currentState == WindmillDamageState.needsWater)
@@ -106,16 +102,13 @@ public class Windmill : MonoBehaviour, IElementInteractable
 
     public void TouchFire(bool isCharged)
     {
-        Debug.Log("HELLO");
-        if (currentState == WindmillDamageState.tangled && isCharged)
+        if (currentState == WindmillDamageState.tangled && isCharged) //isCharged prevents contact alone igniting the trees
         {
             StartCoroutine(BurnTrees());
-         
         }
     }
     IEnumerator BurnTrees()
     {
-        Debug.Log("H");
         flames.SetActive(true);
         yield return new WaitForSeconds(2f);
         trees.SetActive(false);

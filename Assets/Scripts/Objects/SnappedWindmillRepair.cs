@@ -6,10 +6,12 @@ public class SnappedWindmillRepair : MonoBehaviourPunCallbacks
     [SerializeField] private Animator anim;
     private Windmill owner;
     public string highlightText = "[F]";
+    private AudioSource tree;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         owner = GetComponentInParent<Windmill>();
+        tree = GetComponentInParent<AudioSource>();
     }
 
     // Update is called once per frame
@@ -21,7 +23,9 @@ public class SnappedWindmillRepair : MonoBehaviourPunCallbacks
     [PunRPC] 
     private void RPCRepairWindmill()
     {
+        
         anim.SetTrigger("EarthRepair");
+        tree.Play();
         owner.ReadyToSpin();
     }
     private void OnTriggerStay(Collider other)

@@ -55,10 +55,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 15
-  jumpStrength: 30
-  sprite: {fileID: 2324572360693651654}
-  prevInput: {x: 0, y: 0}
+  jumpStrength: 45
   canMove: 1
+  prevInput: {x: 0, y: 0}
+  sprite: {fileID: 2324572360693651654}
 --- !u!114 &9087434924260859972
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -79,16 +79,14 @@ MonoBehaviour:
   fireSprite: {fileID: 1844500207, guid: cb46f1b15471b074292bcc0051995c6b, type: 3}
   earthSprite: {fileID: -1979245163, guid: cb46f1b15471b074292bcc0051995c6b, type: 3}
   windSprite: {fileID: -1123262932, guid: cb46f1b15471b074292bcc0051995c6b, type: 3}
-  currentType: 0
-  currentColour: {r: 0, g: 0, b: 0, a: 0}
   playerName: 
   iconBGSprite: {fileID: 4198839032424434889}
   iconFGSprite: {fileID: 8624875041772222480}
+  currentType: 0
+  currentColour: {r: 0, g: 0, b: 0, a: 0}
   bodySprite: {fileID: 8974939443041552718}
   windTunnel: {fileID: 4967002450238993862, guid: 5907960c8b2a0764f88f22c074e2c764, type: 3}
-  windTunnelInstance: {fileID: 0}
   earthCube: {fileID: 1864968551278961925, guid: 6d2c5de7444424b418099088e711eaf9, type: 3}
-  earthCubeInstances: []
   earthCubeRiseTimeInSeconds: 2
   powers: {fileID: 0}
   movement: {fileID: 0}
@@ -111,9 +109,9 @@ MonoBehaviour:
   isActive: 0
   isCharged: 0
   PowerChargeTimeInSeconds: 4
-  WATER: {r: 0.088679194, g: 0.839378, b: 1, a: 1}
-  burnBlendColour: {r: 1, g: 0.35794678, b: 0, a: 0.03137255}
-  EARTH: {r: 0.49056602, g: 0.38646606, b: 0.22908506, a: 1}
+  playerSource: {fileID: 0}
+  walkGrass: {fileID: 0}
+  walkStone: {fileID: 0}
   waterParticles: {fileID: 7373663541031482973, guid: 3dbe00c22c2f7df48b5ef630e68d75d3, type: 3}
   flameParticles: {fileID: 1494279176249264221, guid: 66f578b7c7e5a0a409d42ca480b0738b, type: 3}
   earthParticles: {fileID: 5134174502015815708, guid: 7f2ed26d0c471f647b75b9506d40c09c, type: 3}
@@ -124,6 +122,9 @@ MonoBehaviour:
   pMAGMA: {fileID: 5134174502015815708, guid: 18fe240363181804c93173a003f45f92, type: 3}
   pFIRESTORM: {fileID: 7373663541031482973, guid: 2d0c16309f124d7448826b2665e4642b, type: 3}
   pEARTHQUAKE: {fileID: 5134174502015815708, guid: e323c1e8661fe7c4fa0edf51e69d1498, type: 3}
+  WATER: {r: 0.088679194, g: 0.839378, b: 1, a: 1}
+  burnBlendColour: {r: 1, g: 0.35794678, b: 0, a: 0.03137255}
+  EARTH: {r: 0.49056602, g: 0.38646606, b: 0.22908506, a: 1}
 --- !u!65 &7715264059520144298
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -143,7 +144,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.7766031, y: 1.2543094, z: 0.32}
+  m_Size: {x: 0.7766031, y: 1.2543094, z: 0.53}
   m_Center: {x: -0.0047923774, y: 0.12715471, z: 0}
 --- !u!54 &6391962331672973110
 Rigidbody:

@@ -24,8 +24,7 @@ public class PlayerUI : MonoBehaviour
     void Start()
     {
         main = this;
-        HighlightText.text = "";
-        DialogueUI.alpha = 0f;
+        EndDialogue();
     }
 
     void Update()
@@ -33,41 +32,44 @@ public class PlayerUI : MonoBehaviour
         
     }
 
+    //Shows dialogue panel and updates text
     public void ShowDialogue(string dialogue)
     {
         DialogueUI.alpha = 1f;
         DialogueUIText.text = dialogue;
     }
-
+    //Hides all dialogue UI
     public void EndDialogue()
     {
         DialogueUI.alpha = 0f;
         DialogueUIText.text = "";
         HighlightText.text = "";
     }
+    //Updates the highlight text and positions over interactable object
     public void UpdateHighlightText(string text, Vector3 position, float alpha)
     {
         HighlightText.text = text;
         HighlightText.transform.position = Camera.main.WorldToScreenPoint(position) + Vector3.up;
         HighlightText.alpha = alpha;
     }
-
+    //Sets the default tutorial image in the hints menu
     public void SetTutorialImage(Sprite sprite)
     {
         tutorialUI.sprite = sprite;
     }
+    //Enables the hint button, leads to tutorial sprite
     public void ActivateHintButton(Sprite sprite)
     {
         SetTutorialImage(sprite);
         CG_Tutorial.alpha = 1;
     }
-
     public void DisableHintButton()
     {
         CG_Tutorial.alpha = 0;
         DisableAndHideButton(closeButton);
         DisableAndHideButton(hintButton);
     }
+    //Show the tutorial image, hide hint button, enable back button
     public void ShowTutorialOverlay()
     {
         tutorialUI.gameObject.SetActive(true);
@@ -75,6 +77,7 @@ public class PlayerUI : MonoBehaviour
         DisableAndHideButton(hintButton);
         
     }
+    //Remove tutorial, enable hint, disable back
     public void HideTutorialOverlay()
     {
         tutorialUI.gameObject.SetActive(false);
@@ -83,7 +86,6 @@ public class PlayerUI : MonoBehaviour
     }
     public void EnableAndShowButton(Button button)
     {
-        
         button.enabled = true;
         button.gameObject.SetActive(true);
     }
