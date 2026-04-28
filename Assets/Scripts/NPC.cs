@@ -20,7 +20,8 @@ public class NPC : MonoBehaviour
     public int dialogueIndex = 0;
     [SerializeField] private Transform newSpawnPos;
     void Start()
-    {   
+    {
+        oldManAudioSource = GetComponent<AudioSource>();
     }
 
     void Update()
