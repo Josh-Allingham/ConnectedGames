@@ -43,6 +43,8 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
 
     public NPC currentInteractee;
 
+    bool initFlag;
+
     void Start()
     {
         anim = GetComponent<Animator>();
@@ -64,6 +66,12 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
 
     void Update()
     {
+        if(!initFlag)
+        {
+            photonView.RPC("RPCChangeTypeTo", RpcTarget.AllBuffered, currentType);
+            initFlag = true;
+        }
+
         if (photonView.IsMine)
         {
             if (Input.GetKeyDown(KeyCode.Q))
@@ -162,11 +170,14 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
             photonView.RPC("RPCSetElementPowerActive", RpcTarget.OthersBuffered, isActive);
         }
     }
-    [PunRPC] void RPCChangeTypeTo(PlayerType newType)
+    [PunRPC] public void RPCChangeTypeTo(PlayerType newType)
     {
         //Reset Animations
         anim.SetInteger("ElementID", -1);
         anim.SetTrigger("Switch");
+
+        NetManager.main.removeElem(powers.TypeToInt(currentType));
+        NetManager.main.addElem(powers.TypeToInt(newType));
 
         currentType = newType;
         GetComponent<PlayerPowers>().SetType(currentType);
@@ -258,49 +269,108 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
     }
     void ToggleElementSwitch()
     {
-        PlayerType[] types = { PlayerType.Water, PlayerType.Fire, PlayerType.Earth, PlayerType.Wind};
+        //PlayerType[] types = { PlayerType.Water, PlayerType.Fire, PlayerType.Earth, PlayerType.Wind};
 
-        HashSet<PlayerType> currentTypesInGame = new HashSet<PlayerType>();
-
-        
-
-        foreach (GameObject player in NetManager.main.players)
-        {
-            Debug.Log(player.GetComponent<Player>().currentType);
-            currentTypesInGame.Add(player.GetComponent<Player>().currentType);
-        }
-
-        int typeIndex = System.Array.IndexOf(types, currentType);
-
-        Debug.Log($"Type index: {typeIndex}");
-        for (int i = 1; i <= 4; i++)
-        {
-            int desiredIndex = (typeIndex + i) % 4;
-            PlayerType desiredType = types[desiredIndex];
-            if (!currentTypesInGame.Contains(desiredType))
-            {
-                RPCChangeTypeTo(desiredType);
-                return;
-            }
-        }
-        
+        //HashSet<int> currentTypesInGame = new HashSet<int>();
 
 
-        /*switch (currentType)
+        //foreach (int elemNum in NetManager.main.players)
+        //{
+        //    currentTypesInGame.Add(elemNum);
+        //}
+
+        //int typeIndex = System.Array.IndexOf(types, currentType);
+
+        //Debug.Log($"Type index: {typeIndex}");
+        //for (int i = 1; i <= 4; i++)
+        //{
+        //    int desiredIndex = (typeIndex + i) % 4;
+        //    PlayerType desiredType = types[desiredIndex];
+        //    if (!currentTypesInGame.Contains(desiredIndex))
+        //    {
+        //        RPCChangeTypeTo(desiredType);
+        //        return;
+        //    }
+        //}
+
+        //NetManager.main.players.Contains(1);
+
+        ///*switch (currentType)
+        //{
+        //    case PlayerType.Water:
+        //        RPCChangeTypeTo(PlayerType.Fire);
+        //        break;
+        //    case PlayerType.Fire:
+        //        RPCChangeTypeTo(PlayerType.Earth);
+        //        break;
+        //    case PlayerType.Earth:
+        //        RPCChangeTypeTo(PlayerType.Wind);
+        //        break;
+        //    case PlayerType.Wind:
+        //        RPCChangeTypeTo(PlayerType.Water);
+        //        break;
+        //}*/
+
+
+        switch (currentType)
         {
             case PlayerType.Water:
-                RPCChangeTypeTo(PlayerType.Fire);
+                if (!NetManager.main.players.Contains(1))
+                {
+                    RPCChangeTypeTo(PlayerType.Fire);
+                }
+                else if (!NetManager.main.players.Contains(2))
+                {
+                    RPCChangeTypeTo(PlayerType.Earth);
+                }
+                else if (!NetManager.main.players.Contains(3))
+                {
+                    RPCChangeTypeTo(PlayerType.Wind);
+                }
                 break;
             case PlayerType.Fire:
-                RPCChangeTypeTo(PlayerType.Earth);
+                if (!NetManager.main.players.Contains(2))
+                {
+                    RPCChangeTypeTo(PlayerType.Earth);
+                }
+                else if (!NetManager.main.players.Contains(3))
+                {
+                    RPCChangeTypeTo(PlayerType.Wind);
+                }
+                else if (!NetManager.main.players.Contains(0))
+                {
+                    RPCChangeTypeTo(PlayerType.Water);
+                }
                 break;
             case PlayerType.Earth:
-                RPCChangeTypeTo(PlayerType.Wind);
+                if (!NetManager.main.players.Contains(3))
+                {
+                    RPCChangeTypeTo(PlayerType.Wind);
+                }
+                else if (!NetManager.main.players.Contains(0))
+                {
+                    RPCChangeTypeTo(PlayerType.Water);
+                }
+                else if (!NetManager.main.players.Contains(1))
+                {
+                    RPCChangeTypeTo(PlayerType.Fire);
+                }
                 break;
             case PlayerType.Wind:
-                RPCChangeTypeTo(PlayerType.Water);
+                if (!NetManager.main.players.Contains(0))
+                {
+                    RPCChangeTypeTo(PlayerType.Water);
+                }
+                else if (!NetManager.main.players.Contains(1))
+                {
+                    RPCChangeTypeTo(PlayerType.Fire);
+                }
+                else if (!NetManager.main.players.Contains(2))
+                {
+                    RPCChangeTypeTo(PlayerType.Earth);
+                }
                 break;
-        }*/
+        }
     }
     public void SpawnWindTunnel()
     {

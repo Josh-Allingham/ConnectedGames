@@ -110,6 +110,9 @@ MonoBehaviour:
   - playerReady
   - playerUneady
   - playerUnready
+  - updatePlayerList
+  - addPlayerList
+  - removePlayerList
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

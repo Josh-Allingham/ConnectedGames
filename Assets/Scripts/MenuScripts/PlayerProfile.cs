@@ -28,22 +28,6 @@ public class PlayerProfile : MonoBehaviourPunCallbacks, IPunObservable
     {
         updateProfile(profileName, elementSelected);
        
-        switch(elementSelected)
-        {
-            case "Water":
-                elemNumber = 0;
-                break;
-            case "Fire":
-                elemNumber = 1;
-                break;
-            case "Earth":
-                elemNumber = 2;
-                break;
-            case "Wind":
-                elemNumber = 3;
-                break;
-        }
-
         WorldToBattleTransfer.playerName = profileName;
         WorldToBattleTransfer.element = elemNumber;
     }
@@ -66,20 +50,24 @@ public class PlayerProfile : MonoBehaviourPunCallbacks, IPunObservable
             transform.GetChild(3).GetComponent<Image>().enabled = false;
         }
 
-            switch (elem)
-            {
-                case "Water":
-                    transform.GetChild(0).GetChild(1).GetComponent<Image>().sprite = waterIcon;
-                    break;
-                case "Fire":
-                    transform.GetChild(0).GetChild(1).GetComponent<Image>().sprite = fireIcon;
-                    break;
-                case "Earth":
-                    transform.GetChild(0).GetChild(1).GetComponent<Image>().sprite = earthIcon;
-                    break;
-                case "Wind":
-                    transform.GetChild(0).GetChild(1).GetComponent<Image>().sprite = windIcon;
-                    break;
+        switch (elem)
+        {
+            case "Water":
+                transform.GetChild(0).GetChild(1).GetComponent<Image>().sprite = waterIcon;
+                elemNumber = 0;
+                break;
+            case "Fire":
+                transform.GetChild(0).GetChild(1).GetComponent<Image>().sprite = fireIcon;
+                elemNumber = 1;
+                break;
+            case "Earth":
+                transform.GetChild(0).GetChild(1).GetComponent<Image>().sprite = earthIcon;
+                elemNumber = 2;
+                break;
+            case "Wind":
+                transform.GetChild(0).GetChild(1).GetComponent<Image>().sprite = windIcon;
+                elemNumber = 3;
+                break;
             }
     }
 
