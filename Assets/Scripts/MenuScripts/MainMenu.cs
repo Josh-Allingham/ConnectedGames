@@ -8,7 +8,6 @@ public class MainMenu : MonoBehaviour
     public GameObject settingsMenu;
     public GameObject exitMenu;
     public GameObject lobbyMenu;
-
     public void play()
     {
         mainMenu.SetActive(false);
@@ -41,4 +40,6 @@ public class MainMenu : MonoBehaviour
     {
         Application.Quit();
     }
+
+
 }
