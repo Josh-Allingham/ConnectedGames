@@ -107,6 +107,9 @@ MonoBehaviour:
   - RPCSetProfile
   - RPCAnnounceElement
   - RPCLoadNewLevel
+  - playerReady
+  - playerUneady
+  - playerUnready
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

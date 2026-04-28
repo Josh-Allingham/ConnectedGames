@@ -6,14 +6,7 @@ using UnityEngine;
 public class BattleNetManager : MonoBehaviourPunCallbacks
 {
     string playerName = "P1";
-    string playerElement = "0";
     string gameVersion = "0.1";
-    List<RoomInfo> createdRooms = new List<RoomInfo>();
-    string roomName = "Room 1";
-    int maxPlayers = 4;
-    Vector2 roomListScroll = Vector2.zero;
-    bool joiningRoom = false;
-    bool render = true;
 
     public GameObject myPlayerManager;
     public GameObject playerPrefab;
@@ -40,7 +33,8 @@ public class BattleNetManager : MonoBehaviourPunCallbacks
             PhotonNetwork.PhotonServerSettings.AppSettings.AppVersion = gameVersion;
             PhotonNetwork.ConnectUsingSettings();
         }
-
+        playerName = WorldToBattleTransfer.playerName;
+        addPlayer(WorldToBattleTransfer.element);
     }
 
     private void Update()
@@ -97,154 +91,6 @@ public class BattleNetManager : MonoBehaviourPunCallbacks
     public override void OnDisconnected(DisconnectCause cause)
     {
         Debug.Log("Disconnected: " + cause.ToString());
-    }
-
-    //Connected to master server, record info
-    public override void OnConnectedToMaster()
-    {
-        Debug.Log("Connection made to " + PhotonNetwork.CloudRegion + " server.");
-        PhotonNetwork.JoinLobby(TypedLobby.Default);
-    }
-
-    //Update list of rooms
-    public override void OnRoomListUpdate(List<RoomInfo> roomList)
-    {
-        Debug.Log("Rooms received");
-        createdRooms = roomList;
-    }
-
-    //GUI update -- remove in stitch --
-    private void OnGUI()
-    {
-        if (render)
-        {
-            GUI.Window(0, new Rect(Screen.width / 2 - 450, Screen.height / 2 - 200, 900, 400), LobbyWindow, "Lobby");
-        }
-    }
-
-    //Lobby window -- remove in stitch --
-    void LobbyWindow(int index)
-    {
-        GUILayout.BeginHorizontal();
-        GUILayout.Label("Status: " + PhotonNetwork.NetworkClientState);
-
-        if (joiningRoom || !PhotonNetwork.IsConnected || PhotonNetwork.NetworkClientState != ClientState.JoinedLobby)
-        {
-            GUI.enabled = false;
-        }
-
-        GUILayout.FlexibleSpace();
-
-        roomName = GUILayout.TextField(roomName, GUILayout.Width(250));
-
-        if (GUILayout.Button("Create Room", GUILayout.Width(125)))
-        {
-            if (roomName != "")
-            {
-                joiningRoom = true;
-
-                RoomOptions roomOptions = new RoomOptions();
-                roomOptions.IsOpen = true;
-                roomOptions.IsVisible = true;
-                roomOptions.MaxPlayers = (byte)maxPlayers;
-
-                PhotonNetwork.JoinOrCreateRoom(roomName, roomOptions, TypedLobby.Default);
-            }
-        }
-
-        GUILayout.EndHorizontal();
-
-        roomListScroll = GUILayout.BeginScrollView(roomListScroll, true, true);
-
-        if (createdRooms.Count == 0)
-        {
-            GUILayout.Label("No Rooms exist.");
-        }
-        else
-        {
-            for (int i = 0; i < createdRooms.Count; i++)
-            {
-                GUILayout.BeginHorizontal("box");
-                GUILayout.Label(createdRooms[i].Name, GUILayout.Width(400));
-                GUILayout.Label(createdRooms[i].PlayerCount + "/" + createdRooms[i].MaxPlayers);
-
-                GUILayout.FlexibleSpace();
-
-                if (GUILayout.Button("Join Room"))
-                {
-                    joiningRoom = true;
-                    PhotonNetwork.NickName = playerName;
-                    PhotonNetwork.JoinRoom(createdRooms[i].Name);
-                }
-                GUILayout.EndHorizontal();
-            }
-        }
-
-        GUILayout.EndScrollView();
-
-        GUILayout.BeginHorizontal();
-        GUILayout.Label("Player Name: ", GUILayout.Width(85));
-        playerName = GUILayout.TextField(playerName, GUILayout.Width(250));
-        GUILayout.Label("Element: ", GUILayout.Width(85));
-        playerElement = GUILayout.TextField(playerElement, GUILayout.Width(50));
-
-        string elementChosen = "";
-        switch (playerElement)
-        {
-            case "0":
-                elementChosen = "Water";
-                break;
-            case "1":
-                elementChosen = "Fire";
-                break;
-            case "2":
-                elementChosen = "Earth";
-                break;
-            case "3":
-                elementChosen = "Wind";
-                break;
-        }
-
-        GUILayout.Label(elementChosen, GUILayout.Width(85));
-
-        GUILayout.FlexibleSpace();
-
-        GUI.enabled = (PhotonNetwork.NetworkClientState == ClientState.JoinedLobby || PhotonNetwork.NetworkClientState == ClientState.Disconnected) && !joiningRoom;
-        if (GUILayout.Button("Refresh", GUILayout.Width(100)))
-        {
-            if (PhotonNetwork.IsConnected)
-            {
-                PhotonNetwork.JoinLobby(TypedLobby.Default);
-            }
-            else
-            {
-                PhotonNetwork.ConnectUsingSettings();
-            }
-        }
-
-        GUILayout.EndHorizontal();
-
-        if (joiningRoom)
-        {
-            GUI.enabled = true;
-            GUI.Label(new Rect(900 / 2 - 50, 400 / 2 - 10, 100, 20), "Connecting...");
-        }
-
-    }
-
-    //Records in console when lobby is joined
-    public override void OnJoinedLobby()
-    {
-        Debug.Log("Joined Lobby");
-    }
-
-    //Records when the room joined
-    public override void OnJoinedRoom()
-    {
-        Debug.Log("Connected to Room");
-        print(PhotonNetwork.CurrentRoom.Players.Count);
-        render = false;
-        addPlayer(int.Parse(playerElement));
     }
 
     //Adds the battleplayer to the scene with the correct element and name

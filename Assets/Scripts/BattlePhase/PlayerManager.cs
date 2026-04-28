@@ -968,7 +968,6 @@ public class PlayerManager : MonoBehaviourPun
     public void RPCGameOver()
     {
         gameOverFlag = true;
-        PhotonNetwork.LeaveRoom();
     }
 
     //Handles if the team defeat the boss and beat the game
@@ -976,6 +975,5 @@ public class PlayerManager : MonoBehaviourPun
     public void RPCGameWin()
     {
         gameWinFlag = true;
-        PhotonNetwork.LeaveRoom();
     }
 }

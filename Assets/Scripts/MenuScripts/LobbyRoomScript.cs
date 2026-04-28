@@ -3,6 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 
 public class LobbyRoomScript : MonoBehaviourPunCallbacks, IPunOwnershipCallbacks
 {
@@ -21,15 +22,18 @@ public class LobbyRoomScript : MonoBehaviourPunCallbacks, IPunOwnershipCallbacks
 
     public TMP_Text lobbyRoomName;
 
-    public string[] elementsAvailable = new string[] { "Water", "Fire", "Earth", "Wind" };
-    public string[] elementsTaken = new string[4];
+    public List<string> elementsAvailable = new List<string>() { "Water", "Fire", "Earth", "Wind" };
+    public List<string> elementsTaken = new List<string>();
 
     public GameObject myProfile;
     public int myNumProfile;
 
+    public List<string> playersReady = new List<string>();
+
     public void Start()
     {
         photonView.OwnershipTransfer = OwnershipOption.Takeover;
+        elementsTaken.Clear();
     }
 
     public void Update()
@@ -39,7 +43,18 @@ public class LobbyRoomScript : MonoBehaviourPunCallbacks, IPunOwnershipCallbacks
             playerCount.text = PhotonNetwork.CurrentRoom.PlayerCount.ToString();
         }
 
-
+        if(PhotonNetwork.IsMasterClient)
+        {
+            if((playersReady.Count == PhotonNetwork.CurrentRoom.PlayerCount) && (PhotonNetwork.CurrentRoom.PlayerCount >= 2))
+            {
+                startGameBtn.interactable = true;
+            }
+            else
+            {
+                startGameBtn.interactable = false;
+            }
+        }
+        
 
     }
 
@@ -64,6 +79,7 @@ public class LobbyRoomScript : MonoBehaviourPunCallbacks, IPunOwnershipCallbacks
         switch (playerNum)
         {
             case 1:
+                startGameBtnImage.SetActive(true);
                 playerProfile1.transform.GetChild(1).gameObject.SetActive(true);
                 myProfile = playerProfile1;
                 myNumProfile = 1;
@@ -72,27 +88,26 @@ public class LobbyRoomScript : MonoBehaviourPunCallbacks, IPunOwnershipCallbacks
             case 2:
                 playerProfile2.transform.GetChild(1).gameObject.SetActive(true);
                 myProfile = playerProfile2;
-                var id = playerProfile2.GetComponent<PhotonView>().ViewID;
-                PhotonView view = PhotonView.Find(id);
-                view.TransferOwnership(PhotonNetwork.LocalPlayer);
+                playerProfile2.SetActive(true);
+                playerProfile2.GetComponent<PhotonView>().TransferOwnership(PhotonNetwork.LocalPlayer);
                 myNumProfile = 2;
                 photonView.RPC("RPCAnnounceProfile", RpcTarget.AllBuffered, 2, playerName);
                 break;
             case 3:
                 playerProfile3.transform.GetChild(1).gameObject.SetActive(true);
                 myProfile = playerProfile3;
+                playerProfile2.SetActive(true);
                 playerProfile3.GetComponent<PhotonView>().TransferOwnership(PhotonNetwork.LocalPlayer);
                 myNumProfile = 3;
                 photonView.RPC("RPCAnnounceProfile", RpcTarget.AllBuffered, 3, playerName);
-                
                 break;
             case 4:
                 playerProfile4.transform.GetChild(1).gameObject.SetActive(true);
                 myProfile = playerProfile4;
+                playerProfile2.SetActive(true);
                 playerProfile4.GetComponent<PhotonView>().TransferOwnership(PhotonNetwork.LocalPlayer);
                 myNumProfile = 4;
                 photonView.RPC("RPCAnnounceProfile", RpcTarget.AllBuffered, 4, playerName);
-                
                 break;
         }
     }
@@ -102,11 +117,11 @@ public class LobbyRoomScript : MonoBehaviourPunCallbacks, IPunOwnershipCallbacks
     {
         string currentElem = myProfile.GetComponent<PlayerProfile>().elementSelected;
         string newElem = currentElem;
-        for (int i = 0; i < elementsAvailable.Length; i++)
+        for (int i = 0; i < elementsAvailable.Count; i++)
         {
             if(currentElem == elementsAvailable[i])
             {
-                if(i+1 < elementsAvailable.Length)
+                if(i+1 < elementsAvailable.Count)
                 {
                     newElem = elementsAvailable[i + 1];
                 }
@@ -125,7 +140,7 @@ public class LobbyRoomScript : MonoBehaviourPunCallbacks, IPunOwnershipCallbacks
     {
         string currentElem = myProfile.GetComponent<PlayerProfile>().elementSelected;
         string newElem = currentElem;
-        for (int i = 0; i < elementsAvailable.Length; i++)
+        for (int i = 0; i < elementsAvailable.Count; i++)
         {
             if (currentElem == elementsAvailable[i])
             {
@@ -139,13 +154,48 @@ public class LobbyRoomScript : MonoBehaviourPunCallbacks, IPunOwnershipCallbacks
                 }
                 else
                 {
-                    newElem = elementsAvailable[elementsAvailable.Length - 1];
+                    newElem = elementsAvailable[elementsAvailable.Count - 1];
                 }
             }
         }
         Debug.Log(newElem);
         myProfile.GetComponent<PlayerProfile>().updateProfile(myProfile.GetComponent<PlayerProfile>().profileName, newElem);
         //myProfile.GetComponent<PlayerProfile>().elementSelected = newElem;
+    }
+
+    public void readyUp()
+    {
+        string elemHovered = myProfile.GetComponent<PlayerProfile>().elementSelected;
+        bool ready = myProfile.GetComponent<PlayerProfile>().readyUp;
+
+        if(ready)
+        {
+            for (int i = 0; i < elementsTaken.Count; i++)
+            {
+                if (elementsTaken[i] == elemHovered)
+                {
+                    photonView.RPC("playerUnready", RpcTarget.AllBuffered, elemHovered);
+                }
+            }
+
+            readyBtnText.text = "Ready";
+            myProfile.GetComponent<PlayerProfile>().readyUp = false;
+            myProfile.transform.GetChild(1).gameObject.SetActive(true);
+        }
+        else
+        {
+            for(int i = 0; i < elementsAvailable.Count; i++)
+            {
+                if (elementsAvailable[i] == elemHovered)
+                {
+                    photonView.RPC("playerReady", RpcTarget.AllBuffered, elemHovered);
+                }
+            }
+
+            readyBtnText.text = "Unready";
+            myProfile.GetComponent<PlayerProfile>().readyUp = true;
+            myProfile.transform.GetChild(1).gameObject.SetActive(false);
+        }
     }
 
     [PunRPC]
@@ -172,9 +222,35 @@ public class LobbyRoomScript : MonoBehaviourPunCallbacks, IPunOwnershipCallbacks
 
 
     [PunRPC]
+    public void playerReady(string element)
+    {
+        elementsTaken.Add(element);
+        elementsAvailable.Remove(element);
+        playersReady.Add(element);
+    }
+
+
+    [PunRPC]
+    public void playerUnready(string element)
+    {
+        elementsAvailable.Add(element);
+        elementsTaken.Remove(element);
+        playersReady.Remove(element);
+    }
+
+    [PunRPC]
     public void changeElement()
     {
 
+    }
+
+
+    public void startGame()
+    {
+        if (PhotonNetwork.IsMasterClient)
+        {
+            PhotonNetwork.LoadLevel("SampleScene");
+        }
     }
 
     public void OnOwnershipRequest(PhotonView targetView, Photon.Realtime.Player requestingPlayer)
@@ -192,4 +268,5 @@ public class LobbyRoomScript : MonoBehaviourPunCallbacks, IPunOwnershipCallbacks
     {
         Debug.Log("Transfer Failed!");
     }
+
 }

@@ -79,7 +79,11 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
             WorldToBattleTransfer.playerName = playerName;
             WorldToBattleTransfer.element = powers.TypeToInt(currentType);
         }
-        
+
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            photonView.RPC("RPCLoadNewLevel", RpcTarget.AllBuffered);
+        }
     }
 
     void HandleNPCInteractions()
@@ -101,6 +105,7 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
                         RPCEndDialogue();
                         //START BATTLE SCENE
                         photonView.RPC("RPCLoadNewLevel", RpcTarget.AllBuffered);
+                        
                         break;
 
                     case false: //Intro Conversation Ended
@@ -113,13 +118,17 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
             }
         }
     }
-    [PunRPC] void RPCLoadNewLevel()
+
+    [PunRPC]
+    void RPCLoadNewLevel()
     {
         if (PhotonNetwork.IsMasterClient)
         {
             ProgressionManager.main.StartBattleScene();
         }
     }
+
+
     [PunRPC]  void RPCSetPlayerName(string _playerName)
     {
         GetComponentInChildren<TMP_Text>().text = _playerName;
