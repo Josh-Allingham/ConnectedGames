@@ -11,26 +11,52 @@ public class Cloud : MonoBehaviour
     [SerializeField] private float speedMultiplier = 0.5f;
     public bool isAlive = true;
     private float timer = 0;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+
+    public AudioClip cloudMove;
     void Start()
     {
-        spheres = new List<CloudBall>();
+        /*spheres = new List<CloudBall>();
 
         for (int i = 0; i < numBalls; i++)
         {
             AddBall();
-        }
+        }*/
     }
 
     void Update()
     {
-        //UpdateBalls();
+        /*UpdateBalls();
         if (!isAlive)
         {
             gameObject.SetActive(false);
-        }
+        }*/
     }
 
+    //Moves cloud in the given direction for duration seconds
+    public IEnumerator MoveCloud(Vector3 direction, float duration)
+    {
+        Vector3 startingPos = transform.position;
+        Vector3 finalPos = transform.position + (direction * 10);
+        AudioPlayer.main.PlaySound(cloudMove);
+        yield return new WaitForSeconds(1f);
+        while (timer < duration)
+        {
+            transform.position = Vector3.Lerp(startingPos, finalPos, (timer / duration));
+            timer += Time.deltaTime;
+            yield return null;
+        }
+        while (timer < duration + 2)
+        {
+            transform.localScale = Vector3.Lerp(Vector3.one, Vector3.zero, (timer - duration) / 2f);
+            timer += Time.deltaTime;
+            yield return null;
+        }
+        isAlive = false;
+        
+            
+    }
+    
+    //Functions for the original sphere method for cloud rendering
     private void AddBall()
     {
         GameObject newBall = Instantiate(spherePrefab);
@@ -59,29 +85,6 @@ public class Cloud : MonoBehaviour
             currentBall.instance.transform.localScale = Vector3.one * currentBall.maxRadius * Mathf.Sin(c * currentBall.lifeTimer);
             spheres[i] = currentBall;
         }
-    }
-
-    public IEnumerator MoveCloud(Vector3 direction, float duration)
-    {
-        Vector3 startingPos = transform.position;
-        Vector3 finalPos = transform.position + (direction * 10);
-
-        yield return new WaitForSeconds(1f);
-        while (timer < duration)
-        {
-            transform.position = Vector3.Lerp(startingPos, finalPos, (timer / duration));
-            timer += Time.deltaTime;
-            yield return null;
-        }
-        while (timer < duration + 2)
-        {
-            transform.localScale = Vector3.Lerp(Vector3.one, Vector3.zero, (timer - duration) / 2);
-            timer += Time.deltaTime;
-            yield return null;
-        }
-        isAlive = false;
-        
-            
     }
     public struct CloudBall
     {

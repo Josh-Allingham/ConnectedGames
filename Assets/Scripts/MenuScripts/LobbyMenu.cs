@@ -1,8 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using WebSocketSharp;
-using Photon.Pun;
+using UnityEngine.SceneManagement;
 
 public class LobbyMenu : MonoBehaviour
 {

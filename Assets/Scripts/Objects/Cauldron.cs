@@ -5,24 +5,27 @@ public class Cauldron : MonoBehaviour, IElementInteractable
 {
     [SerializeField] private bool isLit = false, hasWater = false, hasWind = false, hasWood = false;
     [SerializeField] private GameObject wood;
-    [SerializeField] private GameObject water; //scale y from 0 to .2
+    [SerializeField] private GameObject water; 
     [SerializeField] private Vector2 waterScaleMinMax = new Vector2(0, 0.2f); //scale y from 0 to .2
     [SerializeField] private GameObject fire;
     [SerializeField] private GameObject steam;
+
+    private AudioSource cauldronAudioSource;
+    public AudioClip flameSound;
+    public AudioClip earthSound;
+    public AudioClip windSound;
     
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        cauldronAudioSource = GetComponent<AudioSource>();
         wood.transform.position += Vector3.down * 2;
         water.transform.localScale = new Vector3(water.transform.localScale.x, waterScaleMinMax.x, water.transform.localScale.z);
         fire.SetActive(false);
         steam.SetActive(false);
     }
 
-    // Update is called once per frame
     void Update()
     {
-        
         if (isLit && hasWater && hasWood)
         {
             steam.SetActive(true);
@@ -56,12 +59,11 @@ public class Cauldron : MonoBehaviour, IElementInteractable
     }
     public void TouchFire(bool isCharged)
     {
-        
         if (!isLit && hasWood && isCharged)
         {
+            cauldronAudioSource.PlayOneShot(flameSound);
             isLit = true;
             fire.SetActive(true);
-            //add flames to fire
         }
 
     }
@@ -70,8 +72,8 @@ public class Cauldron : MonoBehaviour, IElementInteractable
     {
         if (!hasWood)
         {
+            cauldronAudioSource.PlayOneShot(earthSound);
             hasWood = true;
-            //add wood to fire
             StartCoroutine(RaiseFireWood(0.5f));
         }
         
@@ -89,10 +91,11 @@ public class Cauldron : MonoBehaviour, IElementInteractable
     }
     public void TouchWind()
     {
-        if (!hasWind && hasWood && hasWater && isLit) //wind is the last thing
+        
+        if (!hasWind && hasWood && hasWater && isLit)
         {
+            cauldronAudioSource.PlayOneShot(windSound);
             hasWind = true;
-            //trigger platforms
         }
 
     }

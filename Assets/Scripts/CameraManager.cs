@@ -8,7 +8,6 @@ public class CameraManager : MonoBehaviourPunCallbacks
     public static CameraManager main;
     public Dictionary<string, GameObject> cameraDict = new Dictionary<string, GameObject>();
     public GameObject[] cameras;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         main = this;
@@ -31,38 +30,39 @@ public class CameraManager : MonoBehaviourPunCallbacks
         SetPlayerCam(true);
     }
 
-    // Update is called once per frame
     void Update()
     {
         
     }
 
+    //Network call to activate given camera on all local clients
     public void ActivateCamera(string cameraName)
     {
-        Debug.Log("Activating " + cameraName);
+        //Debug.Log("Activating " + cameraName);
         photonView.RPC("RPCActivateCamera", RpcTarget.All, cameraName);
     }
-
+    //Network call to disable camera after x seconds on all local clients
+    public IEnumerator DisableCameraAfterXSeconds(string cameraName, float x)
+    {
+        yield return new WaitForSeconds(x);
+        Debug.Log("Deactivating " + cameraName);
+        photonView.RPC("RPCDisableCamera", RpcTarget.All, cameraName);
+        
+    }
+    //Disable Camera locally
     [PunRPC] public void RPCDisableCamera(string cameraName)
     {
         GameObject cam = cameraDict[cameraName];
         cam.SetActive(false);
     }
 
+    //Activate Camera locally
     [PunRPC] public void RPCActivateCamera(string cameraName)
     {
         //TODO disable movement
 
         GameObject cam = cameraDict[cameraName];
         cam.SetActive(true);
-        
-    }
-
-    public IEnumerator DisableCameraAfterXSeconds(string cameraName, float x)
-    {
-        yield return new WaitForSeconds(x);
-        Debug.Log("Deactivating " + cameraName);
-        photonView.RPC("RPCDisableCamera", RpcTarget.All, cameraName);
         
     }
 

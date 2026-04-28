@@ -21,8 +21,6 @@ public class WindmillWaterWheel : MonoBehaviour, IElementInteractable
         wheelSpeed = Mathf.Max(wheelSpeed - Time.deltaTime * wheelDrag * wheelDrag, 0f);
 
         transform.Rotate(Vector3.right, wheelSpeed * Time.deltaTime, Space.Self);
-
-        
         windmill.IsReceivingPowerFromWheel(wheelSpeed > maxWheelSpeed / 2);
     }
     public void TouchEarth()
@@ -38,7 +36,6 @@ public class WindmillWaterWheel : MonoBehaviour, IElementInteractable
     public void TouchWater()
     {
         wheelAcceleration += 1f;
-
     }
 
     public void TouchWind()

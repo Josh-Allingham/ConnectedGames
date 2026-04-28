@@ -2,34 +2,28 @@ using UnityEngine;
 using Photon.Pun;
 public class PlayerPowers : MonoBehaviour
 {
-
-
     [Header("Footsteps")]
     public float footstepRadius = 1f;
     public float footstepDistance;
     public float timeBetweenIdleSpawns = 0.2f;
-    public bool isActive = false;
-    public bool isCharged;
-
     private Color footstepColour;
     private Vector3 prevPosition;
+
+    [Header("Powers")]
+    public bool isActive = false;
+    public bool isCharged;
     public Player.PlayerType playerType { get; private set; }
+    [SerializeField] private float PowerChargeTimeInSeconds = 4f;
     private float powerTimer = 0;
 
     private Player player;
 
-    #region Stats
-    [SerializeField] private float PowerChargeTimeInSeconds = 4f;
-    #endregion
-    #region ColorCodes
-    [Header("Colours")]
-    [SerializeField] private Color WATER;
-    [SerializeField] private Color burnBlendColour;
-    [SerializeField] private Color EARTH;
-    #endregion
+    [Header("Audio")]
+    public AudioSource playerSource;
+    public AudioClip walkGrass;
+    public AudioClip walkStone;
 
-    #region Particles
-    [Header("Particles")]    
+    [Header("Particles")]
     public ParticleSystem waterParticles;
     public ParticleSystem flameParticles;
     public ParticleSystem earthParticles;
@@ -41,7 +35,14 @@ public class PlayerPowers : MonoBehaviour
     public ParticleSystem pFIRESTORM;
     public ParticleSystem pEARTHQUAKE;
     private ParticleSystem[,] particleInteractionLookup;
+    #region ColorCodes
+    [Header("Colours")]
+    [SerializeField] private Color WATER;
+    [SerializeField] private Color burnBlendColour;
+    [SerializeField] private Color EARTH;
     #endregion
+
+
     void Start()
     {
         player = GetComponent<Player>();
@@ -67,20 +68,21 @@ public class PlayerPowers : MonoBehaviour
         if (prevPosition == null || (prevPosition - transform.position).magnitude > footstepDistance)
         {
             prevPosition = transform.position;
-            PlaceFootstep();
+            ApplyPowers();
         }
         else if (GetComponent<Rigidbody>().linearVelocity.magnitude <= .1f && Time.time - Mathf.FloorToInt(Time.time) < timeBetweenIdleSpawns) //If standing still, place periodically
         {
-            PlaceFootstep();
+            ApplyPowers();
         }
 
     }
 
-    private void PlaceFootstep()
+    private void ApplyPowers()
     {
         RaycastHit hit;
         if (Physics.Raycast(transform.position, Vector3.down, out hit, .5f)) //if stood on ground
         {
+            //Footstep Logic (drawing on floor)
             hit.collider.gameObject.TryGetComponent(out GroundTextureGenerator generator);
             if (generator != null)//If standing on drawable texture, run relevent footstep logic
             {
@@ -103,7 +105,8 @@ public class PlayerPowers : MonoBehaviour
             }
             
         }
-        switch (playerType) //spawn particle
+        //Spawn power particles
+        switch (playerType)
         {
             case Player.PlayerType.Water:
                 SpawnParticles(waterParticles, Vector3.one * .5f);
@@ -114,7 +117,8 @@ public class PlayerPowers : MonoBehaviour
             case Player.PlayerType.Earth:
                 SpawnParticles(earthParticles, Vector3.one * 1f);
 
-                if (powerTimer >= PowerChargeTimeInSeconds)
+                //Once charged, spawn platform
+                if (isCharged)
                 {
                     player.RPCSpawnEarthCube();
                     powerTimer = 0;
@@ -122,7 +126,8 @@ public class PlayerPowers : MonoBehaviour
                 break;
             case Player.PlayerType.Wind:
                 SpawnParticles(windParticles, Vector3.one * 1f * Mathf.Min(powerTimer / 2, 2));
-                if (powerTimer >= PowerChargeTimeInSeconds)
+                //Once charged, spawn wind tunnel
+                if (isCharged)
                 {
                     player.SpawnWindTunnel();
                     powerTimer = 0;
@@ -131,6 +136,7 @@ public class PlayerPowers : MonoBehaviour
         }
     }
 
+    //If the player is stood on a drawable texture, translates player position to grid coordinates on the texture.
     private Vector2Int GetPlayerPositionOnGrid(GroundTextureGenerator generator)
     {
         Vector3 scale = generator.transform.localScale;
@@ -156,6 +162,7 @@ public class PlayerPowers : MonoBehaviour
         newParticle.GetComponent<FootstepParticle>().player = this;
 
     }
+    //Create combination table for particle interactions
     void ConstructLookupTable()
     {
         particleInteractionLookup = new ParticleSystem[4, 4];
@@ -182,6 +189,8 @@ public class PlayerPowers : MonoBehaviour
         particleInteractionLookup[iWIND, iEARTH] = pEARTHQUAKE;
         particleInteractionLookup[iEARTH, iWIND] = pEARTHQUAKE;
     }
+    
+    //converts types to integers in defined mapping
     public int TypeToInt(Player.PlayerType type)
     {
         switch (type)
@@ -238,7 +247,6 @@ public class PlayerPowers : MonoBehaviour
         Color colour = EARTH;
         generator.DrawAt(drawPos.x, drawPos.y, (int)footstepRadius, colour);
 
-        //TODO Quake()
       
         
     }
