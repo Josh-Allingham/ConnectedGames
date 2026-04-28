@@ -7094,7 +7094,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerPrefab: {fileID: 869804286486522258, guid: 8fe2fd7abae335d4b8592faec7db0545, type: 3}
-  players: []
+  players: 
   playerSpawn: {fileID: 1716269947}
 --- !u!4 &1406861148
 Transform:
