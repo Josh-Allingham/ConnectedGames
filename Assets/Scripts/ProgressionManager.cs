@@ -9,6 +9,7 @@ public class ProgressionManager : MonoBehaviourPunCallbacks, IPunObservable
     [SerializeField] private Cauldron cauldron;
     [SerializeField] private Animator GateAnimator;
     [SerializeField] private GameObject oldMan;
+    
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -19,6 +20,11 @@ public class ProgressionManager : MonoBehaviourPunCallbacks, IPunObservable
     // Update is called once per frame
     void Update()
     {
+
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            StartBattleScene();
+        }
         switch (currentState)
         {
             case ProgressionState.PreOldMan:
@@ -55,6 +61,10 @@ public class ProgressionManager : MonoBehaviourPunCallbacks, IPunObservable
             case ProgressionState.PlatformsSpawned:
                 break;
         }
+    }
+    public void StartBattleScene()
+    {
+        PhotonNetwork.LoadLevel("BattleScene");
     }
     public void ChangeState(ProgressionState state)
     {

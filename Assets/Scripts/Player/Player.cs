@@ -75,6 +75,9 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
             RPCSetPlayerName(playerName);
             anim.SetBool("IsWalking", rb.linearVelocity.magnitude > .1f);
             HandleNPCInteractions();
+
+            WorldToBattleTransfer.playerName = playerName;
+            WorldToBattleTransfer.element = powers.TypeToInt(currentType);
         }
         
     }
@@ -97,10 +100,8 @@ public class Player : MonoBehaviourPunCallbacks, IPunObservable
                     case true: //Bridge Conversation Ended
                         RPCEndDialogue();
                         //START BATTLE SCENE
-                        if(PhotonNetwork.IsMasterClient)
-                        {
-                            PhotonNetwork.LoadLevel("BattleScene");
-                        }
+                        ProgressionManager.main.StartBattleScene();
+                        
                         break;
 
                     case false: //Intro Conversation Ended
