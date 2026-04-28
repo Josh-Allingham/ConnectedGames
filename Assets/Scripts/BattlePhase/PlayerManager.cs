@@ -6,14 +6,17 @@ using System.Linq;
 using UnityEngine;
 
 
-
+//The purpose of this class is to handle everything that happen within the battle for all players, recording stats, moves taken and the state of the fight.
 public class PlayerManager : MonoBehaviourPun
 {
     public Element myElement;
+    public bool spawnedIn = false;
+    public bool despawned = false;
 
     public string myElementType;
     public int numOfCPU;
     public List<Element> cpuElement = new List<Element>();
+    public bool cpuSpawned = false;
 
     public bool gameWinFlag = false;
     public bool gameOverFlag = false;
@@ -85,12 +88,15 @@ public class PlayerManager : MonoBehaviourPun
 
     public void Update()
     {
-
+        //First child as Host is your own player; if you are not host, the only child will be your player
         if (this.transform.childCount>0)
         {
             myElement = GetComponentInChildren<BattlePlayer>().GetComponentInChildren<Element>();
+            spawnedIn = true;
+
         }
 
+        //If you are the host, handle/record all of the CPUs that are spawned under the player manager and their element
         if ((PhotonNetwork.IsMasterClient && this.transform.childCount > 1))
         {
             numOfCPU = 5 - PhotonNetwork.CurrentRoom.PlayerCount;
@@ -101,8 +107,13 @@ public class PlayerManager : MonoBehaviourPun
                 {
                     cpuElement.Add(cpu);
                 }
+                else if(cpuElement.Count == numOfCPU)
+                {
+                    cpuSpawned = true;
+                }
             }
-
+            
+            //Announce the CPU element stats to all players (including non-host players)
             if(cpuElement.Count > 0)
             {
                 foreach (Element cpu in cpuElement)
@@ -114,6 +125,7 @@ public class PlayerManager : MonoBehaviourPun
 
         }
 
+        //Announce my element stats to all other players
         if (myElement != null)
         {
             getMyPlayerStats(myElement);
@@ -121,50 +133,74 @@ public class PlayerManager : MonoBehaviourPun
 
         }
 
-        if(turnLockedIn)
+        //If you have spawned in with your element
+        if (spawnedIn)
         {
-            turnLockedIn = false;
-
-            if (turnAction == "Attack")
+            //And you have locked your turn in using the battle menu, handle your actions and target before announcing your turn to everyone
+            if (turnLockedIn)
             {
-                int attackHitProb = UnityEngine.Random.Range(0, 100);
-                if (attackHitProb <= attackAccuracy)
+                turnLockedIn = false;
+                //Check if the attack lands or misses before recording
+                if (turnAction == "Attack" && myElement.IsAlive)
                 {
-                    photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, myElementType, turnAction, turnTarget, attackName, attackPower, castName, castPower);
+                    int attackHitProb = UnityEngine.Random.Range(0, 100);
+                    if (attackHitProb <= attackAccuracy)
+                    {
+                        photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, myElementType, turnAction, turnTarget, attackName, attackPower, castName, castPower);
+                    }
+                    else
+                    {
+                        turnAction = "Miss";
+                        photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, myElementType, turnAction, turnTarget, attackName, attackPower, castName, castPower);
+                    }
                 }
-                else
+                //Check if cast lands or misses before recording
+                if (turnAction == "Cast" && myElement.IsAlive)
                 {
-                    turnAction = "Miss";
-                    photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, myElementType, turnAction, turnTarget, attackName, attackPower, castName, castPower);
+                    int castHitProb = UnityEngine.Random.Range(0, 100);
+                    if (castHitProb <= castAccuracy)
+                    {
+                        photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, myElementType, turnAction, turnTarget, attackName, attackPower, castName, castPower);
+                    }
+                    else
+                    {
+                        turnAction = "Miss";
+                        photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, myElementType, turnAction, turnTarget, attackName, attackPower, castName, castPower);
+                    }
+                }
+
+                //Also if you are the host do this for all the CPUs
+                if (PhotonNetwork.IsMasterClient)
+                {
+                    if (!cpuTurnsLockedIn && cpuElement.Count == numOfCPU)
+                    {
+                        foreach (Element cpu in cpuElement)
+                        {
+                            cpuAction(cpu);
+                        }
+                        cpuTurnsLockedIn = true;
+                    }
                 }
             }
-            if(turnAction == "Cast")
+            //If you are the host and your element is dead, still continue to handle all of CPU actions
+            else if (!myElement.alive && cpuSpawned)
             {
-                int castHitProb = UnityEngine.Random.Range(0, 100);
-                if (castHitProb <= castAccuracy)
+                if (PhotonNetwork.IsMasterClient)
                 {
-                    photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, myElementType, turnAction, turnTarget, attackName, attackPower, castName, castPower);
-                }
-                else
-                {
-                    turnAction = "Miss";
-                    photonView.RPC("RPCRecordTurnActions", RpcTarget.AllBuffered, myElementType, turnAction, turnTarget, attackName, attackPower, castName, castPower);
+                    if (!cpuTurnsLockedIn && cpuElement.Count == numOfCPU)
+                    {
+                        foreach (Element cpu in cpuElement)
+                        {
+                            cpuAction(cpu);
+                        }
+                        cpuTurnsLockedIn = true;
+                    }
                 }
             }
             
-            if(PhotonNetwork.IsMasterClient)
-            {
-                if (!cpuTurnsLockedIn && cpuElement.Count == numOfCPU)
-                {
-                    foreach (Element cpu in cpuElement)
-                    {
-                        cpuAction(cpu);
-                    }
-                    cpuTurnsLockedIn = true;
-                }
-            }
         }
 
+        //Starts the coroutine for the fight if everyone that is alive has locked in their turn
         if(turnActions.Count == 5 - deadPlayers.Count && !fighting)
         {
             fighting = true;
@@ -173,11 +209,14 @@ public class PlayerManager : MonoBehaviourPun
             StartCoroutine(commenceFight());
         }
 
+        //Once the turn has finished
         if(nextTurnReady)
         {
             fighting = false;
+            //Clear the recorded turns from last turn
             photonView.RPC("RPCResetTurns", RpcTarget.AllBuffered);
             nextTurnReady = false;
+            //Check if the boss died, despawn and win game if true
             if(!chaosAlive)
             {
                 foreach(Element cpu in cpuElement)
@@ -190,16 +229,20 @@ public class PlayerManager : MonoBehaviourPun
                 photonView.RPC("RPCGameWin", RpcTarget.AllBuffered);
             }
 
+            //If all elements are dead, you lose
             if (!fireAlive && !waterAlive && !earthAlive && !windAlive)
             {
                 photonView.RPC("RPCGameOver", RpcTarget.AllBuffered);
             }
 
-            if (!myElement.alive)
+            //Check if your element died this turn, despawn if so
+            if (!myElement.alive && !despawned)
             {
-                photonView.RPC("RPCDespawn", RpcTarget.AllBuffered, myElement.elementType); ;
+                despawned = true;
+                photonView.RPC("RPCDespawn", RpcTarget.AllBuffered, myElement.elementType);
             }
 
+            //Despawn all elements that has died
             foreach (Element cpu in cpuElement)
             {
                 if (!cpu.alive)
@@ -211,6 +254,7 @@ public class PlayerManager : MonoBehaviourPun
 
     }
 
+    //This functions fetches the players current stats from the element they control
     public void getMyPlayerStats(Element element)
     {
         switch (element.ElementType)
@@ -264,6 +308,7 @@ public class PlayerManager : MonoBehaviourPun
         getMoves(element.MyMoves);
     }
 
+    //This function fetches the players moves from the element class it controls
     public void getMoves(string[,] moves)
     {
         attackType = moves[0, 0];
@@ -281,6 +326,7 @@ public class PlayerManager : MonoBehaviourPun
         castDescription = moves[1, 5];
     }
 
+    //An RPC call that updates all players of the the stats sent to it. This function is used to keep being called to ensure everyone's menu and stats are up to date
     [PunRPC]
     public void RPCAnnounceStats(string element, float maxHealth, float health, float maxStatera, float statera, float speed, bool alive)
     {
@@ -329,6 +375,7 @@ public class PlayerManager : MonoBehaviourPun
         }
     }
 
+    //This RPC records the actions of the element passed to it with all the vital information needed for the move to be carried out on everyon'e client for a single turn
     [PunRPC]
     public void RPCRecordTurnActions(string element, string action, string target, string attackMoveName, int attackPower, string castMoveName, int castPower)
     {
@@ -341,6 +388,10 @@ public class PlayerManager : MonoBehaviourPun
         {
             turnPower.Add(element, castPower);
             turnActions.Add(element + " is using " + castMoveName + " on " + target);
+            if (myElementType == element)
+            {
+                myElement.CurrentElementStatera = myElement.CurrentElementStatera - 5;
+            }
         }
         else if (action == "Miss")
         {
@@ -349,6 +400,7 @@ public class PlayerManager : MonoBehaviourPun
         }
     }
 
+    //Clears all buffers and details of all turns recorded after the turn is finished
     [PunRPC]
     public void RPCResetTurns()
     {
@@ -358,6 +410,7 @@ public class PlayerManager : MonoBehaviourPun
         cpuTurnsLockedIn = false;
     }
 
+    //Called by host only to determine all of the cpu actions for this turn, including the boss actions
     public void cpuAction(Element cpuElement)
     {
         string lockInCPUAction;
@@ -369,9 +422,10 @@ public class PlayerManager : MonoBehaviourPun
         {
             switch (cpuElement.elementType)
             {
+                //Chaos prioritises attack the whole party, with a stunning cast on a random player. Once at half health, it uses it's second attack where the damage dealt is doubled.
                 case "Chaos":
                     randomAction = UnityEngine.Random.Range(0, 1);
-                    if (randomAction <= .75f)
+                    if (randomAction <= 1f) //Set to one as the cast implementation for the boss has not been implemented (Meant to be .75)
                     {
                         lockInCPUAction = "Attack";
                     }
@@ -387,15 +441,15 @@ public class PlayerManager : MonoBehaviourPun
                     else
                     {
                         randomTarget = UnityEngine.Random.Range(0, 1);
-                        if (randomTarget <= 0.25f)
+                        if (randomTarget <= 0.25f && fireAlive)
                         {
                             lockInCPUTarget = "Fire";
                         }
-                        else if (randomTarget <= 0.5f)
+                        else if (randomTarget <= 0.5f && waterAlive)
                         {
                             lockInCPUTarget = "Water";
                         }
-                        else if (randomTarget <= 0.75f)
+                        else if (randomTarget <= 0.75f && earthAlive)
                         {
                             lockInCPUTarget = "Earth";
                         }
@@ -449,22 +503,26 @@ public class PlayerManager : MonoBehaviourPun
                     }
 
                     break;
+                //Water prioritises casting on the other party members if they are below half health, otherwise it will attack the boss
                 case "Water":
                     //Check other players health to heal, otheriwse copy others actions
-                    if ((fireHealth / fireMaxHealth) < 0.33f)
+                    if (((fireHealth / fireMaxHealth) < 0.33f) && fireAlive && cpuElement.CurrentElementStatera >= 5)
                     {
                         lockInCPUAction = "Cast";
                         lockInCPUTarget = "Fire";
+                        cpuElement.CurrentElementStatera = cpuElement.CurrentElementStatera - 5;
                     }
-                    else if ((earthHealth / earthMaxHealth) < 0.33f)
+                    else if (((earthHealth / earthMaxHealth) < 0.33f) && earthAlive && cpuElement.CurrentElementStatera >= 5)
                     {
                         lockInCPUAction = "Cast";
                         lockInCPUTarget = "Earth";
+                        cpuElement.CurrentElementStatera = cpuElement.CurrentElementStatera - 5;
                     }
-                    else if ((windHealth / windMaxHealth) < 0.33f)
+                    else if (((windHealth / windMaxHealth) < 0.33f) && windAlive && cpuElement.CurrentElementStatera >= 5)
                     {
                         lockInCPUAction = "Cast";
                         lockInCPUTarget = "Wind";
+                        cpuElement.CurrentElementStatera = cpuElement.CurrentElementStatera - 5;
                     }
                     else
                     {
@@ -501,6 +559,7 @@ public class PlayerManager : MonoBehaviourPun
                     }
 
                     break;
+                //Fire prioritises its high damage attack on the boss, with a low chance to cast on a team member 
                 case "Fire":
                     randomAction = UnityEngine.Random.Range(0, 1);
                     if (randomAction <= .75f)
@@ -519,17 +578,25 @@ public class PlayerManager : MonoBehaviourPun
                     else
                     {
                         randomTarget = UnityEngine.Random.Range(0, 1);
-                        if (randomTarget <= 0.33f)
+                        if (randomTarget <= 0.33f && windAlive && cpuElement.CurrentElementStatera >= 5)
                         {
                             lockInCPUTarget = "Wind";
+                            cpuElement.CurrentElementStatera = cpuElement.CurrentElementStatera - 5;
                         }
-                        else if (randomTarget <= 0.66f)
+                        else if (randomTarget <= 0.66f && waterAlive && cpuElement.CurrentElementStatera >= 5)
                         {
                             lockInCPUTarget = "Water";
+                            cpuElement.CurrentElementStatera = cpuElement.CurrentElementStatera - 5;
+                        }
+                        else if(earthAlive && cpuElement.CurrentElementStatera >= 5)
+                        {
+                            lockInCPUTarget = "Earth";
+                            cpuElement.CurrentElementStatera = cpuElement.CurrentElementStatera - 5;
                         }
                         else
                         {
-                            lockInCPUTarget = "Earth";
+                            lockInCPUAction = "Attack";
+                            lockInCPUTarget = "The Guardian";
                         }
                     }
 
@@ -562,21 +629,25 @@ public class PlayerManager : MonoBehaviourPun
                     }
 
                     break;
+                //Similar to Water, Earth prioritises casting on the other party members if they are below half health, otherwise attacking the boss
                 case "Earth":
-                    if ((fireHealth / fireMaxHealth) < 0.33f)
+                    if (((fireHealth / fireMaxHealth) < 0.33f) && fireAlive && cpuElement.CurrentElementStatera >= 5)
                     {
                         lockInCPUAction = "Cast";
                         lockInCPUTarget = "Fire";
+                        cpuElement.CurrentElementStatera = cpuElement.CurrentElementStatera - 5;
                     }
-                    else if ((waterHealth / waterMaxHealth) < 0.33f)
+                    else if (((waterHealth / waterMaxHealth) < 0.33f) && waterAlive && cpuElement.CurrentElementStatera >= 5)
                     {
                         lockInCPUAction = "Cast";
                         lockInCPUTarget = "Water";
+                        cpuElement.CurrentElementStatera = cpuElement.CurrentElementStatera - 5;
                     }
-                    else if ((windHealth / windMaxHealth) < 0.33f)
+                    else if (((windHealth / windMaxHealth) < 0.33f) && windAlive && cpuElement.CurrentElementStatera >= 5)
                     {
                         lockInCPUAction = "Cast";
                         lockInCPUTarget = "Wind";
+                        cpuElement.CurrentElementStatera = cpuElement.CurrentElementStatera - 5;
                     }
                     else
                     {
@@ -613,6 +684,7 @@ public class PlayerManager : MonoBehaviourPun
                     }
 
                     break;
+                //Wind prioritises its fast and more accurate attack, only casting on team members with a small chance
                 case "Wind":
                     randomAction = UnityEngine.Random.Range(0, 1);
                     if (randomAction <= .75f)
@@ -631,17 +703,25 @@ public class PlayerManager : MonoBehaviourPun
                     else
                     {
                         randomTarget = UnityEngine.Random.Range(0, 1);
-                        if (randomTarget <= 0.33f)
+                        if (randomTarget <= 0.33f && fireAlive && cpuElement.CurrentElementStatera >= 5)
                         {
                             lockInCPUTarget = "Fire";
+                            cpuElement.CurrentElementStatera = cpuElement.CurrentElementStatera - 5;
                         }
-                        else if (randomTarget <= 0.66f)
+                        else if (randomTarget <= 0.66f && waterAlive && cpuElement.CurrentElementStatera >= 5)
                         {
                             lockInCPUTarget = "Water";
+                            cpuElement.CurrentElementStatera = cpuElement.CurrentElementStatera - 5;
+                        }
+                        else if (earthAlive && cpuElement.CurrentElementStatera >= 5)
+                        {
+                            lockInCPUTarget = "Earth";
+                            cpuElement.CurrentElementStatera = cpuElement.CurrentElementStatera - 5;
                         }
                         else
                         {
-                            lockInCPUTarget = "Earth";
+                            lockInCPUAction = "Attack";
+                            lockInCPUTarget = "The Guardian";
                         }
                     }
 
@@ -678,6 +758,7 @@ public class PlayerManager : MonoBehaviourPun
         }
     }
 
+    //Gets the speed of all members, dead or alive, and orders them from fastest to slowest before the turn starts
     [PunRPC]
     public void RPCCheckSpeed()
     {
@@ -696,14 +777,18 @@ public class PlayerManager : MonoBehaviourPun
         }
     }
 
+    //This function runs as a coroutine that everyone handles client side
     public IEnumerator commenceFight()
     {
+        //First check the order the turns should be carried out in based on player speed
         for (int e = 0; e < turnOrder.Count; e++)
         {
+            //If the boss dies, the fight should no longer continue
             if(!chaosAlive)
             {
                 break;
             }
+            //Quick check of speed and health before the next action is carried out
             photonView.RPC("RPCCheckSpeed", RpcTarget.AllBuffered);
             photonView.RPC("RPCCheckAlive", RpcTarget.AllBuffered);
             var player = turnOrder.ElementAt(e);
@@ -714,66 +799,94 @@ public class PlayerManager : MonoBehaviourPun
                     if (turnActions[i].Contains(player.Key))
                     {
                         string[] actionArray = turnActions[i].Split(' ');
+                        //Whos carrying out the action
                         string actionee = actionArray[0];
+                        //Did they miss
                         bool miss = (actionArray[1] == "missed");
+                        //Who is the target
                         string target = actionArray[actionArray.Length - 1];
+                        //power of the attack
                         float damageToDeal;
+                        //power of the cast (Simplified to just heal for the time purposes)
+                        float healToDeal;
 
-                        if (actionee == player.Key)
+                        if (actionee == player.Key && (alivePlayers.Contains(target) || target == "Guardian" || target == "Players"))
                         {
+                            //Display the turn
                             actionOccuring = turnActions[i];
-                            yield return new WaitForSeconds(3);
+                            yield return new WaitForSeconds(2);
 
+                            //Guardian Attacks
                             if(target == "Players" && !miss)
                             {
                                 damageToDeal = turnPower[actionee] / 4;
                                 myElement.damage(damageToDeal);
                             }
-                            else if(myElement.elementType == target && actionee !="The")
+                            //A team member casts
+                            else if(myElement.elementType == target && (actionee == "Fire" || actionee == "Water" ||actionee == "Earth" || actionee == "Wind"))
                             {
-                                switch(actionee)
-                                {
-                                    case "Fire":
-
-                                        break;
-                                    case "Water":
-                                        break;
-                                    case "Earth":
-                                        break;
-                                    case "Wind":
-                                        break;
-                                }
+                                //Simplified Cast abillity to just heal for time purposes
+                                healToDeal = turnPower[actionee];
+                                myElement.heal(healToDeal);
                             }
-
-
+                            //Boss cast implementation should go here on player element
+                            //else if(myElement.elementType == target && actionee !="The")
+                            //{
+                            //    switch(actionee)
+                            //    {
+                            //        case "Fire":
+                            //            break;
+                            //        case "Water":
+                            //            break;
+                            //        case "Earth":
+                            //            break;
+                            //        case "Wind":
+                            //            break;
+                            //    }
+                            //}
+                            //Handles all cpu effects for this turn
                             for (int cpu = 0; cpu < cpuElement.Count; cpu++)
                             {
+                                //CPUs taking damage from chaos attack
                                 if (target == "Players" && !miss && cpuElement[cpu].elementType != "Chaos")
                                 {
                                     damageToDeal = turnPower[actionee] / 4;
                                     cpuElement[cpu].damage(damageToDeal);
                                 }
+                                //CPU boss taking damage from team
                                 else if (cpuElement[cpu].elementType == "Chaos" && target == "Guardian" && !miss)
                                 {
                                     damageToDeal = turnPower[actionee];
                                     cpuElement[cpu].damage(damageToDeal);
                                 }
-                                else if (cpuElement[cpu].elementType == target && actionee != "The")
+                                //CPUs having cast affects on them
+                                else if (cpuElement[cpu].elementType == target && (actionee == "Fire" || actionee == "Water" || actionee == "Earth" || actionee == "Wind"))
                                 {
-                                    switch (actionee)
-                                    {
-                                        case "Fire":
-
-                                            break;
-                                        case "Water":
-                                            break;
-                                        case "Earth":
-                                            break;
-                                        case "Wind":
-                                            break;
-                                    }
+                                    //Simplified Cast abillity to just heal for time purposes
+                                    healToDeal = turnPower[actionee];
+                                    cpuElement[cpu].heal(healToDeal);
                                 }
+                                //Boss cast implementation should go here on cpu element
+                                //else if (cpuElement[cpu].elementType == target && actionee != "The")
+                                //{
+                                //    switch (actionee)
+                                //    {
+                                //        case "Fire":
+                                //            break;
+                                //        case "Water":
+                                //            break;
+                                //        case "Earth":
+                                //            break;
+                                //        case "Wind":
+                                //            break;
+                                //    }
+                                //}
                             }
+                        }
+                        else if(!alivePlayers.Contains(target))
+                        {
+                            //The target of the turn died before it was carried out
+                            actionOccuring = player.Key + "'s target was lost";
                         }
                     }
                     yield return new WaitForSeconds(1);
@@ -781,15 +894,16 @@ public class PlayerManager : MonoBehaviourPun
             }
             else
             {
+                //Displayed if they died before their turn was executed
                 actionOccuring = player.Key + " succumbed to their wounds...";
                 yield return new WaitForSeconds(3);
             }
         }
-        Debug.Log("All moves finished");
         nextTurnReady = true;
         actionOccuring = "";
     }
-
+    
+    //Sanity checks that players are alive before the turn starts, and adds them to a list to see if the move should be carried out or if they died during the turn
     [PunRPC]
     public void RPCCheckAlive()
     {
@@ -817,25 +931,51 @@ public class PlayerManager : MonoBehaviourPun
         }
     }
 
+    //Handles "despawning" the elements at the end of the turn if they died during the turn
     [PunRPC]
     public void RPCDespawn(string element)
     {        
-        
+        if(PhotonNetwork.IsMasterClient)
+        {
+            if(myElementType == element)
+            {
+                myElement.GetComponentInChildren<SpriteRenderer>().enabled = false;
+                alivePlayers.Remove(element);
+                deadPlayers.Add(element);
+            }
+
+            for(int i = 0; i< cpuElement.Count; i++)
+            {
+                if (cpuElement[i].elementType == element)
+                {
+                    cpuElement[i].GetComponentInChildren<SpriteRenderer>().enabled = false;
+                    alivePlayers.Remove(element);
+                    deadPlayers.Add(element);
+                }
+            }
+        }
+        else
+        {
+            GameObject despawn = GameObject.FindWithTag(element);
+            despawn.GetComponentInChildren<SpriteRenderer>().enabled = false;
+            alivePlayers.Remove(element);
+            deadPlayers.Add(element);
+        }
     }
 
-
+    //Handles if the team gets defeated by the boss
     [PunRPC]
     public void RPCGameOver()
     {
         gameOverFlag = true;
-        Debug.Log("YOU LOSE!");
+        PhotonNetwork.LeaveRoom();
     }
 
-    
+    //Handles if the team defeat the boss and beat the game
     [PunRPC]
     public void RPCGameWin()
     {
         gameWinFlag = true;
-        Debug.Log("YOU WIN!");
+        PhotonNetwork.LeaveRoom();
     }
 }

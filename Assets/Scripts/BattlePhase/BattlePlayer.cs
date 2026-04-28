@@ -1,6 +1,7 @@
 using Photon.Pun;
 using UnityEngine;
 
+//The purpose of this class is to record and track all the status of the element the player controls as well as update other players of its current state participating in the battle
 public class BattlePlayer : MonoBehaviourPunCallbacks
 {
     public string playerName;
@@ -22,20 +23,9 @@ public class BattlePlayer : MonoBehaviourPunCallbacks
     {
         RPCSetPlayerName(playerName);
         RPCSetPlayerElement(playerElement);
-
-        if(this.transform.GetComponentInChildren<Element>().alive && playerElement != null)
-        {
-            spawned = true;
-        }
-
-        if (spawned && !this.transform.GetComponentInChildren<Element>().alive)
-        {
-            playerElement = null;
-            this.transform.GetComponentInChildren<SpriteRenderer>().enabled = false;
-        }
-
     }
 
+    //Update everyone and itself of the set player name of this Battle Player
     [PunRPC]
     public void RPCSetPlayerName(string name)
     {
@@ -46,6 +36,7 @@ public class BattlePlayer : MonoBehaviourPunCallbacks
         }
     }
 
+    //Update everyone and itself of the set player element of this Battle Player
     [PunRPC]
     public void RPCSetPlayerElement(string element)
     {
@@ -56,7 +47,7 @@ public class BattlePlayer : MonoBehaviourPunCallbacks
         }
     }
 
-
+    //Spawns the element dependant on what element this Battle Player is controlling
     public virtual void spawnElemental()
     {
         switch (playerElement)
@@ -76,6 +67,7 @@ public class BattlePlayer : MonoBehaviourPunCallbacks
         }
     }
 
+    //Positions the element dependant on what element this Battle Player is controlling
     public virtual void positionElemental()
     {
         switch (playerElement)

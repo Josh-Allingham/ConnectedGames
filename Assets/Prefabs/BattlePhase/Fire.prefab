@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 900380298081561730}
   m_Layer: 0
   m_Name: Fire
-  m_TagString: Player
+  m_TagString: Fire
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -106,5 +106,6 @@ MonoBehaviour:
   defence: 0
   attack: 0
   speed: 0
+  currStatera: 0
   elementStatera: 0
   alive: 0

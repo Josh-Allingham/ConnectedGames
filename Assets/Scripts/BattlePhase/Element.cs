@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
 
+//This base class element holds all the information the individual elements need. It also accesses the server to get all of the element stats and moves
 public class Element : MonoBehaviour
 {
     public string elementType;
@@ -17,48 +18,56 @@ public class Element : MonoBehaviour
     public bool alive;
     public string[,] myMoves = new string[3,7];
 
+    //Get and set the element type
     public string ElementType
     {
         get { return elementType; }
         set { elementType = value; }
     }
 
+    //Get and set the current health of the element
     public float CurrentHealth
     {
         get { return currHealth; }
         set { currHealth = value; }
     }
 
+    //Get and set the max health of the element
     public float MaxHealth
     {
         get { return maxHealth; }
         set { maxHealth = value; }
     }
 
+    //Get and set the defence of the element
     public float Defence
     {
         get { return defence; }
         set { defence = value; }
     }
 
+    //Get and set the attack of the element
     public float Attack
     {
         get { return attack; }
         set { attack = value; }
     }
 
+    //Get and set the speed of the element
     public float Speed
     {
         get { return speed; }
         set { speed = value; }
     }
 
+    //Get and set the current statera (mana) of the element
     public float CurrentElementStatera
     {
         get { return currStatera; }
         set { currStatera = value; }
     }
 
+    //Get and set the max statera (mana) of the element
     public float ElementStatera
     {
         get { return elementStatera; }
@@ -66,18 +75,21 @@ public class Element : MonoBehaviour
 
     }
 
+    ////Get and set if the element is alive
     public bool IsAlive
     {
         get { return alive; }
         set { alive = value; }
     }
 
+    //Get and set all of this element's moves
     public string[,] MyMoves
     {
         get { return myMoves; }
         set { myMoves = value; }
     }
 
+    //Heal the element by param entered
     public void heal(float aid)
     {   if (alive)
         {
@@ -92,6 +104,7 @@ public class Element : MonoBehaviour
         }
     }
 
+    //Heal the element to full health
     public void fullHeal()
     {
         if(alive)
@@ -100,6 +113,7 @@ public class Element : MonoBehaviour
         }
     }
 
+    //Deal damage to the element by the param entered
     public void damage(float dmg)
     {
         if (alive)
@@ -116,11 +130,13 @@ public class Element : MonoBehaviour
         }
     }
 
+    //Kill the element
     public void death()
     {
         alive = false;
     }
 
+    //Revive the element from death
     public void revive()
     {
         if (!alive)
@@ -130,21 +146,25 @@ public class Element : MonoBehaviour
         }
     }
 
+    //Get the player stats of the input element
     public void getPlayerStats(string element)
     {
         StartCoroutine(LoadStats(element));
     }
 
+    //Update the stats of the element
     public void updatePlayerStats()
     {
         StartCoroutine(UpdateStats());
     }
 
+    //Get the player moves of the input element
     public void getPlayerMoves(string element)
     {
         StartCoroutine(LoadMoves(element));
     }
 
+    //This coroutine connects to the virtual server set up, runs the get status php function to retrieve all stats, and picks out the ones that matches with the element input
     IEnumerator LoadStats(string element)
     {
         string uri = "http://16.171.171.137/GetStatus.php";
@@ -192,6 +212,8 @@ public class Element : MonoBehaviour
         }
     }
 
+    //This coroutine connects to the virtual server set up, runs the get update status php function to update all stats of this element to the database
+    //FUNCTIONALITY WAS PUT IN PLACE BUT NEVER UTILISED
     IEnumerator UpdateStats()
     {
         string uri = "http://16.171.171.137/UpdateStatus.php";
@@ -218,6 +240,7 @@ public class Element : MonoBehaviour
         }
     }
 
+    //This coroutine connects to the virtual server set up, runs the get moves php function to retrieve all moves, and picks out the ones that matches with the element input
     IEnumerator LoadMoves(string element)
     {
         string uri = "http://16.171.171.137/GetMoves.php";
