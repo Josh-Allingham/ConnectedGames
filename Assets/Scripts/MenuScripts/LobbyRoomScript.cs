@@ -249,7 +249,7 @@ public class LobbyRoomScript : MonoBehaviourPunCallbacks, IPunOwnershipCallbacks
     {
         if (PhotonNetwork.IsMasterClient)
         {
-            PhotonNetwork.LoadLevel("SampleScene");
+            PhotonNetwork.LoadLevel("MainScene");
         }
     }
 
