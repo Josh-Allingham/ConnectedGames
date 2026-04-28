@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
+//The pupose of this class is to allow the player to input actions, targets and get visual feedback on the status of the fight and all players involved
 public class BattleMenu : MonoBehaviour
 {
     [Header("Menus")]
@@ -31,7 +32,6 @@ public class BattleMenu : MonoBehaviour
     public GameObject winMsg;
     [SerializeField]
     public GameObject loseMsg;
-
 
     [Header("Text")]    
     [SerializeField]
@@ -95,12 +95,15 @@ public class BattleMenu : MonoBehaviour
     [SerializeField]
     public Image chaosCurrHealthBar;
 
+    [Header("Buttons")]
     [SerializeField]
-    public Image timer;
-
-    public float timeLimit;
-    public float timerCurrent;
-    public bool timeUp;
+    public Button castBtn;
+    [SerializeField]
+    public Button ally1Btn;
+    [SerializeField]
+    public Button ally2Btn;
+    [SerializeField]
+    public Button ally3Btn;
 
     public bool attackStudy;
     public bool castStudy;
@@ -125,22 +128,29 @@ public class BattleMenu : MonoBehaviour
 
     public void Update()
     {
-        owner = playerManager.myElement;
+        //Set the owner to the element recorded as my own
+        if(playerManager.spawnedIn)
+        {
+            owner = playerManager.myElement;
+        }
+        
+        //Hide the waiting notification when everyone has locked in
         if(playerManager.turnActions.Count == 5 - playerManager.deadPlayers.Count)
         {
             waitingScreen.SetActive(false);
         }
 
         updateStatuses();
-
         checkStatuses();
 
-        if(playerManager.fighting)
+        //When the fight has begun, display what is happening in the fight
+        if(playerManager.actionOccuring != "")
         {
             actionDescriptionTxt.text = playerManager.actionOccuring;
             actionWindow.SetActive(true);
         }
 
+        //Hide the battle description once the fight has finished
         if(playerManager.nextTurnReady)
         {
             actionDescriptionTxt.text = "";
@@ -148,6 +158,7 @@ public class BattleMenu : MonoBehaviour
             resetSelection();
         }
 
+        //Hide the battle menu and display the game win message
         if (playerManager.gameWinFlag)
         {
             topMenu.SetActive(false);
@@ -156,6 +167,7 @@ public class BattleMenu : MonoBehaviour
             fadeScreenWin();
         }
 
+        //Hide the battle menu and display the game lost message
         if (playerManager.gameOverFlag)
         {
             topMenu.SetActive(false);
@@ -164,8 +176,18 @@ public class BattleMenu : MonoBehaviour
             fadeScreenLose();
         }
 
-    }
+        //Disable the cast button if you don't have enough elemental statera
+        if(owner != null && owner.CurrentElementStatera < 5)
+        {
+            castBtn.interactable = false;
+        }
+        else
+        {
+            castBtn.interactable = true;
+        }
 
+    }
+    //This function runs as you press attack, displaying the correct information, if pressed twice it takes you to the target menu
     public void attack()
     {
         if (!attackStudy)
@@ -185,6 +207,7 @@ public class BattleMenu : MonoBehaviour
         }
     }
 
+    //This function runs as you press cast, displaying the correct information, if pressed twice it takes you to the target menu
     public void cast()
     {
         if (!castStudy)
@@ -204,6 +227,7 @@ public class BattleMenu : MonoBehaviour
         }
     }
 
+    //This function allows you to select your target for your selected action. If the target is dead, they will not be selectable to target.
     public void target(string target)
     {
         targetEnemy.SetActive(false);
@@ -214,23 +238,71 @@ public class BattleMenu : MonoBehaviour
             {
                 case "Water":
                     targetAllyTxt1.text = "Fire";
+                    if(!playerManager.fireAlive)
+                    {
+                        ally1Btn.interactable = false;
+                    }
                     targetAllyTxt2.text = "Earth";
+                    if (!playerManager.earthAlive)
+                    {
+                        ally2Btn.interactable = false;
+                    }
                     targetAllyTxt3.text = "Wind";
+                    if (!playerManager.windAlive)
+                    {
+                        ally3Btn.interactable = false;
+                    }
                     break;
                 case "Fire":
                     targetAllyTxt1.text = "Water";
+                    if(!playerManager.waterAlive)
+                    {
+                        ally1Btn.interactable= false;
+                    }
                     targetAllyTxt2.text = "Earth";
+                    if (!playerManager.earthAlive)
+                    {
+                        ally2Btn.interactable = false;
+                    }
                     targetAllyTxt3.text = "Wind";
+                    if (!playerManager.windAlive)
+                    {
+                        ally3Btn.interactable = false;
+                    }
                     break;
                 case "Earth":
                     targetAllyTxt1.text = "Water";
+                    if (!playerManager.waterAlive)
+                    {
+                        ally1Btn.interactable = false;
+                    }
                     targetAllyTxt2.text = "Fire";
+                    if (!playerManager.fireAlive)
+                    {
+                        ally1Btn.interactable = false;
+                    }
                     targetAllyTxt3.text = "Wind";
+                    if (!playerManager.windAlive)
+                    {
+                        ally3Btn.interactable = false;
+                    }
                     break;
                 case "Wind":
                     targetAllyTxt1.text = "Water";
+                    if (!playerManager.waterAlive)
+                    {
+                        ally1Btn.interactable = false;
+                    }
                     targetAllyTxt2.text = "Fire";
+                    if (!playerManager.fireAlive)
+                    {
+                        ally1Btn.interactable = false;
+                    }
                     targetAllyTxt3.text = "Earth";
+                    if (!playerManager.earthAlive)
+                    {
+                        ally2Btn.interactable = false;
+                    }
                     break;
             }
             targetAlly.SetActive(true);
@@ -244,6 +316,7 @@ public class BattleMenu : MonoBehaviour
         }
     }
 
+    //Pressing back on the target window takes you back to select action
     public void cancelTarget()
     {
         targetAlly.SetActive(false);
@@ -251,19 +324,25 @@ public class BattleMenu : MonoBehaviour
         targetMenu.SetActive(false);
     }
 
+    //Resets the state of the menu
     private void resetSelection()
     {
         attackStudy = false;
         castStudy = false;
         targetStudy = false;
 
-        if(owner.alive)
+        if(owner != null)
         {
-            bottomAnim.SetBool("HideMenu", false);
+            if (owner.alive)
+            {
+                bottomAnim.SetBool("HideMenu", false);
+            }
+            
         }
         
     }
 
+    //Once the target is selected, this will run passing the action and target to the player manager to lock it in, also setting the lockin flag for the player manager
     public void lockIn(TMP_Text target)
     {
         switch (target.text)
@@ -293,6 +372,7 @@ public class BattleMenu : MonoBehaviour
         addMove(actionSelection, targetSelection);
     }
 
+    //Hides the battle menu and waits for everyone else to lock in their turns
     public void endTurn()
     {
         targetEnemy.SetActive(false);
@@ -302,6 +382,7 @@ public class BattleMenu : MonoBehaviour
         waitingScreen.SetActive(true);
     }
 
+    //Sets the variables for the player manager when locking in the action and target
     public void addMove(string action, string target)
     {
         playerManager.turnAction = action;
@@ -309,6 +390,7 @@ public class BattleMenu : MonoBehaviour
         playerManager.turnLockedIn = true;
     }
 
+    //Resets all of the status bars to be full
     public void resetStatuses()
     {
         //Fire Reset
@@ -336,6 +418,7 @@ public class BattleMenu : MonoBehaviour
         chaosCurrHealthBar.fillAmount = 1;
     }
 
+    //Updates the status bars to reflect the current state of all elements
     public void updateStatuses()
     {
         //Fire Update
@@ -357,6 +440,7 @@ public class BattleMenu : MonoBehaviour
         chaosCurrHealthBar.fillAmount = playerManager.chaosHealth / playerManager.chaosMaxHealth;
     }
 
+    //This checks to see if the drain bar coroutine needs to be run if the status of the bars change
     public void checkStatuses()
     {
         //Check Fire
@@ -460,39 +544,44 @@ public class BattleMenu : MonoBehaviour
         }
     }
 
+    //This coroutine is run to give the health bar a drain effect so the players can see just how much damage is dealt or how much mana was used
     private IEnumerator drainBar(Image previousHealth, Image newHealth)
     {
         while(previousHealth.fillAmount > newHealth.fillAmount)
         {
-            previousHealth.fillAmount = previousHealth.fillAmount - 0.01f;
+            previousHealth.fillAmount = previousHealth.fillAmount - 0.005f;
             yield return new WaitForSeconds(2f);
         }
     }
 
-
+    //Fades the screen to black and continues to the winning message
     public void fadeScreenWin()
     {
         fadeScreen.SetActive(true);
         StartCoroutine(waitAndPopUp(winMsg));
     }
 
+    //Fades the screen to black and continues to the losing message
     public void fadeScreenLose()
     {
         fadeScreen.SetActive(true);
         StartCoroutine(waitAndPopUp(loseMsg));
     }
 
+    //Coroutine that waits for the fade to balck happen before loading the window passed to it
     public IEnumerator waitAndPopUp(GameObject message)
     {
         yield return new WaitForSeconds(5);
         message.SetActive(true);
     }
 
+    //Quit the application
     public void exitGame()
     {
         Application.Quit();
     }
 
+    //Returns back to the main menu
     public void returnToMenu()
     {
         SceneManager.LoadScene("StartMenu");

@@ -15,13 +15,30 @@ public class LobbyMenu : MonoBehaviour
 
     [Header("Inputs")]
     public TMP_InputField createRoomName;
+    public TMP_InputField chosenName;
     public TMP_InputField makePassword;
-    public TMP_InputField joinRoomName;
-    public TMP_InputField joinPassword;
+    public TMP_InputField joinChosenName;
 
     [Header("Objects")]
     public GameObject lockImg;
     public GameObject unlockImg;
+    public Button createBtn;
+
+    public LobbyRoomScript lobbyRoomManager;
+
+
+
+    public void Update()
+    {
+        if(lockImg.activeSelf == true && makePassword.text.IsNullOrEmpty())
+        {
+            createBtn.interactable = false;
+        }
+        else
+        {
+            createBtn.interactable = true;
+        }
+    }
 
     public void toPreviousMenu(string currentMenu)
     {
@@ -81,11 +98,14 @@ public class LobbyMenu : MonoBehaviour
     {
         createRoomMenu.SetActive(false);
         lobbyRoom.SetActive(true);
+        lobbyRoomManager.hostJoin(chosenName.text, createRoomName.text);
     }
 
     public void joinRoom()
     {
-
+        createRoomMenu.SetActive(false);
+        lobbyRoom.SetActive(true);
+        lobbyRoomManager.playerJoin(joinChosenName.text);
     }
 
 

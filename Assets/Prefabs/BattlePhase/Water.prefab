@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 5143667463767991281}
   m_Layer: 0
   m_Name: Water
-  m_TagString: Player
+  m_TagString: Water
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -106,5 +106,6 @@ MonoBehaviour:
   defence: 0
   attack: 0
   speed: 0
+  currStatera: 0
   elementStatera: 0
   alive: 0

@@ -1,16 +1,12 @@
-using System.Collections;
-using System.Linq;
 using UnityEngine;
-using UnityEngine.Networking;
-using UnityEngine.Rendering;
-using UnityEngine.Rendering.Universal;
 
+//Derived class from element that records the Earth status
 public class Earth : Element
 {
-    private Animator anim;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        //Get the Earth stats and moves
         getPlayerStats("Earth");
         getPlayerMoves("Earth");
     }
@@ -18,9 +14,7 @@ public class Earth : Element
     // Update is called once per frame
     void Update()
     {
+        //Ensures the sprite is facing the camera
         transform.LookAt(transform.position - (Camera.main.transform.position - transform.position));
-
     }
-
 }
-
